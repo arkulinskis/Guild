@@ -501,10 +501,10 @@ native_deps:
     \ : '') + '>Continue with Google</button>' : '');\n    }\n\n    function render() {\n      root.innerHTML = '<div class=\"\
     qb-auth\">' +\n        '<div class=\"side\"><div style=\"position:relative\"><div class=\"kind\" style=\"color:inherit;opacity:.8\"\
     >' + esc(data.app_name || 'Quizbook') + '</div>' +\n          '<h1>' + esc(data.headline || 'Learn it. Test it. Remember\
-    \ it.') + '</h1>' +\n          '<p>' + esc(data.tagline || 'Short quizzes with instant feedback and an explanation for\
-    \ every answer.') + '</p>' +\n          '<ul><li>Instant feedback on every question</li><li>Recall mode to test real memory</li><li>Track\
-    \ scores, streaks and progress</li></ul></div>' +\n          '<div class=\"deco\"></div><div class=\"deco two\"></div></div>'\
-    \ +\n        '<div class=\"main\"><div class=\"box fade-in\">' + form() + '<div data-el=\"msg\"></div></div></div></div>';\n\
+    \ it.') + '</h1>' +\n          '<p>' + esc(data.tagline || 'Flashcards that come back just before you would forget them.')\
+    \ + '</p>' +\n          '<ul><li>Answer in your head, then reveal</li><li>Cards you know come back less often</li><li>Track\
+    \ cards learned, streaks and progress</li></ul></div>' +\n          '<div class=\"deco\"></div><div class=\"deco two\"\
+    ></div></div>' +\n        '<div class=\"main\"><div class=\"box fade-in\">' + form() + '<div data-el=\"msg\"></div></div></div></div>';\n\
     \      var f = root.querySelector('form');\n      if (f) f.onsubmit = submit;\n      showMsg();\n      var first = root.querySelector('form\
     \ input:not([value]), form input[value=\"\"]');\n      if (first) first.focus();\n    }\n\n    function showMsg() {\n\
     \      var box = root.querySelector('[data-el=msg]');\n      if (box) box.innerHTML = S.msg ? '<div class=\"feedback '\
