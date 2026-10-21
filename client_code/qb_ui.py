@@ -7,8 +7,8 @@ import anvil.js
 from anvil.js import window
 
 APP_NAME = "Quizbook"
-# "Sign in with Google" is enabled in this app's Users service. Set to False to hide the button.
-GOOGLE_LOGIN = True
+# Show a "Continue with Google" button (also needs Google enabled in the Users service).
+GOOGLE_LOGIN = False
 
 
 def today():
