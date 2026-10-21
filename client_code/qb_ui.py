@@ -24,7 +24,10 @@ def mount(form, name, data, on_event=None):
     returns (a dict, or None) is handed back to the component.
     Returns the component's JS API object (e.g. header.setUser(...)).
     """
-    root = anvil.js.get_dom_node(form).querySelector('[data-qb-root="%s"]' % name)
+    selector = '[data-qb-root="%s"]' % name
+    node = anvil.js.get_dom_node(form)
+    # A form whose HTML is a single element *is* that element, so check the node itself first.
+    root = node if node.matches(selector) else node.querySelector(selector)
 
     def emit(event, payload_json):
         if on_event is None:
