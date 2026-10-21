@@ -1,0 +1,87 @@
+# DemoData - Server Module (name it "DemoData"). Demo flashcards loaded by seed_demo().
+# Same content as sample_data/demo_quizzes.json.
+
+DEMO_QUIZZES = [{'collection': 'How the Internet Works',
+  'collection_description': 'The ideas behind every web page you open.',
+  'kind': 'Course',
+  'title': 'Packets and routing',
+  'description': 'How data travels across the network in small pieces.',
+  'difficulty': 'Beginner',
+  'questions': [{'question': 'Why is data split into packets before it is sent?',
+                 'answer': 'So pieces can take different routes and be resent if lost',
+                 'explanation': 'Small packets can travel independently and only the lost ones need '
+                                'resending, which makes the network robust and efficient.',
+                 'concept': 'Packet switching'},
+                {'question': 'What does a router mainly do?',
+                 'answer': 'Forwards packets toward their destination',
+                 'explanation': "A router looks at a packet's destination address and passes it to the next "
+                                "hop that gets it closer. Name lookup is DNS's job.",
+                 'concept': 'Routing'},
+                {'question': 'What is an IP address?',
+                 'answer': 'A number that identifies a device on a network',
+                 'explanation': 'An IP address works like a postal address for a device, so packets know '
+                                'where to go.',
+                 'concept': 'IP addressing'},
+                {'question': 'What happens if a packet is lost on the way?',
+                 'answer': 'TCP notices and asks for it to be sent again',
+                 'explanation': 'TCP numbers packets and acknowledges them, so a missing one is detected and '
+                                'resent.',
+                 'concept': 'Reliable delivery'},
+                {'question': 'Do all packets of one message follow the same path?',
+                 'answer': 'No, they can take different routes',
+                 'explanation': 'Each packet is routed on its own, so packets may arrive by different paths '
+                                'and out of order; they are reassembled at the end.',
+                 'concept': 'Packet switching'}]},
+ {'collection': 'How the Internet Works',
+  'title': 'DNS and the web',
+  'description': 'What happens between typing a web address and seeing the page.',
+  'difficulty': 'Beginner',
+  'questions': [{'question': 'What does DNS do?',
+                 'answer': 'Turns names like example.com into IP addresses',
+                 'explanation': "DNS is the internet's phone book: it looks up the numeric address behind a "
+                                'human-friendly name.',
+                 'concept': 'DNS'},
+                {'question': 'What does the "S" in HTTPS add?',
+                 'answer': 'Security through encryption',
+                 'explanation': 'HTTPS encrypts traffic between your browser and the site, so others on the '
+                                "network can't read or change it.",
+                 'concept': 'HTTPS'},
+                {'question': 'When you open a web page, what does the browser send to the server?',
+                 'answer': 'A request for the page',
+                 'explanation': "The browser sends an HTTP request; the server replies with the page's HTML "
+                                'and other files.',
+                 'concept': 'HTTP requests'},
+                {'question': 'Why do browsers cache files?',
+                 'answer': 'To avoid downloading the same files again',
+                 'explanation': 'Keeping a local copy of unchanged files (like logos) makes repeat visits '
+                                'faster and saves bandwidth.',
+                 'concept': 'Caching'}]},
+ {'collection': 'The Human Body',
+  'collection_description': 'A quick tour of the systems that keep you running.',
+  'kind': 'Topic',
+  'title': 'Heart and blood',
+  'description': 'The circulatory system in five questions.',
+  'difficulty': 'Beginner',
+  'questions': [{'question': 'What is the main job of red blood cells?',
+                 'answer': 'Carrying oxygen',
+                 'explanation': 'Red blood cells contain haemoglobin, which picks up oxygen in the lungs and '
+                                'releases it in the tissues.',
+                 'concept': 'Red blood cells'},
+                {'question': 'Which vessels carry blood away from the heart?',
+                 'answer': 'Arteries',
+                 'explanation': 'Arteries carry blood away from the heart; veins bring it back. Capillaries '
+                                'connect the two.',
+                 'concept': 'Blood vessels'},
+                {'question': 'How many chambers does the human heart have?',
+                 'answer': 'Four',
+                 'explanation': 'Two atria receive blood and two ventricles pump it out.',
+                 'concept': 'Heart anatomy'},
+                {'question': 'Where does blood pick up oxygen?',
+                 'answer': 'In the lungs',
+                 'explanation': 'In the tiny air sacs of the lungs, oxygen passes into the blood and carbon '
+                                'dioxide passes out.',
+                 'concept': 'Gas exchange'},
+                {'question': 'What do platelets help with?',
+                 'answer': 'Making blood clot',
+                 'explanation': 'Platelets gather at a wound and help form a clot that stops the bleeding.',
+                 'concept': 'Platelets'}]}]
