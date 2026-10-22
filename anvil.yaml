@@ -615,84 +615,82 @@ native_deps:
     \ = '<header class=\"qb-header\"><div class=\"in\">' +\n        '<button class=\"brand\" data-action=\"nav\" data-page=\"\
     home\"><span class=\"logo\">' + (S.logo ? '<img alt=\"\" src=\"' + esc(S.logo) + '\">' : QB.leaf()) + '</span>' +\n  \
     \        '<span><span class=\"name\">' + esc(S.appName) + '</span><span class=\"sub\">Unofficial CAF study guide · made\
-    \ by a civilian</span></span></button>' +\n        (u ? '<nav>' +\n            '<button data-action=\"nav\" data-page=\"\
-    home\" class=\"' + (S.active === 'home' ? 'on' : '') + '\">Home</button>' +\n            '<button data-action=\"nav\"\
-    \ data-page=\"profile\" class=\"' + (S.active === 'profile' ? 'on' : '') + '\">Profile</button>' +\n            '<button\
-    \ data-action=\"lookup\" class=\"look' + (dict.hidden ? '' : ' on') + '\" title=\"Look up an abbreviation\" aria-label=\"\
-    Look up an abbreviation\" aria-expanded=\"' + !dict.hidden + '\">' +\n              '<svg viewBox=\"0 0 24 24\" fill=\"\
-    none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"\
-    /><path d=\"M15.5 15.5 21 21\"/></svg><span>Lookup</span></button>' +\n          '</nav>' +\n          '<div class=\"\
-    me\"><button data-action=\"menu\" aria-haspopup=\"true\" aria-expanded=\"' + S.open + '\">' +\n            '<span class=\"\
-    xp\">' + (u.xp || 0) + ' XP' + (u.streak ? ' · \U0001F525 ' + u.streak : '') + '</span>' + QB.avatar(u) + '</button>'\
-    \ +\n            (S.open ? '<div class=\"menu card fade-in\"><div class=\"who\"><strong>' + esc(u.display_name) + '</strong><div\
-    \ class=\"muted small\">' + (u.guest ? 'Guest · nothing is saved' : esc(u.email)) + '</div></div>' +\n              '<button\
-    \ data-action=\"nav\" data-page=\"profile\">Your profile</button>' +\n              '<button data-action=\"signout\">'\
-    \ + (u.guest ? 'Exit guest mode' : 'Sign out') + '</button></div>' : '') +\n          '</div>' : '') +\n        '</div>'\
-    \ +\n        (u.guest ? '<div class=\"guest\"><span><strong>Guest mode.</strong> Your progress is kept only until you\
-    \ close this tab.</span>' +\n          '<button data-action=\"signout\">Sign in or create an account</button></div>' :\
-    \ '') +\n        '</header>';\n    }\n\n    root.addEventListener('click', function (e) {\n      var el = e.target.closest('[data-action]');\n\
-    \      e.qbHeader = true; // tells the outside-click handler below to ignore this click\n      if (!el) return;\n    \
-    \  var a = el.dataset.action;\n      if (a === 'menu') { S.open = !S.open; dict.hidden = true; render(); return; }\n \
-    \     if (a === 'lookup') { S.open = false; openDict(dict.hidden); return; }\n      S.open = false;\n      dict.hidden\
-    \ = true;\n      if (a === 'nav') { S.active = el.dataset.page; render(); emit('nav', { page: el.dataset.page }); }\n\
-    \      else if (a === 'signout') { render(); emit('signout', {}); }\n    });\n    document.addEventListener('click', function\
-    \ (e) {\n      if (e.qbHeader) return;\n      if (S.open) { S.open = false; render(); }\n      if (!dict.hidden) openDict(false);\n\
-    \    });\n\n    // The sign-in page fills the screen minus the footer, so the disclaimer is visible without scrolling.\n\
-    \    var foot = document.querySelector('.qb-footer');\n    if (foot && window.ResizeObserver) {\n      new ResizeObserver(function\
-    \ () {\n        document.documentElement.style.setProperty('--qb-foot-h', foot.offsetHeight + 'px');\n      }).observe(foot);\n\
-    \    }\n\n    render();\n    return {\n      setUser: function (json) { S.user = json ? JSON.parse(json) : null; render();\
-    \ },\n      setActive: function (page) { S.active = page; S.open = false; render(); }\n    };\n  });\n})();\n</script>\n\
-    \n<!-- ===== AuthPage component ===== -->\n<style>\n.qb-auth { min-height: calc(100vh - var(--qb-foot-h, 105px)); min-height:\
-    \ calc(100dvh - var(--qb-foot-h, 105px)); display: grid; grid-template-columns: 1.05fr 1fr; }\n.qb-auth .side { background:\
-    \ var(--qb-hero); color: var(--qb-hero-ink); padding: 52px 48px 40px; display: flex; flex-direction: column; justify-content:\
-    \ space-between; gap: 28px; position: relative; overflow: hidden; border-bottom: 6px solid var(--qb-red); }\n.qb-auth\
-    \ .side .inner { position: relative; z-index: 1; }\n.qb-auth .side .badge-logo { width: 88px; height: 88px; border-radius:\
-    \ 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.3); margin-bottom: 26px; background: rgba(255,255,255,.06);\
-    \ display: grid; place-items: center; }\n.qb-auth .side .badge-logo img { width: 100%; height: 100%; object-fit: cover;\
-    \ }\n.qb-auth .side .badge-logo .leaf { width: 52px; height: 52px; color: var(--qb-red); }\n.qb-auth .side .kind { color:\
-    \ #ff8a95; }\n.qb-auth .side h1 { color: inherit; font-size: 3rem; max-width: 13ch; text-transform: uppercase; letter-spacing:\
-    \ .02em; line-height: 1; }\n.qb-auth .side p { opacity: .85; max-width: 40ch; font-size: 1.08rem; }\n.qb-auth .side .wm\
-    \ { position: absolute; right: -90px; bottom: -70px; width: 420px; height: 420px; color: rgba(255,255,255,.05); transform:\
-    \ rotate(-12deg); }\n.qb-auth .side ul { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 11px; }\n\
-    .qb-auth .side .civ { margin-top: 28px; padding: 12px 14px; border: 1px solid rgba(255,255,255,.22); border-radius: 12px;\
-    \ font-size: .88rem; max-width: 46ch; background: rgba(255,255,255,.05); }\n.qb-auth .side .civ strong { display: block;\
-    \ margin-bottom: 2px; }\n.qb-auth .side li { display: flex; align-items: center; gap: 10px; }\n.qb-auth .side li::before\
-    \ { content: \"\"; flex: none; width: 8px; height: 8px; background: var(--qb-red); transform: rotate(45deg); margin: 0\
-    \ 6px 0 4px; }\n.qb-auth .main { display: grid; place-items: center; padding: 40px 16px; }\n.qb-auth .box { width: min(400px,\
-    \ 100%); }\n.qb-auth .tabs { display: flex; gap: 4px; padding: 4px; background: var(--qb-panel-2); border: 1px solid var(--qb-line);\
-    \ border-radius: 12px; margin-bottom: 22px; }\n.qb-auth .tabs button { all: unset; flex: 1; text-align: center; cursor:\
-    \ pointer; padding: 8px; border-radius: 9px; font-weight: 600; font-size: .92rem; color: var(--qb-muted); }\n.qb-auth\
-    \ .tabs button.on { background: var(--qb-panel); color: var(--qb-ink); box-shadow: var(--qb-shadow); }\n.qb-auth form\
-    \ > div + div { margin-top: 14px; }\n.qb-auth .or { display: flex; align-items: center; gap: 10px; color: var(--qb-muted);\
-    \ font-size: .85rem; margin: 18px 0; }\n.qb-auth .or::before, .qb-auth .or::after { content: \"\"; flex: 1; height: 1px;\
-    \ background: var(--qb-line); }\n.qb-auth .guest-note { text-align: center; margin-top: 8px; }\n.qb-auth .link { all:\
-    \ unset; cursor: pointer; color: var(--qb-accent); font-size: .88rem; }\n.qb-auth .link:hover { text-decoration: underline;\
-    \ }\n@media (max-width: 820px) { .qb-auth { grid-template-columns: 1fr; } .qb-auth .side { padding: 32px 20px; } .qb-auth\
-    \ .side h1 { font-size: 1.9rem; } .qb-auth .side ul, .qb-auth .side .wm, .qb-auth .side .badge-logo { display: none; }\
-    \ .qb-auth .side h1 { font-size: 2.1rem; } }\n</style>\n<script>\n(function () {\n  var QB = window.QB;\n  QB.define('auth',\
-    \ function (root, data, emit) {\n    var esc = QB.esc;\n    var S = { mode: 'login', busy: false, msg: null, email: ''\
-    \ };\n\n    function form() {\n      if (S.mode === 'reset') {\n        return '<h2>Reset your password</h2><p class=\"\
-    muted small\">We\\'ll email you a link to choose a new one.</p>' +\n          '<form data-form=\"reset\"><div><label class=\"\
-    f\" for=\"qbE\">Email</label><input type=\"email\" id=\"qbE\" name=\"email\" required autocomplete=\"email\" value=\"\
-    ' + esc(S.email) + '\"></div>' +\n          '<div><button class=\"btn primary block\" type=\"submit\"' + (S.busy ? ' disabled'\
-    \ : '') + '>' + (S.busy ? '<span class=\"spin\"></span>' : 'Send reset link') + '</button></div></form>' +\n         \
-    \ '<p style=\"margin-top:14px\"><button class=\"link\" data-action=\"mode\" data-mode=\"login\">← Back to sign in</button></p>';\n\
-    \      }\n      var signup = S.mode === 'signup';\n      return '<div class=\"tabs\" role=\"tablist\">' +\n          '<button\
-    \ role=\"tab\" data-action=\"mode\" data-mode=\"login\" class=\"' + (!signup ? 'on' : '') + '\">Sign in</button>' +\n\
-    \          '<button role=\"tab\" data-action=\"mode\" data-mode=\"signup\" class=\"' + (signup ? 'on' : '') + '\">Create\
-    \ account</button></div>' +\n        '<h2>' + (signup ? 'Create your account' : 'Welcome back') + '</h2>' +\n        '<p\
-    \ class=\"muted small\">' + (signup ? 'Your progress, streak and cards learned are saved to your profile.' : 'Sign in\
-    \ to continue where you left off.') + '</p>' +\n        '<form data-form=\"' + S.mode + '\">' +\n          (signup ? '<div><label\
-    \ class=\"f\" for=\"qbN\">Your name</label><input type=\"text\" id=\"qbN\" name=\"name\" required autocomplete=\"name\"\
-    \ placeholder=\"How should we greet you?\"></div>' : '') +\n          '<div><label class=\"f\" for=\"qbE\">Email</label><input\
+    \ by a civilian</span></span></button>' +\n        (u ? '<nav>' +\n            '<button data-action=\"lookup\" class=\"\
+    look' + (dict.hidden ? '' : ' on') + '\" title=\"Look up an abbreviation\" aria-label=\"Look up an abbreviation\" aria-expanded=\"\
+    ' + !dict.hidden + '\">' +\n              '<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"\
+    2.2\" stroke-linecap=\"round\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"M15.5 15.5 21 21\"/></svg><span>Lookup</span></button>'\
+    \ +\n          '</nav>' +\n          '<div class=\"me\"><button data-action=\"menu\" aria-haspopup=\"true\" aria-expanded=\"\
+    ' + S.open + '\">' +\n            '<span class=\"xp\">' + (u.xp || 0) + ' XP' + (u.streak ? ' · \U0001F525 ' + u.streak\
+    \ : '') + '</span>' + QB.avatar(u) + '</button>' +\n            (S.open ? '<div class=\"menu card fade-in\"><div class=\"\
+    who\"><strong>' + esc(u.display_name) + '</strong><div class=\"muted small\">' + (u.guest ? 'Guest · nothing is saved'\
+    \ : esc(u.email)) + '</div></div>' +\n              '<button data-action=\"nav\" data-page=\"profile\">Your profile</button>'\
+    \ +\n              '<button data-action=\"signout\">' + (u.guest ? 'Exit guest mode' : 'Sign out') + '</button></div>'\
+    \ : '') +\n          '</div>' : '') +\n        '</div>' +\n        (u.guest ? '<div class=\"guest\"><span><strong>Guest\
+    \ mode.</strong> Your progress is kept only until you close this tab.</span>' +\n          '<button data-action=\"signout\"\
+    >Sign in or create an account</button></div>' : '') +\n        '</header>';\n    }\n\n    root.addEventListener('click',\
+    \ function (e) {\n      var el = e.target.closest('[data-action]');\n      e.qbHeader = true; // tells the outside-click\
+    \ handler below to ignore this click\n      if (!el) return;\n      var a = el.dataset.action;\n      if (a === 'menu')\
+    \ { S.open = !S.open; dict.hidden = true; render(); return; }\n      if (a === 'lookup') { S.open = false; openDict(dict.hidden);\
+    \ return; }\n      S.open = false;\n      dict.hidden = true;\n      if (a === 'nav') { S.active = el.dataset.page; render();\
+    \ emit('nav', { page: el.dataset.page }); }\n      else if (a === 'signout') { render(); emit('signout', {}); }\n    });\n\
+    \    document.addEventListener('click', function (e) {\n      if (e.qbHeader) return;\n      if (S.open) { S.open = false;\
+    \ render(); }\n      if (!dict.hidden) openDict(false);\n    });\n\n    // The sign-in page fills the screen minus the\
+    \ footer, so the disclaimer is visible without scrolling.\n    var foot = document.querySelector('.qb-footer');\n    if\
+    \ (foot && window.ResizeObserver) {\n      new ResizeObserver(function () {\n        document.documentElement.style.setProperty('--qb-foot-h',\
+    \ foot.offsetHeight + 'px');\n      }).observe(foot);\n    }\n\n    render();\n    return {\n      setUser: function (json)\
+    \ { S.user = json ? JSON.parse(json) : null; render(); },\n      setActive: function (page) { S.active = page; S.open\
+    \ = false; render(); }\n    };\n  });\n})();\n</script>\n\n<!-- ===== AuthPage component ===== -->\n<style>\n.qb-auth\
+    \ { min-height: calc(100vh - var(--qb-foot-h, 105px)); min-height: calc(100dvh - var(--qb-foot-h, 105px)); display: grid;\
+    \ grid-template-columns: 1.05fr 1fr; }\n.qb-auth .side { background: var(--qb-hero); color: var(--qb-hero-ink); padding:\
+    \ 52px 48px 40px; display: flex; flex-direction: column; justify-content: space-between; gap: 28px; position: relative;\
+    \ overflow: hidden; border-bottom: 6px solid var(--qb-red); }\n.qb-auth .side .inner { position: relative; z-index: 1;\
+    \ }\n.qb-auth .side .badge-logo { width: 88px; height: 88px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px\
+    \ 30px rgba(0,0,0,.3); margin-bottom: 26px; background: rgba(255,255,255,.06); display: grid; place-items: center; }\n\
+    .qb-auth .side .badge-logo img { width: 100%; height: 100%; object-fit: cover; }\n.qb-auth .side .badge-logo .leaf { width:\
+    \ 52px; height: 52px; color: var(--qb-red); }\n.qb-auth .side .kind { color: #ff8a95; }\n.qb-auth .side h1 { color: inherit;\
+    \ font-size: 3rem; max-width: 13ch; text-transform: uppercase; letter-spacing: .02em; line-height: 1; }\n.qb-auth .side\
+    \ p { opacity: .85; max-width: 40ch; font-size: 1.08rem; }\n.qb-auth .side .wm { position: absolute; right: -90px; bottom:\
+    \ -70px; width: 420px; height: 420px; color: rgba(255,255,255,.05); transform: rotate(-12deg); }\n.qb-auth .side ul {\
+    \ list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 11px; }\n.qb-auth .side .civ { margin-top: 28px;\
+    \ padding: 12px 14px; border: 1px solid rgba(255,255,255,.22); border-radius: 12px; font-size: .88rem; max-width: 46ch;\
+    \ background: rgba(255,255,255,.05); }\n.qb-auth .side .civ strong { display: block; margin-bottom: 2px; }\n.qb-auth .side\
+    \ li { display: flex; align-items: center; gap: 10px; }\n.qb-auth .side li::before { content: \"\"; flex: none; width:\
+    \ 8px; height: 8px; background: var(--qb-red); transform: rotate(45deg); margin: 0 6px 0 4px; }\n.qb-auth .main { display:\
+    \ grid; place-items: center; padding: 40px 16px; }\n.qb-auth .box { width: min(400px, 100%); }\n.qb-auth .tabs { display:\
+    \ flex; gap: 4px; padding: 4px; background: var(--qb-panel-2); border: 1px solid var(--qb-line); border-radius: 12px;\
+    \ margin-bottom: 22px; }\n.qb-auth .tabs button { all: unset; flex: 1; text-align: center; cursor: pointer; padding: 8px;\
+    \ border-radius: 9px; font-weight: 600; font-size: .92rem; color: var(--qb-muted); }\n.qb-auth .tabs button.on { background:\
+    \ var(--qb-panel); color: var(--qb-ink); box-shadow: var(--qb-shadow); }\n.qb-auth form > div + div { margin-top: 14px;\
+    \ }\n.qb-auth .or { display: flex; align-items: center; gap: 10px; color: var(--qb-muted); font-size: .85rem; margin:\
+    \ 18px 0; }\n.qb-auth .or::before, .qb-auth .or::after { content: \"\"; flex: 1; height: 1px; background: var(--qb-line);\
+    \ }\n.qb-auth .guest-note { text-align: center; margin-top: 8px; }\n.qb-auth .link { all: unset; cursor: pointer; color:\
+    \ var(--qb-accent); font-size: .88rem; }\n.qb-auth .link:hover { text-decoration: underline; }\n@media (max-width: 820px)\
+    \ { .qb-auth { grid-template-columns: 1fr; } .qb-auth .side { padding: 32px 20px; } .qb-auth .side h1 { font-size: 1.9rem;\
+    \ } .qb-auth .side ul, .qb-auth .side .wm, .qb-auth .side .badge-logo { display: none; } .qb-auth .side h1 { font-size:\
+    \ 2.1rem; } }\n</style>\n<script>\n(function () {\n  var QB = window.QB;\n  QB.define('auth', function (root, data, emit)\
+    \ {\n    var esc = QB.esc;\n    var S = { mode: 'login', busy: false, msg: null, email: '' };\n\n    function form() {\n\
+    \      if (S.mode === 'reset') {\n        return '<h2>Reset your password</h2><p class=\"muted small\">We\\'ll email you\
+    \ a link to choose a new one.</p>' +\n          '<form data-form=\"reset\"><div><label class=\"f\" for=\"qbE\">Email</label><input\
     \ type=\"email\" id=\"qbE\" name=\"email\" required autocomplete=\"email\" value=\"' + esc(S.email) + '\"></div>' +\n\
-    \          '<div><label class=\"f\" for=\"qbP\">Password</label><input type=\"password\" id=\"qbP\" name=\"password\"\
-    \ required minlength=\"' + (signup ? 8 : 1) + '\" autocomplete=\"' + (signup ? 'new-password' : 'current-password') +\
-    \ '\">' +\n            (signup ? '<div class=\"hint\">At least 8 characters.</div>' : '<div class=\"hint\" style=\"text-align:right\"\
-    ><button type=\"button\" class=\"link\" data-action=\"mode\" data-mode=\"reset\">Forgot password?</button></div>') + '</div>'\
-    \ +\n          '<div><button class=\"btn primary block\" type=\"submit\"' + (S.busy ? ' disabled' : '') + '>' + (S.busy\
-    \ ? '<span class=\"spin\"></span>' : signup ? 'Create account' : 'Sign in') + '</button></div>' +\n        '</form>' +\n\
-    \        (data.google ? '<div class=\"or\">or</div><button class=\"btn block\" data-action=\"google\"' + (S.busy ? ' disabled'\
+    \          '<div><button class=\"btn primary block\" type=\"submit\"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ?\
+    \ '<span class=\"spin\"></span>' : 'Send reset link') + '</button></div></form>' +\n          '<p style=\"margin-top:14px\"\
+    ><button class=\"link\" data-action=\"mode\" data-mode=\"login\">← Back to sign in</button></p>';\n      }\n      var\
+    \ signup = S.mode === 'signup';\n      return '<div class=\"tabs\" role=\"tablist\">' +\n          '<button role=\"tab\"\
+    \ data-action=\"mode\" data-mode=\"login\" class=\"' + (!signup ? 'on' : '') + '\">Sign in</button>' +\n          '<button\
+    \ role=\"tab\" data-action=\"mode\" data-mode=\"signup\" class=\"' + (signup ? 'on' : '') + '\">Create account</button></div>'\
+    \ +\n        '<h2>' + (signup ? 'Create your account' : 'Welcome back') + '</h2>' +\n        '<p class=\"muted small\"\
+    >' + (signup ? 'Your progress, streak and cards learned are saved to your profile.' : 'Sign in to continue where you left\
+    \ off.') + '</p>' +\n        '<form data-form=\"' + S.mode + '\">' +\n          (signup ? '<div><label class=\"f\" for=\"\
+    qbN\">Your name</label><input type=\"text\" id=\"qbN\" name=\"name\" required autocomplete=\"name\" placeholder=\"How\
+    \ should we greet you?\"></div>' : '') +\n          '<div><label class=\"f\" for=\"qbE\">Email</label><input type=\"email\"\
+    \ id=\"qbE\" name=\"email\" required autocomplete=\"email\" value=\"' + esc(S.email) + '\"></div>' +\n          '<div><label\
+    \ class=\"f\" for=\"qbP\">Password</label><input type=\"password\" id=\"qbP\" name=\"password\" required minlength=\"\
+    ' + (signup ? 8 : 1) + '\" autocomplete=\"' + (signup ? 'new-password' : 'current-password') + '\">' +\n            (signup\
+    \ ? '<div class=\"hint\">At least 8 characters.</div>' : '<div class=\"hint\" style=\"text-align:right\"><button type=\"\
+    button\" class=\"link\" data-action=\"mode\" data-mode=\"reset\">Forgot password?</button></div>') + '</div>' +\n    \
+    \      '<div><button class=\"btn primary block\" type=\"submit\"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '<span\
+    \ class=\"spin\"></span>' : signup ? 'Create account' : 'Sign in') + '</button></div>' +\n        '</form>' +\n      \
+    \  (data.google ? '<div class=\"or\">or</div><button class=\"btn block\" data-action=\"google\"' + (S.busy ? ' disabled'\
     \ : '') + '>Continue with Google</button>' : '') +\n        '<div class=\"or\">or</div><button class=\"btn block\" data-action=\"\
     guest\"' + (S.busy ? ' disabled' : '') + '>Try it without signing in</button>' +\n        '<p class=\"hint guest-note\"\
     >Everything works, but your progress is only kept until you close this tab.</p>';\n    }\n\n    function render() {\n\
