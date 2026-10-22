@@ -213,7 +213,8 @@ db_schema:
     indexes: []
     server: full
     title: Users
-name: Scratch 1
+metadata: {description: Learn up on the CAF, logo_img: 'asset:8ff385ff-2cd5-4868-9642-6374157bd844.jpg', title: CAF Guide}
+name: CAF Guide
 native_deps:
   head_html: |
     <!--
@@ -1161,14 +1162,14 @@ native_deps:
       });
     })();
     </script>
-package_name: Scratch_1
+package_name: CAF_Guide
 runtime_options:
   client_version: '3'
   server_spec: {base: python314}
   version: 3
 services:
 - client_config: {enable_v2: true}
-  server_config: {}
+  server_config: {auto_create_missing_columns: false}
   source: /runtime/services/tables.yml
 - client_config: {allow_signup: true, confirm_email: false, enable_automatically: true, use_email: true, use_google: false}
   server_config: {user_table: users}
