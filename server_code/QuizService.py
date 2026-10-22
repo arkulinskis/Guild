@@ -88,6 +88,7 @@ def _me_dict(user, today):
         "streak": _current_streak(user, today),
         "is_admin": bool(user["is_admin"]),
         "signed_up": _iso(user["signed_up"]),
+        "guest": _is_guest(user),
     }
 
 
@@ -97,6 +98,122 @@ def _user():
         raise anvil.users.AuthenticationFailed("Please sign in again.")
     _ensure_defaults(user)
     return user
+
+
+# ---------------------------------------------------------------- guest mode
+# "Try without signing in": progress lives only in anvil.server.session (this browser session),
+# never in the data tables. The guest_* callables run the same logic as the signed-in ones,
+# with a _Guest standing in for the users row and its card states / sessions.
+GUEST_KEY = "guest"
+
+
+class _Ref(object):
+    """Stands in for a row link where only get_id() is needed."""
+    def __init__(self, row_id):
+        self._id = row_id
+
+    def get_id(self):
+        return self._id
+
+
+class _GuestState(object):
+    """A card_state-like view of one guest card: [quiz_id, box, due, reviews, lapses, last_reviewed]."""
+    def __init__(self, qid, v):
+        self._qid, self._v = qid, v
+
+    def __getitem__(self, key):
+        v = self._v
+        if key == "box":
+            return v[1]
+        if key == "due":
+            return date.fromisoformat(v[2]) if v[2] else None
+        if key == "reviews":
+            return v[3]
+        if key == "lapses":
+            return v[4]
+        if key == "last_reviewed":
+            return datetime.fromisoformat(v[5]) if v[5] else None
+        if key == "quiz":
+            return _Ref(v[0])
+        if key == "question":
+            return app_tables.questions.get_by_id(self._qid)
+        raise KeyError(key)
+
+
+class _GuestSession(object):
+    """A sessions-row-like view of one finished guest session."""
+    def __init__(self, d):
+        self._d = d
+
+    def __getitem__(self, key):
+        d = self._d
+        if key == "quiz":
+            return app_tables.quizzes.get_by_id(d["quiz_id"]) if d.get("quiz_id") else None
+        if key == "ratings":
+            return {"module": d["module"]} if d.get("module") else []
+        if key == "finished":
+            return datetime.fromisoformat(d["finished"])
+        return d.get(key)
+
+
+class _Guest(object):
+    """A users-row-like guest whose data is a dict in anvil.server.session."""
+    def __init__(self, data):
+        self.data = data
+
+    def __getitem__(self, key):
+        d = self.data
+        if key == "last_active":
+            return date.fromisoformat(d["last_active"]) if d.get("last_active") else None
+        if key in ("email", "signed_up"):
+            return None
+        if key == "is_admin":
+            return False
+        return d.get(key)
+
+    def update(self, **changes):
+        for k, v in changes.items():
+            self.data[k] = v.isoformat() if isinstance(v, date) else v
+        self.save()
+
+    def save(self):
+        anvil.server.session[GUEST_KEY] = self.data  # reassign so Anvil stores the change
+
+
+def _new_guest():
+    return {"display_name": "Guest", "bio": "", "avatar_color": AVATAR_COLORS[0], "xp": 0, "streak": 0,
+            "last_active": None, "cards": {}, "sessions": []}
+
+
+def _guest():
+    data = anvil.server.session.get(GUEST_KEY)
+    if data is None:
+        raise anvil.users.AuthenticationFailed("Your guest session has ended. Start a new one from the sign-in page.")
+    return _Guest(data)
+
+
+def _is_guest(user):
+    return isinstance(user, _Guest)
+
+
+def _sessions(user):
+    """This learner's finished sessions, newest first."""
+    if _is_guest(user):
+        return [_GuestSession(d) for d in reversed(user.data["sessions"])]
+    return list(app_tables.sessions.search(tables.order_by("finished", ascending=False), user=user))
+
+
+@anvil.server.callable
+def start_guest(today=None):
+    """Begin (or resume, in the same browser session) trying the app without an account."""
+    if anvil.server.session.get(GUEST_KEY) is None:
+        anvil.server.session[GUEST_KEY] = _new_guest()
+    return _me_dict(_guest(), _client_today(today))
+
+
+@anvil.server.callable
+def end_guest():
+    anvil.server.session.pop(GUEST_KEY, None)
 
 
 def _require_admin():
@@ -123,6 +240,8 @@ def _source_url(quizzes):
 
 def _states(user):
     """{question_id: card_state_row} for this user."""
+    if _is_guest(user):
+        return {qid: _GuestState(qid, v) for qid, v in user.data["cards"].items()}
     return {s["question"].get_id(): s for s in app_tables.card_state.search(user=user) if s["question"] is not None}
 
 
@@ -201,14 +320,7 @@ def _card_dict(q, state, quiz_titles=None):
 
 
 # ---------------------------------------------------------------- profile
-@anvil.server.callable(require_user=True)
-def get_me(today=None):
-    return _me_dict(_user(), _client_today(today))
-
-
-@anvil.server.callable(require_user=True)
-def update_profile(display_name=None, bio=None, avatar_color=None):
-    user = _user()
+def _update_profile(user, display_name=None, bio=None, avatar_color=None):
     changes = {}
     if display_name is not None:
         name = " ".join(str(display_name).split())[:60]
@@ -227,9 +339,7 @@ def update_profile(display_name=None, bio=None, avatar_color=None):
 
 
 # ---------------------------------------------------------------- pages
-@anvil.server.callable(require_user=True)
-def get_home(today=None):
-    user = _user()
+def _get_home(user, today=None):
     today = _client_today(today)
     quizzes = _published_quizzes()
     states = _states(user)
@@ -254,8 +364,7 @@ def get_home(today=None):
                 break
     next_due = min((c["next_due"] for c in counts.values() if c["next_due"]), default=None)
 
-    recent = [_session_dict(r) for r in
-              app_tables.sessions.search(tables.order_by("finished", ascending=False), user=user)[:5]]
+    recent = [_session_dict(r) for r in _sessions(user)[:5]]
     return {
         "me": _me_dict(user, today),
         "stats": {
@@ -273,9 +382,7 @@ def get_home(today=None):
     }
 
 
-@anvil.server.callable(require_user=True)
-def get_collection(collection_id, today=None):
-    user = _user()
+def _get_collection(user, collection_id, today=None):
     today = _client_today(today)
     col = app_tables.collections.get_by_id(collection_id) if collection_id else None
     if col is None or not col["published"]:
@@ -296,15 +403,13 @@ def get_collection(collection_id, today=None):
     }
 
 
-@anvil.server.callable(require_user=True)
-def get_study(quiz_id=None, scope="due", today=None, collection_id=None):
+def _get_study(user, quiz_id=None, scope="due", today=None, collection_id=None):
     """Cards for one study session.
 
     quiz_id given:       that quiz (part). scope "due" = due + new cards, "all" = every card (study ahead).
     collection_id given: every part of that module, in order.
     neither:             daily review = due cards from every published quiz (no new cards).
     """
-    user = _user()
     today = _client_today(today)
     states = _states(user)
 
@@ -363,16 +468,17 @@ def get_study(quiz_id=None, scope="due", today=None, collection_id=None):
     }
 
 
-@anvil.server.callable(require_user=True)
-@tables.in_transaction
-def rate_card(question_id, knew, today=None):
+def _rate_card(user, question_id, knew, today=None):
     """Save one self-rating. Called after every card, so leaving mid-session loses nothing."""
-    user = _user()
     today = _client_today(today)
     q = app_tables.questions.get_by_id(question_id) if question_id else None
     if q is None:
         raise ValueError("That card was not found.")
-    state = app_tables.card_state.get(user=user, question=q)
+    if _is_guest(user):
+        old = user.data["cards"].get(q.get_id())
+        state = _GuestState(q.get_id(), old) if old else None
+    else:
+        state = app_tables.card_state.get(user=user, question=q)
     box = (state["box"] or 0) if state else 0
     if knew:
         box = min(box + 1, len(BOX_INTERVALS) - 1)
@@ -380,7 +486,12 @@ def rate_card(question_id, knew, today=None):
     else:
         box, due = 0, today
     fields = dict(box=box, due=due, last_reviewed=_now())
-    if state is None:
+    if _is_guest(user):
+        reviews, lapses = (old[3], old[4]) if old else (0, 0)
+        user.data["cards"][q.get_id()] = [q["quiz"].get_id() if q["quiz"] else None, box, due.isoformat(),
+                                          reviews + 1, lapses + (0 if knew else 1), fields["last_reviewed"].isoformat()]
+        user.save()
+    elif state is None:
         app_tables.card_state.add_row(user=user, question=q, quiz=q["quiz"], reviews=1, lapses=0 if knew else 1, **fields)
     else:
         state.update(reviews=(state["reviews"] or 0) + 1,
@@ -388,11 +499,8 @@ def rate_card(question_id, knew, today=None):
     return {"box": box, "due": _iso(due)}
 
 
-@anvil.server.callable(require_user=True)
-@tables.in_transaction
-def finish_session(quiz_id, ratings, today=None, collection_id=None):
+def _finish_session(user, quiz_id, ratings, today=None, collection_id=None):
     """Record a finished session (ratings were already saved one by one) and award XP + streak."""
-    user = _user()
     today = _client_today(today)
     ratings = [r for r in (ratings or []) if isinstance(r, dict) and r.get("question_id")]
     if not ratings:
@@ -411,26 +519,30 @@ def finish_session(quiz_id, ratings, today=None, collection_id=None):
     else:
         streak = 1
     user.update(xp=(user["xp"] or 0) + xp, streak=streak, last_active=today)
-    stored = {"module": collection_id, "ratings": ratings[:500]} if (collection_id and not qz) else ratings[:500]
-    app_tables.sessions.add_row(user=user, quiz=qz, finished=_now(), reviewed=len(cards), got=got, again=again,
-                                xp=xp, ratings=stored)
+    if _is_guest(user):
+        user.data["sessions"] = (user.data["sessions"] + [{
+            "quiz_id": qz.get_id() if qz else None, "module": collection_id if (collection_id and not qz) else None,
+            "finished": _now().isoformat(), "reviewed": len(cards), "got": got, "again": again}])[-HISTORY_LIMIT:]
+        user.save()
+    else:
+        stored = {"module": collection_id, "ratings": ratings[:500]} if (collection_id and not qz) else ratings[:500]
+        app_tables.sessions.add_row(user=user, quiz=qz, finished=_now(), reviewed=len(cards), got=got, again=again,
+                                    xp=xp, ratings=stored)
 
     # When does this learner next have something due?
-    states = [s for s in app_tables.card_state.search(user=user) if s["due"] is not None]
+    states = [s for s in _states(user).values() if s["due"] is not None]
     future = [s["due"] for s in states if s["due"] > today]
     return {"xp_gained": xp, "streak": streak, "next_due": _iso(min(future) if future else None),
             "due_tomorrow": sum(1 for s in states if s["due"] <= today + timedelta(days=1)),
             "me": _me_dict(user, today)}
 
 
-@anvil.server.callable(require_user=True)
-def get_profile(today=None):
-    user = _user()
+def _get_profile(user, today=None):
     today = _client_today(today)
     quizzes = _published_quizzes()
     states = _states(user)
     counts = _quiz_counts(quizzes, states, today)
-    sessions = list(app_tables.sessions.search(tables.order_by("finished", ascending=False), user=user))
+    sessions = _sessions(user)
     return {
         "me": _me_dict(user, today),
         "stats": {
@@ -447,6 +559,90 @@ def get_profile(today=None):
         "history": [_session_dict(r) for r in sessions[:HISTORY_LIMIT]],
         "colors": AVATAR_COLORS,
     }
+
+
+# ---------------------------------------------------------------- learner API
+# Each call has a signed-in version and a guest_ version (guest progress stays in the browser session).
+@anvil.server.callable(require_user=True)
+def get_me(today=None):
+    return _me_dict(_user(), _client_today(today))
+
+
+@anvil.server.callable
+def guest_get_me(today=None):
+    return _me_dict(_guest(), _client_today(today))
+
+
+@anvil.server.callable(require_user=True)
+def update_profile(display_name=None, bio=None, avatar_color=None):
+    return _update_profile(_user(), display_name, bio, avatar_color)
+
+
+@anvil.server.callable
+def guest_update_profile(display_name=None, bio=None, avatar_color=None):
+    return _update_profile(_guest(), display_name, bio, avatar_color)
+
+
+@anvil.server.callable(require_user=True)
+def get_home(today=None):
+    return _get_home(_user(), today)
+
+
+@anvil.server.callable
+def guest_get_home(today=None):
+    return _get_home(_guest(), today)
+
+
+@anvil.server.callable(require_user=True)
+def get_collection(collection_id, today=None):
+    return _get_collection(_user(), collection_id, today)
+
+
+@anvil.server.callable
+def guest_get_collection(collection_id, today=None):
+    return _get_collection(_guest(), collection_id, today)
+
+
+@anvil.server.callable(require_user=True)
+def get_study(quiz_id=None, scope="due", today=None, collection_id=None):
+    return _get_study(_user(), quiz_id, scope, today, collection_id)
+
+
+@anvil.server.callable
+def guest_get_study(quiz_id=None, scope="due", today=None, collection_id=None):
+    return _get_study(_guest(), quiz_id, scope, today, collection_id)
+
+
+@anvil.server.callable(require_user=True)
+@tables.in_transaction
+def rate_card(question_id, knew, today=None):
+    return _rate_card(_user(), question_id, knew, today)
+
+
+@anvil.server.callable
+def guest_rate_card(question_id, knew, today=None):
+    return _rate_card(_guest(), question_id, knew, today)
+
+
+@anvil.server.callable(require_user=True)
+@tables.in_transaction
+def finish_session(quiz_id, ratings, today=None, collection_id=None):
+    return _finish_session(_user(), quiz_id, ratings, today, collection_id)
+
+
+@anvil.server.callable
+def guest_finish_session(quiz_id, ratings, today=None, collection_id=None):
+    return _finish_session(_guest(), quiz_id, ratings, today, collection_id)
+
+
+@anvil.server.callable(require_user=True)
+def get_profile(today=None):
+    return _get_profile(_user(), today)
+
+
+@anvil.server.callable
+def guest_get_profile(today=None):
+    return _get_profile(_guest(), today)
 
 
 # ---------------------------------------------------------------- admin: importing cards

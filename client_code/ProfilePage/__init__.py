@@ -10,7 +10,7 @@ from .. import qb_ui
 class ProfilePage(ProfilePageTemplate):
     def __init__(self, **properties):
         super().__init__(**properties)
-        self.data = anvil.server.call("get_profile", qb_ui.today())
+        self.data = qb_ui.call("get_profile", qb_ui.today())
         self.add_event_handler("show", self._on_show)
 
     def _on_show(self, **event_args):
@@ -18,11 +18,13 @@ class ProfilePage(ProfilePageTemplate):
 
     def _on_event(self, event, p):
         if event == "save":
-            res = anvil.server.call("update_profile", display_name=p.get("display_name"),
+            res = qb_ui.call("update_profile", display_name=p.get("display_name"),
                                     bio=p.get("bio"), avatar_color=p.get("avatar_color"))
             if res.get("ok"):
                 get_open_form().refresh_user(res["me"])
             return res
+        if qb_ui.GUEST[0] and event in ("import_json", "seed_demo", "change_password", "reset_email"):
+            return {"ok": False, "error": "Create an account to use this."}
         if event == "open_quiz":
             get_open_form().go("quiz", quiz_id=p["id"])
         elif event == "open_collection":

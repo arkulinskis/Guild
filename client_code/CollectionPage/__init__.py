@@ -10,7 +10,7 @@ from .. import qb_ui
 class CollectionPage(CollectionPageTemplate):
     def __init__(self, collection_id=None, **properties):
         super().__init__(**properties)
-        self.data = anvil.server.call("get_collection", collection_id, qb_ui.today())
+        self.data = qb_ui.call("get_collection", collection_id, qb_ui.today())
         self.add_event_handler("show", self._on_show)
 
     def _on_show(self, **event_args):

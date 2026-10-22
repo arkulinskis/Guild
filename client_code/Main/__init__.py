@@ -41,14 +41,24 @@ class Main(MainTemplate):
 
     # ---- navigation (pages call get_open_form().go(...)) ----
     def go(self, page, **kwargs):
-        if page != "auth" and not anvil.users.get_user():
+        if page != "auth" and not (anvil.users.get_user() or qb_ui.GUEST[0]):
             page, kwargs = "auth", {}
         self.clear()
         self.add_component(PAGES[page](**kwargs))
         self.header.setActive(page)
         qb_ui.scroll_top()
 
+    def start_guest(self):
+        """Try the app without an account: progress is kept for this browser session only."""
+        self.me = anvil.server.call("start_guest", qb_ui.today())
+        qb_ui.GUEST[0] = True
+        self.refresh_user(self.me)
+        self.go("home")
+
     def signed_in(self):
+        if qb_ui.GUEST[0]:
+            anvil.server.call("end_guest")
+            qb_ui.GUEST[0] = False
         self.me = anvil.server.call("get_me", qb_ui.today())
         name = qb_ui.pending_name()
         if name and self.me.get("default_name"):
@@ -58,11 +68,15 @@ class Main(MainTemplate):
         self.go("home")
 
     def refresh_user(self, me=None):
-        self.me = me or anvil.server.call("get_me", qb_ui.today())
+        self.me = me or qb_ui.call("get_me", qb_ui.today())
         self.header.setUser(json.dumps(self.me) if self.me else None)
 
     def sign_out(self):
-        anvil.users.logout()
+        if qb_ui.GUEST[0]:
+            anvil.server.call("end_guest")  # guest progress is discarded
+            qb_ui.GUEST[0] = False
+        else:
+            anvil.users.logout()
         self.me = None
         self.header.setUser(None)
         self.go("auth")

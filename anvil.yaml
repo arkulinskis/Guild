@@ -457,14 +457,17 @@ native_deps:
     \ min-width: 220px; padding: 6px; z-index: 60; }\n.qb-header .menu .who { padding: 8px 10px 10px; border-bottom: 1px solid\
     \ var(--qb-line); margin-bottom: 4px; }\n.qb-header .menu button { all: unset; box-sizing: border-box; cursor: pointer;\
     \ display: block; width: 100%; padding: 8px 10px; border-radius: 8px; font-size: .93rem; }\n.qb-header .menu button:hover\
-    \ { background: var(--qb-panel-2); }\n.qb-page { min-height: calc(100vh - 120px); }\n.qb-signed-out .qb-page { min-height:\
-    \ 0; }\n.qb-footer { max-width: 980px; margin: 0 auto; padding: 18px 16px 28px; border-top: 1px solid var(--qb-line);\
-    \ color: var(--qb-muted); font-size: .8rem; text-align: center; line-height: 1.5; }\n.qb-footer strong { color: var(--qb-ink);\
-    \ font-weight: 600; }\n@media (max-width: 520px) { .qb-header .xp, .qb-header .brand .sub { display: none; } .qb-header\
-    \ .brand .name { font-size: 1.1rem; } .qb-header .in { gap: 10px; } }\n</style>\n<script>\n(function () {\n  var QB =\
-    \ window.QB;\n  QB.define('header', function (root, data, emit) {\n    var esc = QB.esc;\n    var S = { user: data.user\
-    \ || null, active: data.active || 'home', open: false, appName: data.app_name || 'CAF Guide', logo: data.logo_url || ''\
-    \ };\n\n    function render() {\n      var u = S.user;\n      document.documentElement.classList.toggle('qb-signed-out',\
+    \ { background: var(--qb-panel-2); }\n.qb-header .guest { max-width: 980px; margin: 0 auto; padding: 6px 16px 8px; display:\
+    \ flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: .85rem; color: var(--qb-muted); }\n.qb-header\
+    \ .guest strong { color: var(--qb-ink); }\n.qb-header .guest button { all: unset; cursor: pointer; color: var(--qb-accent);\
+    \ font-weight: 600; }\n.qb-header .guest button:hover { text-decoration: underline; }\n.qb-page { min-height: calc(100vh\
+    \ - 120px); }\n.qb-signed-out .qb-page { min-height: 0; }\n.qb-footer { max-width: 980px; margin: 0 auto; padding: 18px\
+    \ 16px 28px; border-top: 1px solid var(--qb-line); color: var(--qb-muted); font-size: .8rem; text-align: center; line-height:\
+    \ 1.5; }\n.qb-footer strong { color: var(--qb-ink); font-weight: 600; }\n@media (max-width: 520px) { .qb-header .xp, .qb-header\
+    \ .brand .sub { display: none; } .qb-header .brand .name { font-size: 1.1rem; } .qb-header .in { gap: 10px; } }\n</style>\n\
+    <script>\n(function () {\n  var QB = window.QB;\n  QB.define('header', function (root, data, emit) {\n    var esc = QB.esc;\n\
+    \    var S = { user: data.user || null, active: data.active || 'home', open: false, appName: data.app_name || 'CAF Guide',\
+    \ logo: data.logo_url || '' };\n\n    function render() {\n      var u = S.user;\n      document.documentElement.classList.toggle('qb-signed-out',\
     \ !u);\n      if (!u) { root.innerHTML = ''; return; } // no top bar until signed in\n      root.innerHTML = '<header\
     \ class=\"qb-header\"><div class=\"in\">' +\n        '<button class=\"brand\" data-action=\"nav\" data-page=\"home\"><span\
     \ class=\"logo\">' + (S.logo ? '<img alt=\"\" src=\"' + esc(S.logo) + '\">' : QB.leaf()) + '</span>' +\n          '<span><span\
@@ -475,15 +478,18 @@ native_deps:
     menu\" aria-haspopup=\"true\" aria-expanded=\"' + S.open + '\">' +\n            '<span class=\"xp\">' + (u.xp || 0) +\
     \ ' XP' + (u.streak ? ' · \U0001F525 ' + u.streak : '') + '</span>' + QB.avatar(u) + '</button>' +\n            (S.open\
     \ ? '<div class=\"menu card fade-in\"><div class=\"who\"><strong>' + esc(u.display_name) + '</strong><div class=\"muted\
-    \ small\">' + esc(u.email) + '</div></div>' +\n              '<button data-action=\"nav\" data-page=\"profile\">Your profile</button>'\
-    \ +\n              '<button data-action=\"signout\">Sign out</button></div>' : '') +\n          '</div>' : '') +\n   \
-    \     '</div></header>';\n    }\n\n    root.addEventListener('click', function (e) {\n      var el = e.target.closest('[data-action]');\n\
-    \      e.qbHeader = true; // tells the outside-click handler below to ignore this click\n      if (!el) return;\n    \
-    \  var a = el.dataset.action;\n      if (a === 'menu') { S.open = !S.open; render(); return; }\n      S.open = false;\n\
-    \      if (a === 'nav') { S.active = el.dataset.page; render(); emit('nav', { page: el.dataset.page }); }\n      else\
-    \ if (a === 'signout') { render(); emit('signout', {}); }\n    });\n    document.addEventListener('click', function (e)\
-    \ {\n      if (S.open && !e.qbHeader) { S.open = false; render(); }\n    });\n\n    // The sign-in page fills the screen\
-    \ minus the footer, so the disclaimer is visible without scrolling.\n    var foot = document.querySelector('.qb-footer');\n\
+    \ small\">' + (u.guest ? 'Guest · nothing is saved' : esc(u.email)) + '</div></div>' +\n              '<button data-action=\"\
+    nav\" data-page=\"profile\">Your profile</button>' +\n              '<button data-action=\"signout\">' + (u.guest ? 'Exit\
+    \ guest mode' : 'Sign out') + '</button></div>' : '') +\n          '</div>' : '') +\n        '</div>' +\n        (u.guest\
+    \ ? '<div class=\"guest\"><span><strong>Guest mode.</strong> Your progress is kept only until you close this tab.</span>'\
+    \ +\n          '<button data-action=\"signout\">Sign in or create an account</button></div>' : '') +\n        '</header>';\n\
+    \    }\n\n    root.addEventListener('click', function (e) {\n      var el = e.target.closest('[data-action]');\n     \
+    \ e.qbHeader = true; // tells the outside-click handler below to ignore this click\n      if (!el) return;\n      var\
+    \ a = el.dataset.action;\n      if (a === 'menu') { S.open = !S.open; render(); return; }\n      S.open = false;\n   \
+    \   if (a === 'nav') { S.active = el.dataset.page; render(); emit('nav', { page: el.dataset.page }); }\n      else if\
+    \ (a === 'signout') { render(); emit('signout', {}); }\n    });\n    document.addEventListener('click', function (e) {\n\
+    \      if (S.open && !e.qbHeader) { S.open = false; render(); }\n    });\n\n    // The sign-in page fills the screen minus\
+    \ the footer, so the disclaimer is visible without scrolling.\n    var foot = document.querySelector('.qb-footer');\n\
     \    if (foot && window.ResizeObserver) {\n      new ResizeObserver(function () {\n        document.documentElement.style.setProperty('--qb-foot-h',\
     \ foot.offsetHeight + 'px');\n      }).observe(foot);\n    }\n\n    render();\n    return {\n      setUser: function (json)\
     \ { S.user = json ? JSON.parse(json) : null; render(); },\n      setActive: function (page) { S.active = page; S.open\
@@ -511,34 +517,37 @@ native_deps:
     \ var(--qb-panel); color: var(--qb-ink); box-shadow: var(--qb-shadow); }\n.qb-auth form > div + div { margin-top: 14px;\
     \ }\n.qb-auth .or { display: flex; align-items: center; gap: 10px; color: var(--qb-muted); font-size: .85rem; margin:\
     \ 18px 0; }\n.qb-auth .or::before, .qb-auth .or::after { content: \"\"; flex: 1; height: 1px; background: var(--qb-line);\
-    \ }\n.qb-auth .link { all: unset; cursor: pointer; color: var(--qb-accent); font-size: .88rem; }\n.qb-auth .link:hover\
-    \ { text-decoration: underline; }\n@media (max-width: 820px) { .qb-auth { grid-template-columns: 1fr; } .qb-auth .side\
-    \ { padding: 32px 20px; } .qb-auth .side h1 { font-size: 1.9rem; } .qb-auth .side ul, .qb-auth .side .wm, .qb-auth .side\
-    \ .badge-logo { display: none; } .qb-auth .side h1 { font-size: 2.1rem; } }\n</style>\n<script>\n(function () {\n  var\
-    \ QB = window.QB;\n  QB.define('auth', function (root, data, emit) {\n    var esc = QB.esc;\n    var S = { mode: 'login',\
-    \ busy: false, msg: null, email: '' };\n\n    function form() {\n      if (S.mode === 'reset') {\n        return '<h2>Reset\
-    \ your password</h2><p class=\"muted small\">We\\'ll email you a link to choose a new one.</p>' +\n          '<form data-form=\"\
-    reset\"><div><label class=\"f\" for=\"qbE\">Email</label><input type=\"email\" id=\"qbE\" name=\"email\" required autocomplete=\"\
-    email\" value=\"' + esc(S.email) + '\"></div>' +\n          '<div><button class=\"btn primary block\" type=\"submit\"\
-    ' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '<span class=\"spin\"></span>' : 'Send reset link') + '</button></div></form>'\
-    \ +\n          '<p style=\"margin-top:14px\"><button class=\"link\" data-action=\"mode\" data-mode=\"login\">← Back to\
-    \ sign in</button></p>';\n      }\n      var signup = S.mode === 'signup';\n      return '<div class=\"tabs\" role=\"\
-    tablist\">' +\n          '<button role=\"tab\" data-action=\"mode\" data-mode=\"login\" class=\"' + (!signup ? 'on' :\
-    \ '') + '\">Sign in</button>' +\n          '<button role=\"tab\" data-action=\"mode\" data-mode=\"signup\" class=\"' +\
-    \ (signup ? 'on' : '') + '\">Create account</button></div>' +\n        '<h2>' + (signup ? 'Create your account' : 'Welcome\
-    \ back') + '</h2>' +\n        '<p class=\"muted small\">' + (signup ? 'Your progress, streak and cards learned are saved\
-    \ to your profile.' : 'Sign in to continue where you left off.') + '</p>' +\n        '<form data-form=\"' + S.mode + '\"\
-    >' +\n          (signup ? '<div><label class=\"f\" for=\"qbN\">Your name</label><input type=\"text\" id=\"qbN\" name=\"\
-    name\" required autocomplete=\"name\" placeholder=\"How should we greet you?\"></div>' : '') +\n          '<div><label\
-    \ class=\"f\" for=\"qbE\">Email</label><input type=\"email\" id=\"qbE\" name=\"email\" required autocomplete=\"email\"\
-    \ value=\"' + esc(S.email) + '\"></div>' +\n          '<div><label class=\"f\" for=\"qbP\">Password</label><input type=\"\
-    password\" id=\"qbP\" name=\"password\" required minlength=\"' + (signup ? 8 : 1) + '\" autocomplete=\"' + (signup ? 'new-password'\
-    \ : 'current-password') + '\">' +\n            (signup ? '<div class=\"hint\">At least 8 characters.</div>' : '<div class=\"\
-    hint\" style=\"text-align:right\"><button type=\"button\" class=\"link\" data-action=\"mode\" data-mode=\"reset\">Forgot\
-    \ password?</button></div>') + '</div>' +\n          '<div><button class=\"btn primary block\" type=\"submit\"' + (S.busy\
-    \ ? ' disabled' : '') + '>' + (S.busy ? '<span class=\"spin\"></span>' : signup ? 'Create account' : 'Sign in') + '</button></div>'\
-    \ +\n        '</form>' +\n        (data.google ? '<div class=\"or\">or</div><button class=\"btn block\" data-action=\"\
-    google\"' + (S.busy ? ' disabled' : '') + '>Continue with Google</button>' : '');\n    }\n\n    function render() {\n\
+    \ }\n.qb-auth .guest-note { text-align: center; margin-top: 8px; }\n.qb-auth .link { all: unset; cursor: pointer; color:\
+    \ var(--qb-accent); font-size: .88rem; }\n.qb-auth .link:hover { text-decoration: underline; }\n@media (max-width: 820px)\
+    \ { .qb-auth { grid-template-columns: 1fr; } .qb-auth .side { padding: 32px 20px; } .qb-auth .side h1 { font-size: 1.9rem;\
+    \ } .qb-auth .side ul, .qb-auth .side .wm, .qb-auth .side .badge-logo { display: none; } .qb-auth .side h1 { font-size:\
+    \ 2.1rem; } }\n</style>\n<script>\n(function () {\n  var QB = window.QB;\n  QB.define('auth', function (root, data, emit)\
+    \ {\n    var esc = QB.esc;\n    var S = { mode: 'login', busy: false, msg: null, email: '' };\n\n    function form() {\n\
+    \      if (S.mode === 'reset') {\n        return '<h2>Reset your password</h2><p class=\"muted small\">We\\'ll email you\
+    \ a link to choose a new one.</p>' +\n          '<form data-form=\"reset\"><div><label class=\"f\" for=\"qbE\">Email</label><input\
+    \ type=\"email\" id=\"qbE\" name=\"email\" required autocomplete=\"email\" value=\"' + esc(S.email) + '\"></div>' +\n\
+    \          '<div><button class=\"btn primary block\" type=\"submit\"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ?\
+    \ '<span class=\"spin\"></span>' : 'Send reset link') + '</button></div></form>' +\n          '<p style=\"margin-top:14px\"\
+    ><button class=\"link\" data-action=\"mode\" data-mode=\"login\">← Back to sign in</button></p>';\n      }\n      var\
+    \ signup = S.mode === 'signup';\n      return '<div class=\"tabs\" role=\"tablist\">' +\n          '<button role=\"tab\"\
+    \ data-action=\"mode\" data-mode=\"login\" class=\"' + (!signup ? 'on' : '') + '\">Sign in</button>' +\n          '<button\
+    \ role=\"tab\" data-action=\"mode\" data-mode=\"signup\" class=\"' + (signup ? 'on' : '') + '\">Create account</button></div>'\
+    \ +\n        '<h2>' + (signup ? 'Create your account' : 'Welcome back') + '</h2>' +\n        '<p class=\"muted small\"\
+    >' + (signup ? 'Your progress, streak and cards learned are saved to your profile.' : 'Sign in to continue where you left\
+    \ off.') + '</p>' +\n        '<form data-form=\"' + S.mode + '\">' +\n          (signup ? '<div><label class=\"f\" for=\"\
+    qbN\">Your name</label><input type=\"text\" id=\"qbN\" name=\"name\" required autocomplete=\"name\" placeholder=\"How\
+    \ should we greet you?\"></div>' : '') +\n          '<div><label class=\"f\" for=\"qbE\">Email</label><input type=\"email\"\
+    \ id=\"qbE\" name=\"email\" required autocomplete=\"email\" value=\"' + esc(S.email) + '\"></div>' +\n          '<div><label\
+    \ class=\"f\" for=\"qbP\">Password</label><input type=\"password\" id=\"qbP\" name=\"password\" required minlength=\"\
+    ' + (signup ? 8 : 1) + '\" autocomplete=\"' + (signup ? 'new-password' : 'current-password') + '\">' +\n            (signup\
+    \ ? '<div class=\"hint\">At least 8 characters.</div>' : '<div class=\"hint\" style=\"text-align:right\"><button type=\"\
+    button\" class=\"link\" data-action=\"mode\" data-mode=\"reset\">Forgot password?</button></div>') + '</div>' +\n    \
+    \      '<div><button class=\"btn primary block\" type=\"submit\"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '<span\
+    \ class=\"spin\"></span>' : signup ? 'Create account' : 'Sign in') + '</button></div>' +\n        '</form>' +\n      \
+    \  (data.google ? '<div class=\"or\">or</div><button class=\"btn block\" data-action=\"google\"' + (S.busy ? ' disabled'\
+    \ : '') + '>Continue with Google</button>' : '') +\n        '<div class=\"or\">or</div><button class=\"btn block\" data-action=\"\
+    guest\"' + (S.busy ? ' disabled' : '') + '>Try it without signing in</button>' +\n        '<p class=\"hint guest-note\"\
+    >Everything works, but your progress is only kept until you close this tab.</p>';\n    }\n\n    function render() {\n\
     \      root.innerHTML = '<div class=\"qb-auth\">' +\n        '<div class=\"side\">' + QB.leaf('wm') +\n          '<div\
     \ class=\"inner\"><div class=\"badge-logo\">' + (data.logo_url ? '<img alt=\"\" src=\"' + esc(data.logo_url) + '\">' :\
     \ QB.leaf()) + '</div>' +\n          '<div class=\"kind\">' + esc(data.app_name || 'CAF Guide') + ' · unofficial study\
@@ -554,7 +563,7 @@ native_deps:
     \"]');\n      if (first) first.focus();\n    }\n\n    function showMsg() {\n      var box = root.querySelector('[data-el=msg]');\n\
     \      if (box) box.innerHTML = S.msg ? '<div class=\"feedback ' + (S.msg.ok ? 'good' : 'bad') + '\">' + esc(S.msg.text)\
     \ + '</div>' : '';\n    }\n\n    // Toggle the busy state in place so typed values are kept.\n    function setBusy(on)\
-    \ {\n      S.busy = on;\n      root.querySelectorAll('.box button[type=submit], .box [data-action=google]').forEach(function\
+    \ {\n      S.busy = on;\n      root.querySelectorAll('.box button[type=submit], .box [data-action=google], .box [data-action=guest]').forEach(function\
     \ (b) {\n        b.disabled = on;\n        if (b.type === 'submit') {\n          if (on) { b.dataset.label = b.innerHTML;\
     \ b.innerHTML = '<span class=\"spin\"></span>'; }\n          else if (b.dataset.label) b.innerHTML = b.dataset.label;\n\
     \        }\n      });\n    }\n\n    function run(event, payload) {\n      if (S.busy) return;\n      S.msg = null; showMsg();\
@@ -568,111 +577,111 @@ native_deps:
     \ function (e) {\n      var el = e.target.closest('[data-action]');\n      if (!el) return;\n      if (el.dataset.action\
     \ === 'mode') {\n        var em = root.querySelector('input[name=email]');\n        if (em) S.email = em.value;\n    \
     \    S.mode = el.dataset.mode; S.msg = null; render();\n      } else if (el.dataset.action === 'google') run('google',\
-    \ {});\n    });\n\n    render();\n    return {};\n  });\n})();\n</script>\n\n<!-- ===== HomePage component ===== -->\n\
-    <style>\n.qb-home .hero { display: flex; gap: 16px; align-items: flex-end; justify-content: space-between; flex-wrap:\
-    \ wrap; margin-bottom: 22px; }\n.qb-home .hero p { margin: 0; }\n.qb-home .stats { display: grid; grid-template-columns:\
-    \ repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }\n.qb-home .stat { padding: 16px 18px; }\n.qb-home .stat .v { font-family:\
-    \ var(--qb-serif); font-size: 1.9rem; font-weight: 700; line-height: 1.1; }\n.qb-home .stat .k { font-size: .82rem; color:\
-    \ var(--qb-muted); }\n.qb-home .continue { width: 100%; display: flex; gap: 16px; align-items: center; padding: 18px 22px;\
-    \ margin-bottom: 26px; border-color: var(--qb-accent); background: linear-gradient(120deg, var(--qb-accent-soft), var(--qb-panel)\
-    \ 70%); }\n.qb-home .continue.calm { border-color: var(--qb-line); background: var(--qb-panel); cursor: default; }\n.qb-home\
-    \ .continue .ico { width: 44px; height: 44px; border-radius: 12px; background: var(--qb-accent); color: var(--qb-accent-ink);\
-    \ display: grid; place-items: center; font-size: 1.2rem; flex: none; }\n.qb-home section + section { margin-top: 30px;\
-    \ }\n.qb-home .sechead { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }\n.qb-home\
-    \ .sechead h2 { margin: 0; font-size: 1.35rem; }\n.qb-home .path-top { padding: 18px 22px; margin-bottom: 14px; }\n.qb-home\
-    \ .path-top .big { font-family: var(--qb-serif); font-size: 2rem; font-weight: 700; line-height: 1; }\n.qb-home .segbar\
-    \ { display: flex; gap: 3px; margin-top: 12px; }\n.qb-home .segbar i { flex: 1; height: 10px; border-radius: 3px; background:\
-    \ var(--qb-line); position: relative; overflow: hidden; }\n.qb-home .segbar i > b { position: absolute; inset: 0 auto\
-    \ 0 0; background: var(--qb-accent); }\n.qb-home .segbar i.done { background: var(--qb-good); }\n.qb-home .segbar i.done\
-    \ > b { background: var(--qb-good); }\n.qb-home .modules { display: grid; gap: 8px; }\n.qb-home .mod { display: grid;\
-    \ grid-template-columns: 54px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 16px; transition: border-color\
-    \ .12s, transform .12s; }\n.qb-home .mod:hover { border-color: var(--qb-accent); transform: translateX(2px); }\n.qb-home\
-    \ .mod .num { font-family: var(--qb-serif); font-weight: 700; font-size: 1.35rem; width: 54px; height: 54px; border-radius:\
-    \ 12px; display: grid; place-items: center; background: var(--qb-panel-2); border: 1px solid var(--qb-line); color: var(--c,\
-    \ var(--qb-accent)); }\n.qb-home .mod.complete .num { background: var(--qb-good-soft); color: var(--qb-good); border-color:\
-    \ transparent; }\n.qb-home .mod .t { font-weight: 600; }\n.qb-home .mod .sub { display: block; font-weight: 400; font-size:\
-    \ .85rem; color: var(--qb-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n.qb-home .mod .mini\
-    \ { display: block; height: 4px; border-radius: 99px; background: var(--qb-line); margin-top: 7px; max-width: 260px; overflow:\
-    \ hidden; }\n.qb-home .mod .mini > span { display: block; height: 100%; background: var(--c, var(--qb-accent)); }\n.qb-home\
-    \ .mod .right { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }\n.qb-home\
-    \ .filters { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--qb-line); border-radius: 10px; background:\
-    \ var(--qb-panel-2); margin-left: auto; }\n.qb-home .filters button { all: unset; cursor: pointer; padding: 4px 10px;\
-    \ border-radius: 8px; font-size: .85rem; color: var(--qb-muted); }\n.qb-home .filters button.on { background: var(--qb-panel);\
-    \ color: var(--qb-ink); box-shadow: var(--qb-shadow); }\n.qb-home .recent { padding: 6px 0; }\n.qb-home .recent button\
-    \ { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap:\
-    \ 12px; align-items: center; width: 100%; padding: 10px 18px; }\n.qb-home .recent button + button { border-top: 1px solid\
-    \ var(--qb-line); }\n.qb-home .recent button:hover { background: var(--qb-panel-2); }\n@media (max-width: 720px) {\n \
-    \ .qb-home .stats { grid-template-columns: repeat(2, 1fr); }\n  .qb-home .mod { grid-template-columns: 46px minmax(0,\
-    \ 1fr); }\n  .qb-home .mod .num { width: 46px; height: 46px; font-size: 1.15rem; }\n  .qb-home .mod .right { grid-column:\
-    \ 2; justify-content: flex-start; }\n  .qb-home .filters { margin-left: 0; }\n}\n</style>\n<script>\n(function () {\n\
-    \  var QB = window.QB;\n  QB.define('home', function (root, data, emit) {\n    var esc = QB.esc;\n    var me = data.me\
-    \ || {}, st = data.stats || {}, mods = data.collections || [], recent = data.recent || [], cont = data.continue;\n   \
-    \ var h = new Date().getHours();\n    var greet = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';\n\
-    \    var first = String(me.display_name || '').split(/\\s+/)[0];\n    var filter = 'all';\n    try { filter = localStorage.getItem('qb.modFilter')\
-    \ || 'all'; } catch (e) {}\n\n    function statTile(v, k) { return '<div class=\"card stat\"><div class=\"v\">' + v +\
-    \ '</div><div class=\"k\">' + k + '</div></div>'; }\n    function plural(n, w) { return n + ' ' + w + (n === 1 ? '' :\
-    \ 's'); }\n    function pad(n) { return (n < 10 ? '0' : '') + n; }\n    function when(iso) {\n      if (!iso) return '';\n\
-    \      var days = Math.round((new Date(iso + 'T00:00:00') - new Date(new Date().toDateString())) / 864e5);\n      return\
-    \ days <= 1 ? 'tomorrow' : days < 7 ? 'in ' + days + ' days' : 'on ' + QB.fmtDate(iso + 'T12:00:00');\n    }\n    function\
-    \ status(m) {\n      if (m.complete) return '<span class=\"badge good\">✓ complete</span>';\n      if (m.due) return '<span\
-    \ class=\"badge warn\">' + m.due + ' due</span>';\n      if (m.started) return '<span class=\"badge accent\">in progress</span>';\n\
-    \      return '<span class=\"badge\">not started</span>';\n    }\n\n    var nTotal = st.modules_total || mods.length,\
-    \ nDone = st.modules_complete || 0;\n\n    var contHtml = '';\n    if (cont && cont.kind === 'review') {\n      contHtml\
-    \ = '<button class=\"card continue\" data-action=\"review\"><span class=\"ico\">↻</span><span style=\"flex:1;min-width:0\"\
-    ><span class=\"kind\">Due today</span><br>' +\n        '<strong style=\"font-size:1.05rem\">' + esc(cont.title) + '</strong><br><span\
-    \ class=\"muted small\">' + esc(cont.subtitle) + '</span></span>' +\n        '<span class=\"badge warn\">' + cont.due\
-    \ + '</span></button>';\n    } else if (cont) {\n      contHtml = '<button class=\"card continue\" data-action=\"quiz\"\
-    \ data-id=\"' + esc(cont.quiz_id) + '\"><span class=\"ico\">▶</span><span style=\"flex:1;min-width:0\"><span class=\"\
-    kind\">' +\n        (cont.started ? 'Keep going' : 'Start learning') + (cont.module ? ' · Module ' + cont.module : '')\
-    \ + '</span><br>' +\n        '<strong style=\"font-size:1.05rem\">' + esc(cont.title) + '</strong><br><span class=\"muted\
-    \ small\">' + esc(cont.subtitle) + '</span></span><span class=\"badge accent\">new</span></button>';\n    } else if (st.total_cards)\
-    \ {\n      contHtml = '<div class=\"card continue calm\"><span class=\"ico\">✓</span><span><span class=\"kind\">All caught\
-    \ up</span><br><strong>Nothing is due right now.</strong>' +\n        (st.next_due ? '<br><span class=\"muted small\"\
-    >Your next review is ' + esc(when(st.next_due)) + '.</span>' : '') + '</span></div>';\n    }\n\n    function modulesHtml()\
-    \ {\n      var list = mods.filter(function (m) {\n        return filter === 'all' || (filter === 'todo' && !m.complete)\
-    \ || (filter === 'due' && m.due) || (filter === 'done' && m.complete);\n      });\n      if (!mods.length) return '<div\
-    \ class=\"empty\"><h3>No modules yet</h3><p>Once the learning modules are imported they will show up here.</p></div>';\n\
-    \      if (!list.length) return '<div class=\"empty\">Nothing in this view.</div>';\n      return '<div class=\"modules\"\
-    >' + list.map(function (m) {\n        var pct = m.card_count ? Math.round(100 * m.learned / m.card_count) : 0;\n     \
-    \   return '<button class=\"card mod' + (m.complete ? ' complete' : '') + '\" data-action=\"col\" data-id=\"' + esc(m.id)\
-    \ + '\" style=\"--c:' + esc(m.color || '') + '\">' +\n          '<span class=\"num\">' + (m.complete ? '✓' : pad(m.number\
-    \ || 0)) + '</span>' +\n          '<span style=\"min-width:0\"><span class=\"t\">' + esc(m.title) + '</span><span class=\"\
-    sub\">' + esc(m.description || '') + '</span>' +\n            '<span class=\"mini\" title=\"' + m.learned + ' of ' + m.card_count\
-    \ + ' cards learned\"><span style=\"width:' + pct + '%\"></span></span></span>' +\n          '<span class=\"right\"><span\
-    \ class=\"badge\">' + m.learned + '/' + m.card_count + '</span>' + status(m) + '</span>' +\n          '</button>';\n \
-    \     }).join('') + '</div>';\n    }\n\n    function render() {\n      root.innerHTML = '<div class=\"wrap qb-home fade-in\"\
-    >' +\n        '<div class=\"hero\"><div><div class=\"kind\">Canadian Armed Forces · unofficial study guide</div><h1>'\
-    \ + greet + (first ? ', ' + esc(first) : '') + '</h1>' +\n          '<p class=\"muted\">' + (st.due ? 'You have ' + plural(st.due,\
-    \ 'card') + ' to review today.'\n            : nTotal ? 'Work through ' + nTotal + ' learning modules about the Canadian\
-    \ Armed Forces, one card at a time.'\n            : 'The learning modules will appear here once they are imported.') +\
-    \ '</p></div></div>' +\n        '<div class=\"stats\">' +\n          statTile(nDone + '<span class=\"muted\" style=\"\
-    font-size:1rem\"> / ' + nTotal + '</span>', 'modules complete') +\n          statTile((st.learned || 0) + '<span class=\"\
-    muted\" style=\"font-size:1rem\"> / ' + (st.total_cards || 0) + '</span>', 'cards learned') +\n          statTile(st.due\
-    \ || 0, 'due today') +\n          statTile((st.streak || 0) + (st.streak ? ' \U0001F525' : ''), 'day streak') +\n    \
-    \    '</div>' + contHtml +\n        '<section><div class=\"sechead\"><h2>Your learning path</h2><span class=\"muted small\"\
-    >' + plural(nTotal, 'module') + '</span>' +\n          '<div class=\"filters\">' + [['all', 'All'], ['todo', 'To do'],\
-    \ ['due', 'Due'], ['done', 'Complete']].map(function (f) {\n            return '<button data-action=\"filter\" data-f=\"\
-    ' + f[0] + '\" class=\"' + (filter === f[0] ? 'on' : '') + '\">' + f[1] + '</button>';\n          }).join('') + '</div></div>'\
-    \ +\n          (mods.length ? '<div class=\"card path-top\"><div class=\"row\"><span class=\"big\">' + nDone + ' of '\
-    \ + nTotal + '</span><span class=\"muted\">modules complete · ' +\n            (st.modules_started || 0) + ' started</span><span\
-    \ class=\"spacer\"></span><span class=\"muted small\">A module is complete when every card has been marked \"Got it\"\
-    .</span></div>' +\n            '<div class=\"segbar\" aria-hidden=\"true\">' + mods.map(function (m) {\n             \
-    \ var pct = m.card_count ? Math.round(100 * m.learned / m.card_count) : 0;\n              return '<i class=\"' + (m.complete\
-    \ ? 'done' : '') + '\" title=\"Module ' + m.number + ': ' + pct + '%\"><b style=\"width:' + (m.complete ? 100 : pct) +\
-    \ '%\"></b></i>';\n            }).join('') + '</div></div>' : '') +\n          '<div data-el=\"mods\">' + modulesHtml()\
-    \ + '</div>' +\n        '</section>' +\n        (recent.length ? '<section><div class=\"sechead\"><h2>Recent sessions</h2></div><div\
-    \ class=\"card recent\">' + recent.map(function (r) {\n          var action = r.quiz_id ? 'quiz' : r.collection_id ? 'col'\
-    \ : 'review';\n          return '<button data-action=\"' + action + '\" data-id=\"' + esc(r.quiz_id || r.collection_id\
-    \ || '') + '\"><span><strong>' + esc(r.title) + '</strong><br><span class=\"muted small\">' + esc(r.collection_title)\
-    \ + ' · ' + esc(QB.fmtDate(r.finished)) + '</span></span>' +\n            '<span class=\"row\" style=\"gap:6px\"><span\
-    \ class=\"badge\">' + plural(r.reviewed, 'card') + '</span>' + (r.again ? '<span class=\"badge warn\">' + r.again + '\
-    \ still learning</span>' : '<span class=\"badge good\">all got it</span>') + '</span></button>';\n        }).join('')\
-    \ + '</div></section>' : '') +\n        '</div>';\n    }\n\n    root.addEventListener('click', function (e) {\n      var\
-    \ el = e.target.closest('[data-action]');\n      if (!el) return;\n      var a = el.dataset.action;\n      if (a === 'col')\
-    \ emit('open_collection', { id: el.dataset.id });\n      else if (a === 'quiz') emit('open_quiz', { id: el.dataset.id\
-    \ });\n      else if (a === 'review') emit('open_review', {});\n      else if (a === 'filter') {\n        filter = el.dataset.f;\n\
-    \        try { localStorage.setItem('qb.modFilter', filter); } catch (err) {}\n        root.querySelectorAll('.filters\
-    \ button').forEach(function (b) { b.classList.toggle('on', b === el); });\n        root.querySelector('[data-el=mods]').innerHTML\
+    \ {});\n      else if (el.dataset.action === 'guest') run('guest', {});\n    });\n\n    render();\n    return {};\n  });\n\
+    })();\n</script>\n\n<!-- ===== HomePage component ===== -->\n<style>\n.qb-home .hero { display: flex; gap: 16px; align-items:\
+    \ flex-end; justify-content: space-between; flex-wrap: wrap; margin-bottom: 22px; }\n.qb-home .hero p { margin: 0; }\n\
+    .qb-home .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }\n.qb-home .stat\
+    \ { padding: 16px 18px; }\n.qb-home .stat .v { font-family: var(--qb-serif); font-size: 1.9rem; font-weight: 700; line-height:\
+    \ 1.1; }\n.qb-home .stat .k { font-size: .82rem; color: var(--qb-muted); }\n.qb-home .continue { width: 100%; display:\
+    \ flex; gap: 16px; align-items: center; padding: 18px 22px; margin-bottom: 26px; border-color: var(--qb-accent); background:\
+    \ linear-gradient(120deg, var(--qb-accent-soft), var(--qb-panel) 70%); }\n.qb-home .continue.calm { border-color: var(--qb-line);\
+    \ background: var(--qb-panel); cursor: default; }\n.qb-home .continue .ico { width: 44px; height: 44px; border-radius:\
+    \ 12px; background: var(--qb-accent); color: var(--qb-accent-ink); display: grid; place-items: center; font-size: 1.2rem;\
+    \ flex: none; }\n.qb-home section + section { margin-top: 30px; }\n.qb-home .sechead { display: flex; align-items: baseline;\
+    \ gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }\n.qb-home .sechead h2 { margin: 0; font-size: 1.35rem; }\n.qb-home\
+    \ .path-top { padding: 18px 22px; margin-bottom: 14px; }\n.qb-home .path-top .big { font-family: var(--qb-serif); font-size:\
+    \ 2rem; font-weight: 700; line-height: 1; }\n.qb-home .segbar { display: flex; gap: 3px; margin-top: 12px; }\n.qb-home\
+    \ .segbar i { flex: 1; height: 10px; border-radius: 3px; background: var(--qb-line); position: relative; overflow: hidden;\
+    \ }\n.qb-home .segbar i > b { position: absolute; inset: 0 auto 0 0; background: var(--qb-accent); }\n.qb-home .segbar\
+    \ i.done { background: var(--qb-good); }\n.qb-home .segbar i.done > b { background: var(--qb-good); }\n.qb-home .modules\
+    \ { display: grid; gap: 8px; }\n.qb-home .mod { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 14px;\
+    \ align-items: center; padding: 12px 16px; transition: border-color .12s, transform .12s; }\n.qb-home .mod:hover { border-color:\
+    \ var(--qb-accent); transform: translateX(2px); }\n.qb-home .mod .num { font-family: var(--qb-serif); font-weight: 700;\
+    \ font-size: 1.35rem; width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; background:\
+    \ var(--qb-panel-2); border: 1px solid var(--qb-line); color: var(--c, var(--qb-accent)); }\n.qb-home .mod.complete .num\
+    \ { background: var(--qb-good-soft); color: var(--qb-good); border-color: transparent; }\n.qb-home .mod .t { font-weight:\
+    \ 600; }\n.qb-home .mod .sub { display: block; font-weight: 400; font-size: .85rem; color: var(--qb-muted); white-space:\
+    \ nowrap; overflow: hidden; text-overflow: ellipsis; }\n.qb-home .mod .mini { display: block; height: 4px; border-radius:\
+    \ 99px; background: var(--qb-line); margin-top: 7px; max-width: 260px; overflow: hidden; }\n.qb-home .mod .mini > span\
+    \ { display: block; height: 100%; background: var(--c, var(--qb-accent)); }\n.qb-home .mod .right { display: flex; gap:\
+    \ 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }\n.qb-home .filters { display: inline-flex; gap:\
+    \ 3px; padding: 3px; border: 1px solid var(--qb-line); border-radius: 10px; background: var(--qb-panel-2); margin-left:\
+    \ auto; }\n.qb-home .filters button { all: unset; cursor: pointer; padding: 4px 10px; border-radius: 8px; font-size: .85rem;\
+    \ color: var(--qb-muted); }\n.qb-home .filters button.on { background: var(--qb-panel); color: var(--qb-ink); box-shadow:\
+    \ var(--qb-shadow); }\n.qb-home .recent { padding: 6px 0; }\n.qb-home .recent button { all: unset; box-sizing: border-box;\
+    \ cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%;\
+    \ padding: 10px 18px; }\n.qb-home .recent button + button { border-top: 1px solid var(--qb-line); }\n.qb-home .recent\
+    \ button:hover { background: var(--qb-panel-2); }\n@media (max-width: 720px) {\n  .qb-home .stats { grid-template-columns:\
+    \ repeat(2, 1fr); }\n  .qb-home .mod { grid-template-columns: 46px minmax(0, 1fr); }\n  .qb-home .mod .num { width: 46px;\
+    \ height: 46px; font-size: 1.15rem; }\n  .qb-home .mod .right { grid-column: 2; justify-content: flex-start; }\n  .qb-home\
+    \ .filters { margin-left: 0; }\n}\n</style>\n<script>\n(function () {\n  var QB = window.QB;\n  QB.define('home', function\
+    \ (root, data, emit) {\n    var esc = QB.esc;\n    var me = data.me || {}, st = data.stats || {}, mods = data.collections\
+    \ || [], recent = data.recent || [], cont = data.continue;\n    var h = new Date().getHours();\n    var greet = h < 12\
+    \ ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';\n    var first = String(me.display_name || '').split(/\\\
+    s+/)[0];\n    var filter = 'all';\n    try { filter = localStorage.getItem('qb.modFilter') || 'all'; } catch (e) {}\n\n\
+    \    function statTile(v, k) { return '<div class=\"card stat\"><div class=\"v\">' + v + '</div><div class=\"k\">' + k\
+    \ + '</div></div>'; }\n    function plural(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }\n    function pad(n) {\
+    \ return (n < 10 ? '0' : '') + n; }\n    function when(iso) {\n      if (!iso) return '';\n      var days = Math.round((new\
+    \ Date(iso + 'T00:00:00') - new Date(new Date().toDateString())) / 864e5);\n      return days <= 1 ? 'tomorrow' : days\
+    \ < 7 ? 'in ' + days + ' days' : 'on ' + QB.fmtDate(iso + 'T12:00:00');\n    }\n    function status(m) {\n      if (m.complete)\
+    \ return '<span class=\"badge good\">✓ complete</span>';\n      if (m.due) return '<span class=\"badge warn\">' + m.due\
+    \ + ' due</span>';\n      if (m.started) return '<span class=\"badge accent\">in progress</span>';\n      return '<span\
+    \ class=\"badge\">not started</span>';\n    }\n\n    var nTotal = st.modules_total || mods.length, nDone = st.modules_complete\
+    \ || 0;\n\n    var contHtml = '';\n    if (cont && cont.kind === 'review') {\n      contHtml = '<button class=\"card continue\"\
+    \ data-action=\"review\"><span class=\"ico\">↻</span><span style=\"flex:1;min-width:0\"><span class=\"kind\">Due today</span><br>'\
+    \ +\n        '<strong style=\"font-size:1.05rem\">' + esc(cont.title) + '</strong><br><span class=\"muted small\">' +\
+    \ esc(cont.subtitle) + '</span></span>' +\n        '<span class=\"badge warn\">' + cont.due + '</span></button>';\n  \
+    \  } else if (cont) {\n      contHtml = '<button class=\"card continue\" data-action=\"quiz\" data-id=\"' + esc(cont.quiz_id)\
+    \ + '\"><span class=\"ico\">▶</span><span style=\"flex:1;min-width:0\"><span class=\"kind\">' +\n        (cont.started\
+    \ ? 'Keep going' : 'Start learning') + (cont.module ? ' · Module ' + cont.module : '') + '</span><br>' +\n        '<strong\
+    \ style=\"font-size:1.05rem\">' + esc(cont.title) + '</strong><br><span class=\"muted small\">' + esc(cont.subtitle) +\
+    \ '</span></span><span class=\"badge accent\">new</span></button>';\n    } else if (st.total_cards) {\n      contHtml\
+    \ = '<div class=\"card continue calm\"><span class=\"ico\">✓</span><span><span class=\"kind\">All caught up</span><br><strong>Nothing\
+    \ is due right now.</strong>' +\n        (st.next_due ? '<br><span class=\"muted small\">Your next review is ' + esc(when(st.next_due))\
+    \ + '.</span>' : '') + '</span></div>';\n    }\n\n    function modulesHtml() {\n      var list = mods.filter(function\
+    \ (m) {\n        return filter === 'all' || (filter === 'todo' && !m.complete) || (filter === 'due' && m.due) || (filter\
+    \ === 'done' && m.complete);\n      });\n      if (!mods.length) return '<div class=\"empty\"><h3>No modules yet</h3><p>Once\
+    \ the learning modules are imported they will show up here.</p></div>';\n      if (!list.length) return '<div class=\"\
+    empty\">Nothing in this view.</div>';\n      return '<div class=\"modules\">' + list.map(function (m) {\n        var pct\
+    \ = m.card_count ? Math.round(100 * m.learned / m.card_count) : 0;\n        return '<button class=\"card mod' + (m.complete\
+    \ ? ' complete' : '') + '\" data-action=\"col\" data-id=\"' + esc(m.id) + '\" style=\"--c:' + esc(m.color || '') + '\"\
+    >' +\n          '<span class=\"num\">' + (m.complete ? '✓' : pad(m.number || 0)) + '</span>' +\n          '<span style=\"\
+    min-width:0\"><span class=\"t\">' + esc(m.title) + '</span><span class=\"sub\">' + esc(m.description || '') + '</span>'\
+    \ +\n            '<span class=\"mini\" title=\"' + m.learned + ' of ' + m.card_count + ' cards learned\"><span style=\"\
+    width:' + pct + '%\"></span></span></span>' +\n          '<span class=\"right\"><span class=\"badge\">' + m.learned +\
+    \ '/' + m.card_count + '</span>' + status(m) + '</span>' +\n          '</button>';\n      }).join('') + '</div>';\n  \
+    \  }\n\n    function render() {\n      root.innerHTML = '<div class=\"wrap qb-home fade-in\">' +\n        '<div class=\"\
+    hero\"><div><div class=\"kind\">Canadian Armed Forces · unofficial study guide</div><h1>' + greet + (first ? ', ' + esc(first)\
+    \ : '') + '</h1>' +\n          '<p class=\"muted\">' + (st.due ? 'You have ' + plural(st.due, 'card') + ' to review today.'\n\
+    \            : nTotal ? 'Work through ' + nTotal + ' learning modules about the Canadian Armed Forces, one card at a time.'\n\
+    \            : 'The learning modules will appear here once they are imported.') + '</p></div></div>' +\n        '<div\
+    \ class=\"stats\">' +\n          statTile(nDone + '<span class=\"muted\" style=\"font-size:1rem\"> / ' + nTotal + '</span>',\
+    \ 'modules complete') +\n          statTile((st.learned || 0) + '<span class=\"muted\" style=\"font-size:1rem\"> / ' +\
+    \ (st.total_cards || 0) + '</span>', 'cards learned') +\n          statTile(st.due || 0, 'due today') +\n          statTile((st.streak\
+    \ || 0) + (st.streak ? ' \U0001F525' : ''), 'day streak') +\n        '</div>' + contHtml +\n        '<section><div class=\"\
+    sechead\"><h2>Your learning path</h2><span class=\"muted small\">' + plural(nTotal, 'module') + '</span>' +\n        \
+    \  '<div class=\"filters\">' + [['all', 'All'], ['todo', 'To do'], ['due', 'Due'], ['done', 'Complete']].map(function\
+    \ (f) {\n            return '<button data-action=\"filter\" data-f=\"' + f[0] + '\" class=\"' + (filter === f[0] ? 'on'\
+    \ : '') + '\">' + f[1] + '</button>';\n          }).join('') + '</div></div>' +\n          (mods.length ? '<div class=\"\
+    card path-top\"><div class=\"row\"><span class=\"big\">' + nDone + ' of ' + nTotal + '</span><span class=\"muted\">modules\
+    \ complete · ' +\n            (st.modules_started || 0) + ' started</span><span class=\"spacer\"></span><span class=\"\
+    muted small\">A module is complete when every card has been marked \"Got it\".</span></div>' +\n            '<div class=\"\
+    segbar\" aria-hidden=\"true\">' + mods.map(function (m) {\n              var pct = m.card_count ? Math.round(100 * m.learned\
+    \ / m.card_count) : 0;\n              return '<i class=\"' + (m.complete ? 'done' : '') + '\" title=\"Module ' + m.number\
+    \ + ': ' + pct + '%\"><b style=\"width:' + (m.complete ? 100 : pct) + '%\"></b></i>';\n            }).join('') + '</div></div>'\
+    \ : '') +\n          '<div data-el=\"mods\">' + modulesHtml() + '</div>' +\n        '</section>' +\n        (recent.length\
+    \ ? '<section><div class=\"sechead\"><h2>Recent sessions</h2></div><div class=\"card recent\">' + recent.map(function\
+    \ (r) {\n          var action = r.quiz_id ? 'quiz' : r.collection_id ? 'col' : 'review';\n          return '<button data-action=\"\
+    ' + action + '\" data-id=\"' + esc(r.quiz_id || r.collection_id || '') + '\"><span><strong>' + esc(r.title) + '</strong><br><span\
+    \ class=\"muted small\">' + esc(r.collection_title) + ' · ' + esc(QB.fmtDate(r.finished)) + '</span></span>' +\n     \
+    \       '<span class=\"row\" style=\"gap:6px\"><span class=\"badge\">' + plural(r.reviewed, 'card') + '</span>' + (r.again\
+    \ ? '<span class=\"badge warn\">' + r.again + ' still learning</span>' : '<span class=\"badge good\">all got it</span>')\
+    \ + '</span></button>';\n        }).join('') + '</div></section>' : '') +\n        '</div>';\n    }\n\n    root.addEventListener('click',\
+    \ function (e) {\n      var el = e.target.closest('[data-action]');\n      if (!el) return;\n      var a = el.dataset.action;\n\
+    \      if (a === 'col') emit('open_collection', { id: el.dataset.id });\n      else if (a === 'quiz') emit('open_quiz',\
+    \ { id: el.dataset.id });\n      else if (a === 'review') emit('open_review', {});\n      else if (a === 'filter') {\n\
+    \        filter = el.dataset.f;\n        try { localStorage.setItem('qb.modFilter', filter); } catch (err) {}\n      \
+    \  root.querySelectorAll('.filters button').forEach(function (b) { b.classList.toggle('on', b === el); });\n        root.querySelector('[data-el=mods]').innerHTML\
     \ = modulesHtml();\n      }\n    });\n    render();\n    return {};\n  });\n})();\n</script>\n\n<!-- ===== CollectionPage\
     \ component ===== -->\n<style>\n.qb-col .head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px;\
     \ align-items: end; margin-bottom: 18px; }\n.qb-col .head h1 { margin-bottom: 6px; }\n.qb-col .modnum { display: inline-flex;\
@@ -908,43 +917,49 @@ native_deps:
     \ = 'auto';\n    try { theme = localStorage.getItem('qb.theme') || 'auto'; } catch (e) {}\n\n    function render() {\n\
     \      root.innerHTML = '<div class=\"wrap qb-prof fade-in\">' +\n        '<div class=\"top\">' + QB.avatar(Object.assign({},\
     \ me, { avatar_color: S.color }), 'lg') +\n          '<div><h1>' + esc(me.display_name) + '</h1><div class=\"muted small\"\
-    >' + esc(me.email) +\n          (me.signed_up ? ' · member since ' + esc(QB.fmtDate(me.signed_up)) : '') + (me.is_admin\
-    \ ? ' · <span class=\"badge accent\">admin</span>' : '') + '</div>' +\n          (me.bio ? '<p style=\"margin:6px 0 0;max-width:60ch\"\
-    >' + esc(me.bio) + '</p>' : '') + '</div>' +\n          '<span class=\"spacer\"></span><button class=\"btn\" data-action=\"\
-    signout\">Sign out</button></div>' +\n\n        '<div class=\"cols\"><div>' +\n          '<div class=\"card pad stack\"\
-    ><h2>Your stats</h2><div class=\"stats\">' +\n            tile((st.learned || 0) + '<span class=\"muted\" style=\"font-size:.9rem\"\
-    > / ' + (st.total_cards || 0) + '</span>', 'cards learned') +\n            tile(st.mastered || 0, 'mastered (7+ days)')\
-    \ + tile(st.due || 0, 'due today') +\n            tile(st.reviews || 0, 'reviews') + tile(st.sessions || 0, 'sessions')\
-    \ + tile(me.streak || 0, 'day streak') +\n          '</div></div>' +\n          '<section class=\"card pad\"><h2>Modules</h2>'\
-    \ + (prog.length ? '<p class=\"muted small\">' + prog.filter(function (p) { return p.complete; }).length + ' of ' + prog.length\
-    \ + ' modules complete</p><div class=\"prog\">' + prog.map(function (p) {\n            var pct = p.total ? Math.round(100\
-    \ * p.learned / p.total) : 0;\n            return '<div class=\"click\" data-action=\"col\" data-id=\"' + esc(p.id ||\
-    \ '') + '\" style=\"--c:' + esc(p.color || '') + '\"><div class=\"row small\"><strong>' + (p.complete ? '✓ ' : '') + (p.number\
-    \ ? String(p.number).padStart(2, '0') + ' · ' : '') + esc(p.title) + '</strong><span class=\"spacer\"></span><span class=\"\
-    muted\">' + p.learned + '/' + p.total +\n              (p.due ? ' · ' + p.due + ' due' : '') + '</span></div><div class=\"\
-    bar\" style=\"margin-top:6px\"><span style=\"width:' + pct + '%\"></span></div></div>';\n          }).join('') + '</div>'\
-    \ : '<p class=\"muted\">No modules yet.</p>') + '</section>' +\n        '</div><div>' +\n          '<form class=\"card\
-    \ pad stack\" data-el=\"form\"><h2>Edit profile</h2>' +\n            '<div><label class=\"f\" for=\"qbDN\">Display name</label><input\
-    \ type=\"text\" id=\"qbDN\" name=\"display_name\" maxlength=\"60\" required value=\"' + esc(me.display_name) + '\"></div>'\
-    \ +\n            '<div><label class=\"f\" for=\"qbBio\">About you <span class=\"muted\">(optional)</span></label><textarea\
-    \ id=\"qbBio\" name=\"bio\" maxlength=\"400\" placeholder=\"What are you learning, and why?\">' + esc(me.bio || '') +\
-    \ '</textarea></div>' +\n            '<div><label class=\"f\">Avatar colour</label><div class=\"swatches\">' + colors.map(function\
-    \ (c) {\n              return '<button type=\"button\" data-action=\"color\" data-c=\"' + esc(c) + '\" style=\"--c:' +\
-    \ esc(c) + '\" class=\"' + (c === S.color ? 'on' : '') + '\" aria-label=\"Colour ' + esc(c) + '\"></button>';\n      \
-    \      }).join('') + '</div></div>' +\n            '<div><label class=\"f\">Theme <span class=\"muted\">(this device)</span></label><div\
-    \ class=\"seg\">' + ['auto', 'light', 'dark'].map(function (t) {\n              return '<button type=\"button\" data-action=\"\
-    theme\" data-t=\"' + t + '\" class=\"' + (t === theme ? 'on' : '') + '\">' + t[0].toUpperCase() + t.slice(1) + '</button>';\n\
-    \            }).join('') + '</div></div>' +\n            '<div class=\"row\"><span class=\"spacer\"></span><button class=\"\
-    btn primary\" type=\"submit\"' + (S.saving ? ' disabled' : '') + '>' + (S.saving ? '<span class=\"spin\"></span> Saving'\
-    \ : 'Save changes') + '</button></div>' +\n          '</form>' +\n          '<form class=\"card pad stack\" data-el=\"\
-    pwForm\" style=\"margin-top:16px\"><h2>Change password</h2>' +\n            '<div><label class=\"f\" for=\"qbPwOld\">Current\
+    >' + (me.guest ? 'Guest · progress is kept only until you close this tab' : esc(me.email)) +\n          (me.signed_up\
+    \ ? ' · member since ' + esc(QB.fmtDate(me.signed_up)) : '') + (me.is_admin ? ' · <span class=\"badge accent\">admin</span>'\
+    \ : '') + '</div>' +\n          (me.bio ? '<p style=\"margin:6px 0 0;max-width:60ch\">' + esc(me.bio) + '</p>' : '') +\
+    \ '</div>' +\n          '<span class=\"spacer\"></span><button class=\"btn\" data-action=\"signout\">' + (me.guest ? 'Exit\
+    \ guest mode' : 'Sign out') + '</button></div>' +\n\n        '<div class=\"cols\"><div>' +\n          '<div class=\"card\
+    \ pad stack\"><h2>Your stats</h2><div class=\"stats\">' +\n            tile((st.learned || 0) + '<span class=\"muted\"\
+    \ style=\"font-size:.9rem\"> / ' + (st.total_cards || 0) + '</span>', 'cards learned') +\n            tile(st.mastered\
+    \ || 0, 'mastered (7+ days)') + tile(st.due || 0, 'due today') +\n            tile(st.reviews || 0, 'reviews') + tile(st.sessions\
+    \ || 0, 'sessions') + tile(me.streak || 0, 'day streak') +\n          '</div></div>' +\n          '<section class=\"card\
+    \ pad\"><h2>Modules</h2>' + (prog.length ? '<p class=\"muted small\">' + prog.filter(function (p) { return p.complete;\
+    \ }).length + ' of ' + prog.length + ' modules complete</p><div class=\"prog\">' + prog.map(function (p) {\n         \
+    \   var pct = p.total ? Math.round(100 * p.learned / p.total) : 0;\n            return '<div class=\"click\" data-action=\"\
+    col\" data-id=\"' + esc(p.id || '') + '\" style=\"--c:' + esc(p.color || '') + '\"><div class=\"row small\"><strong>'\
+    \ + (p.complete ? '✓ ' : '') + (p.number ? String(p.number).padStart(2, '0') + ' · ' : '') + esc(p.title) + '</strong><span\
+    \ class=\"spacer\"></span><span class=\"muted\">' + p.learned + '/' + p.total +\n              (p.due ? ' · ' + p.due\
+    \ + ' due' : '') + '</span></div><div class=\"bar\" style=\"margin-top:6px\"><span style=\"width:' + pct + '%\"></span></div></div>';\n\
+    \          }).join('') + '</div>' : '<p class=\"muted\">No modules yet.</p>') + '</section>' +\n        '</div><div>'\
+    \ +\n          '<form class=\"card pad stack\" data-el=\"form\"><h2>Edit profile</h2>' +\n            '<div><label class=\"\
+    f\" for=\"qbDN\">Display name</label><input type=\"text\" id=\"qbDN\" name=\"display_name\" maxlength=\"60\" required\
+    \ value=\"' + esc(me.display_name) + '\"></div>' +\n            '<div><label class=\"f\" for=\"qbBio\">About you <span\
+    \ class=\"muted\">(optional)</span></label><textarea id=\"qbBio\" name=\"bio\" maxlength=\"400\" placeholder=\"What are\
+    \ you learning, and why?\">' + esc(me.bio || '') + '</textarea></div>' +\n            '<div><label class=\"f\">Avatar\
+    \ colour</label><div class=\"swatches\">' + colors.map(function (c) {\n              return '<button type=\"button\" data-action=\"\
+    color\" data-c=\"' + esc(c) + '\" style=\"--c:' + esc(c) + '\" class=\"' + (c === S.color ? 'on' : '') + '\" aria-label=\"\
+    Colour ' + esc(c) + '\"></button>';\n            }).join('') + '</div></div>' +\n            '<div><label class=\"f\"\
+    >Theme <span class=\"muted\">(this device)</span></label><div class=\"seg\">' + ['auto', 'light', 'dark'].map(function\
+    \ (t) {\n              return '<button type=\"button\" data-action=\"theme\" data-t=\"' + t + '\" class=\"' + (t === theme\
+    \ ? 'on' : '') + '\">' + t[0].toUpperCase() + t.slice(1) + '</button>';\n            }).join('') + '</div></div>' +\n\
+    \            '<div class=\"row\"><span class=\"spacer\"></span><button class=\"btn primary\" type=\"submit\"' + (S.saving\
+    \ ? ' disabled' : '') + '>' + (S.saving ? '<span class=\"spin\"></span> Saving' : 'Save changes') + '</button></div>'\
+    \ +\n          '</form>' +\n          (me.guest ? '<section class=\"card pad stack\" style=\"margin-top:16px\"><h2>Save\
+    \ your progress</h2><p class=\"muted small\">You are trying CAF Guide as a guest. Nothing is saved to an account, and\
+    \ your progress ends when you close this tab. Create a free account to keep your cards, streak and completed modules.</p>'\
+    \ +\n            '<div class=\"row\"><span class=\"spacer\"></span><button class=\"btn primary\" data-action=\"signout\"\
+    >Sign in or create an account</button></div></section>' :\n          '<form class=\"card pad stack\" data-el=\"pwForm\"\
+    \ style=\"margin-top:16px\"><h2>Change password</h2>' +\n            '<div><label class=\"f\" for=\"qbPwOld\">Current\
     \ password</label><input type=\"password\" id=\"qbPwOld\" name=\"old\" autocomplete=\"current-password\" required></div>'\
     \ +\n            '<div><label class=\"f\" for=\"qbPwNew\">New password</label><input type=\"password\" id=\"qbPwNew\"\
     \ name=\"new\" autocomplete=\"new-password\" required></div>' +\n            '<div><label class=\"f\" for=\"qbPwNew2\"\
     >Repeat new password</label><input type=\"password\" id=\"qbPwNew2\" name=\"new2\" autocomplete=\"new-password\" required></div>'\
     \ +\n            '<div class=\"row\"><button class=\"btn\" type=\"button\" data-action=\"pw_reset\">Forgot it? Email me\
     \ a link</button><span class=\"spacer\"></span><button class=\"btn primary\" type=\"submit\">Change password</button></div>'\
-    \ +\n            '<div data-el=\"pwMsg\"></div>' +\n          '</form>' +\n          (me.is_admin ? '<section class=\"\
+    \ +\n            '<div data-el=\"pwMsg\"></div>' +\n          '</form>') +\n          (me.is_admin ? '<section class=\"\
     card pad stack\"><h2>Import learning modules</h2>' +\n            '<p class=\"muted small\">Choose one or more module\
     \ files (the <code>modules/*.json</code> files). Each part is imported on its own, so large modules are fine. Importing\
     \ a module again updates it and keeps everyone\\'s progress on unchanged cards.</p>' +\n            '<div class=\"row\"\
@@ -965,25 +980,25 @@ native_deps:
     \ ' + (h.again ? '<span class=\"badge warn\">' + h.again + ' still learning</span>' : '<span class=\"badge good\">all\
     \ got it</span>') + '</td></tr>';\n          }).join('') + '</tbody></table>' : '<p class=\"muted\">You haven\\'t studied\
     \ any cards yet.</p>') + '</section>' +\n        '</div>';\n      root.querySelector('[data-el=form]').onsubmit = save;\n\
-    \      root.querySelector('[data-el=pwForm]').onsubmit = changePassword;\n    }\n\n    function tile(v, k) { return '<div><div\
-    \ class=\"v\">' + v + '</div><div class=\"k\">' + k + '</div></div>'; }\n\n    function save(e) {\n      e.preventDefault();\n\
-    \      var f = e.target;\n      var payload = { display_name: f.display_name.value.trim(), bio: f.bio.value.trim(), avatar_color:\
-    \ S.color };\n      S.saving = true;\n      var btn = f.querySelector('button[type=submit]');\n      btn.disabled = true;\
-    \ btn.innerHTML = '<span class=\"spin\"></span> Saving';\n      emit('save', payload).then(function (res) {\n        S.saving\
-    \ = false;\n        if (res && res.ok) { me = Object.assign(me, res.me || payload); render(); QB.toast('Profile saved');\
-    \ }\n        else { btn.disabled = false; btn.textContent = 'Save changes'; QB.toast((res && res.error) || 'Could not\
-    \ save', true); }\n      }, function (err) { S.saving = false; btn.disabled = false; btn.textContent = 'Save changes';\
-    \ QB.toast(String(err && err.message || err), true); });\n    }\n\n    function pwMsg(ok, text) {\n      root.querySelector('[data-el=pwMsg]').innerHTML\
-    \ = text ? '<div class=\"feedback ' + (ok ? 'good' : 'bad') + '\">' + esc(text) + '</div>' : '';\n    }\n\n    function\
-    \ changePassword(e) {\n      e.preventDefault();\n      var f = e.target;\n      if (f.new.value !== f.new2.value) { pwMsg(false,\
-    \ \"The new passwords don't match.\"); return; }\n      if (f.new.value === f.old.value) { pwMsg(false, 'The new password\
-    \ is the same as the current one.'); return; }\n      var btn = f.querySelector('button[type=submit]');\n      btn.disabled\
-    \ = true; btn.innerHTML = '<span class=\"spin\"></span> Changing';\n      pwMsg(true, '');\n      function done() { btn.disabled\
-    \ = false; btn.textContent = 'Change password'; }\n      emit('change_password', { old: f.old.value, new: f.new.value\
-    \ }).then(function (res) {\n        done();\n        if (res && res.ok) { f.reset(); pwMsg(true, 'Password changed. Use\
-    \ the new one next time you sign in.'); QB.toast('Password changed'); }\n        else pwMsg(false, (res && res.error)\
-    \ || 'Could not change the password.');\n      }, function (err) { done(); pwMsg(false, String(err && err.message || err));\
-    \ });\n    }\n\n    function resetEmail(btn) {\n      btn.disabled = true;\n      emit('reset_email', {}).then(function\
+    \      var pw = root.querySelector('[data-el=pwForm]');\n      if (pw) pw.onsubmit = changePassword;\n    }\n\n    function\
+    \ tile(v, k) { return '<div><div class=\"v\">' + v + '</div><div class=\"k\">' + k + '</div></div>'; }\n\n    function\
+    \ save(e) {\n      e.preventDefault();\n      var f = e.target;\n      var payload = { display_name: f.display_name.value.trim(),\
+    \ bio: f.bio.value.trim(), avatar_color: S.color };\n      S.saving = true;\n      var btn = f.querySelector('button[type=submit]');\n\
+    \      btn.disabled = true; btn.innerHTML = '<span class=\"spin\"></span> Saving';\n      emit('save', payload).then(function\
+    \ (res) {\n        S.saving = false;\n        if (res && res.ok) { me = Object.assign(me, res.me || payload); render();\
+    \ QB.toast('Profile saved'); }\n        else { btn.disabled = false; btn.textContent = 'Save changes'; QB.toast((res &&\
+    \ res.error) || 'Could not save', true); }\n      }, function (err) { S.saving = false; btn.disabled = false; btn.textContent\
+    \ = 'Save changes'; QB.toast(String(err && err.message || err), true); });\n    }\n\n    function pwMsg(ok, text) {\n\
+    \      root.querySelector('[data-el=pwMsg]').innerHTML = text ? '<div class=\"feedback ' + (ok ? 'good' : 'bad') + '\"\
+    >' + esc(text) + '</div>' : '';\n    }\n\n    function changePassword(e) {\n      e.preventDefault();\n      var f = e.target;\n\
+    \      if (f.new.value !== f.new2.value) { pwMsg(false, \"The new passwords don't match.\"); return; }\n      if (f.new.value\
+    \ === f.old.value) { pwMsg(false, 'The new password is the same as the current one.'); return; }\n      var btn = f.querySelector('button[type=submit]');\n\
+    \      btn.disabled = true; btn.innerHTML = '<span class=\"spin\"></span> Changing';\n      pwMsg(true, '');\n      function\
+    \ done() { btn.disabled = false; btn.textContent = 'Change password'; }\n      emit('change_password', { old: f.old.value,\
+    \ new: f.new.value }).then(function (res) {\n        done();\n        if (res && res.ok) { f.reset(); pwMsg(true, 'Password\
+    \ changed. Use the new one next time you sign in.'); QB.toast('Password changed'); }\n        else pwMsg(false, (res &&\
+    \ res.error) || 'Could not change the password.');\n      }, function (err) { done(); pwMsg(false, String(err && err.message\
+    \ || err)); });\n    }\n\n    function resetEmail(btn) {\n      btn.disabled = true;\n      emit('reset_email', {}).then(function\
     \ (res) {\n        btn.disabled = false;\n        pwMsg(!!(res && res.ok), (res && (res.message || res.error)) || 'Could\
     \ not send the email.');\n      }, function (err) { btn.disabled = false; pwMsg(false, String(err && err.message || err));\
     \ });\n    }\n\n    function admin(event, payload) {\n      var box = root.querySelector('[data-el=adminMsg]');\n    \

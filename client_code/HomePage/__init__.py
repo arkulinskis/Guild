@@ -9,7 +9,7 @@ from .. import qb_ui
 class HomePage(HomePageTemplate):
     def __init__(self, **properties):
         super().__init__(**properties)
-        self.data = anvil.server.call("get_home", qb_ui.today())
+        self.data = qb_ui.call("get_home", qb_ui.today())
         self.add_event_handler("show", self._on_show)
 
     def _on_show(self, **event_args):

@@ -16,6 +16,9 @@ class AuthPage(AuthPageTemplate):
         qb_ui.mount(self, "auth", {"app_name": qb_ui.APP_NAME, "logo_url": qb_ui.LOGO_URL, "google": qb_ui.GOOGLE_LOGIN}, self._on_event)
 
     def _on_event(self, event, p):
+        if event == "guest":
+            get_open_form().start_guest()
+            return {"ok": True}
         try:
             if event == "login":
                 anvil.users.login_with_email(p["email"].strip(), p["password"], remember=True)

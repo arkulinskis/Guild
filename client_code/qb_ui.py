@@ -4,7 +4,17 @@ import json
 import datetime
 
 import anvil.js
+import anvil.server
 from anvil.js import window
+
+# Guest mode ("Try without signing in"): learner calls go to the guest_ versions on the server,
+# which keep progress in this browser session only. Main sets this.
+GUEST = [False]
+
+
+def call(name, *args, **kwargs):
+    """anvil.server.call for learner functions, routed to guest_<name> while in guest mode."""
+    return anvil.server.call(("guest_" + name) if GUEST[0] else name, *args, **kwargs)
 
 APP_NAME = "CAF Guide"
 # The app logo uploaded in Anvil (Theme → Assets); shown in the header and on the sign-in page.

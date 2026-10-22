@@ -17,16 +17,16 @@ class QuizPage(QuizPageTemplate):
         self.add_event_handler("show", self._on_show)
 
     def _load(self, scope):
-        return anvil.server.call("get_study", self.quiz_id, scope, qb_ui.today(), self.collection_id)
+        return qb_ui.call("get_study", self.quiz_id, scope, qb_ui.today(), self.collection_id)
 
     def _on_show(self, **event_args):
         qb_ui.mount(self, "quiz", self.data, self._on_event)
 
     def _on_event(self, event, p):
         if event == "rate":
-            return anvil.server.call("rate_card", p["question_id"], bool(p.get("knew")), qb_ui.today())
+            return qb_ui.call("rate_card", p["question_id"], bool(p.get("knew")), qb_ui.today())
         if event == "finish":
-            result = anvil.server.call("finish_session", self.quiz_id, p.get("ratings", []), qb_ui.today(),
+            result = qb_ui.call("finish_session", self.quiz_id, p.get("ratings", []), qb_ui.today(),
                                        self.collection_id)
             get_open_form().refresh_user(result.get("me"))  # updates XP / streak in the header
             return result
