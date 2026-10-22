@@ -464,81 +464,81 @@ native_deps:
     \ .in { gap: 10px; } }\n</style>\n<script>\n(function () {\n  var QB = window.QB;\n  QB.define('header', function (root,\
     \ data, emit) {\n    var esc = QB.esc;\n    var S = { user: data.user || null, active: data.active || 'home', open: false,\
     \ appName: data.app_name || 'CAF Guide', logo: data.logo_url || '' };\n\n    function render() {\n      var u = S.user;\n\
-    \      root.innerHTML = '<header class=\"qb-header\"><div class=\"in\">' +\n        '<button class=\"brand\" data-action=\"\
-    nav\" data-page=\"home\"><span class=\"logo\">' + (S.logo ? '<img alt=\"\" src=\"' + esc(S.logo) + '\">' : QB.leaf())\
-    \ + '</span>' +\n          '<span><span class=\"name\">' + esc(S.appName) + '</span><span class=\"sub\">Unofficial CAF\
-    \ study guide · made by a civilian</span></span></button>' +\n        (u ? '<nav>' +\n            '<button data-action=\"\
-    nav\" data-page=\"home\" class=\"' + (S.active === 'home' ? 'on' : '') + '\">Home</button>' +\n            '<button data-action=\"\
-    nav\" data-page=\"profile\" class=\"' + (S.active === 'profile' ? 'on' : '') + '\">Profile</button>' +\n          '</nav>'\
-    \ +\n          '<div class=\"me\"><button data-action=\"menu\" aria-haspopup=\"true\" aria-expanded=\"' + S.open + '\"\
-    >' +\n            '<span class=\"xp\">' + (u.xp || 0) + ' XP' + (u.streak ? ' · \U0001F525 ' + u.streak : '') + '</span>'\
-    \ + QB.avatar(u) + '</button>' +\n            (S.open ? '<div class=\"menu card fade-in\"><div class=\"who\"><strong>'\
-    \ + esc(u.display_name) + '</strong><div class=\"muted small\">' + esc(u.email) + '</div></div>' +\n              '<button\
-    \ data-action=\"nav\" data-page=\"profile\">Your profile</button>' +\n              '<button data-action=\"signout\">Sign\
-    \ out</button></div>' : '') +\n          '</div>' : '') +\n        '</div></header>';\n    }\n\n    root.addEventListener('click',\
-    \ function (e) {\n      var el = e.target.closest('[data-action]');\n      e.qbHeader = true; // tells the outside-click\
-    \ handler below to ignore this click\n      if (!el) return;\n      var a = el.dataset.action;\n      if (a === 'menu')\
-    \ { S.open = !S.open; render(); return; }\n      S.open = false;\n      if (a === 'nav') { S.active = el.dataset.page;\
-    \ render(); emit('nav', { page: el.dataset.page }); }\n      else if (a === 'signout') { render(); emit('signout', {});\
-    \ }\n    });\n    document.addEventListener('click', function (e) {\n      if (S.open && !e.qbHeader) { S.open = false;\
-    \ render(); }\n    });\n\n    render();\n    return {\n      setUser: function (json) { S.user = json ? JSON.parse(json)\
-    \ : null; render(); },\n      setActive: function (page) { S.active = page; S.open = false; render(); }\n    };\n  });\n\
-    })();\n</script>\n\n<!-- ===== AuthPage component ===== -->\n<style>\n.qb-auth { min-height: calc(100vh - 60px); display:\
-    \ grid; grid-template-columns: 1.05fr 1fr; }\n.qb-auth .side { background: var(--qb-hero); color: var(--qb-hero-ink);\
-    \ padding: 52px 48px 40px; display: flex; flex-direction: column; justify-content: space-between; gap: 28px; position:\
-    \ relative; overflow: hidden; border-bottom: 6px solid var(--qb-red); }\n.qb-auth .side .inner { position: relative; z-index:\
-    \ 1; }\n.qb-auth .side .badge-logo { width: 88px; height: 88px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px\
-    \ 30px rgba(0,0,0,.3); margin-bottom: 26px; background: rgba(255,255,255,.06); display: grid; place-items: center; }\n\
-    .qb-auth .side .badge-logo img { width: 100%; height: 100%; object-fit: cover; }\n.qb-auth .side .badge-logo .leaf { width:\
-    \ 52px; height: 52px; color: var(--qb-red); }\n.qb-auth .side .kind { color: #ff8a95; }\n.qb-auth .side h1 { color: inherit;\
-    \ font-size: 3rem; max-width: 13ch; text-transform: uppercase; letter-spacing: .02em; line-height: 1; }\n.qb-auth .side\
-    \ p { opacity: .85; max-width: 40ch; font-size: 1.08rem; }\n.qb-auth .side .wm { position: absolute; right: -90px; bottom:\
-    \ -70px; width: 420px; height: 420px; color: rgba(255,255,255,.05); transform: rotate(-12deg); }\n.qb-auth .side ul {\
-    \ list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 11px; }\n.qb-auth .side .civ { margin-top: 28px;\
-    \ padding: 12px 14px; border: 1px solid rgba(255,255,255,.22); border-radius: 12px; font-size: .88rem; max-width: 46ch;\
-    \ background: rgba(255,255,255,.05); }\n.qb-auth .side .civ strong { display: block; margin-bottom: 2px; }\n.qb-auth .side\
-    \ li { display: flex; align-items: center; gap: 10px; }\n.qb-auth .side li::before { content: \"\"; flex: none; width:\
-    \ 8px; height: 8px; background: var(--qb-red); transform: rotate(45deg); margin: 0 6px 0 4px; }\n.qb-auth .main { display:\
-    \ grid; place-items: center; padding: 40px 16px; }\n.qb-auth .box { width: min(400px, 100%); }\n.qb-auth .tabs { display:\
-    \ flex; gap: 4px; padding: 4px; background: var(--qb-panel-2); border: 1px solid var(--qb-line); border-radius: 12px;\
-    \ margin-bottom: 22px; }\n.qb-auth .tabs button { all: unset; flex: 1; text-align: center; cursor: pointer; padding: 8px;\
-    \ border-radius: 9px; font-weight: 600; font-size: .92rem; color: var(--qb-muted); }\n.qb-auth .tabs button.on { background:\
-    \ var(--qb-panel); color: var(--qb-ink); box-shadow: var(--qb-shadow); }\n.qb-auth form > div + div { margin-top: 14px;\
-    \ }\n.qb-auth .or { display: flex; align-items: center; gap: 10px; color: var(--qb-muted); font-size: .85rem; margin:\
-    \ 18px 0; }\n.qb-auth .or::before, .qb-auth .or::after { content: \"\"; flex: 1; height: 1px; background: var(--qb-line);\
-    \ }\n.qb-auth .link { all: unset; cursor: pointer; color: var(--qb-accent); font-size: .88rem; }\n.qb-auth .link:hover\
-    \ { text-decoration: underline; }\n@media (max-width: 820px) { .qb-auth { grid-template-columns: 1fr; } .qb-auth .side\
-    \ { padding: 32px 20px; } .qb-auth .side h1 { font-size: 1.9rem; } .qb-auth .side ul, .qb-auth .side .wm, .qb-auth .side\
-    \ .badge-logo { display: none; } .qb-auth .side h1 { font-size: 2.1rem; } }\n</style>\n<script>\n(function () {\n  var\
-    \ QB = window.QB;\n  QB.define('auth', function (root, data, emit) {\n    var esc = QB.esc;\n    var S = { mode: 'login',\
-    \ busy: false, msg: null, email: '' };\n\n    function form() {\n      if (S.mode === 'reset') {\n        return '<h2>Reset\
-    \ your password</h2><p class=\"muted small\">We\\'ll email you a link to choose a new one.</p>' +\n          '<form data-form=\"\
-    reset\"><div><label class=\"f\" for=\"qbE\">Email</label><input type=\"email\" id=\"qbE\" name=\"email\" required autocomplete=\"\
-    email\" value=\"' + esc(S.email) + '\"></div>' +\n          '<div><button class=\"btn primary block\" type=\"submit\"\
-    ' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '<span class=\"spin\"></span>' : 'Send reset link') + '</button></div></form>'\
-    \ +\n          '<p style=\"margin-top:14px\"><button class=\"link\" data-action=\"mode\" data-mode=\"login\">← Back to\
-    \ sign in</button></p>';\n      }\n      var signup = S.mode === 'signup';\n      return '<div class=\"tabs\" role=\"\
-    tablist\">' +\n          '<button role=\"tab\" data-action=\"mode\" data-mode=\"login\" class=\"' + (!signup ? 'on' :\
-    \ '') + '\">Sign in</button>' +\n          '<button role=\"tab\" data-action=\"mode\" data-mode=\"signup\" class=\"' +\
-    \ (signup ? 'on' : '') + '\">Create account</button></div>' +\n        '<h2>' + (signup ? 'Create your account' : 'Welcome\
-    \ back') + '</h2>' +\n        '<p class=\"muted small\">' + (signup ? 'Your progress, streak and cards learned are saved\
-    \ to your profile.' : 'Sign in to continue where you left off.') + '</p>' +\n        '<form data-form=\"' + S.mode + '\"\
-    >' +\n          (signup ? '<div><label class=\"f\" for=\"qbN\">Your name</label><input type=\"text\" id=\"qbN\" name=\"\
-    name\" required autocomplete=\"name\" placeholder=\"How should we greet you?\"></div>' : '') +\n          '<div><label\
-    \ class=\"f\" for=\"qbE\">Email</label><input type=\"email\" id=\"qbE\" name=\"email\" required autocomplete=\"email\"\
-    \ value=\"' + esc(S.email) + '\"></div>' +\n          '<div><label class=\"f\" for=\"qbP\">Password</label><input type=\"\
-    password\" id=\"qbP\" name=\"password\" required minlength=\"' + (signup ? 8 : 1) + '\" autocomplete=\"' + (signup ? 'new-password'\
-    \ : 'current-password') + '\">' +\n            (signup ? '<div class=\"hint\">At least 8 characters.</div>' : '<div class=\"\
-    hint\" style=\"text-align:right\"><button type=\"button\" class=\"link\" data-action=\"mode\" data-mode=\"reset\">Forgot\
-    \ password?</button></div>') + '</div>' +\n          '<div><button class=\"btn primary block\" type=\"submit\"' + (S.busy\
-    \ ? ' disabled' : '') + '>' + (S.busy ? '<span class=\"spin\"></span>' : signup ? 'Create account' : 'Sign in') + '</button></div>'\
-    \ +\n        '</form>' +\n        (data.google ? '<div class=\"or\">or</div><button class=\"btn block\" data-action=\"\
-    google\"' + (S.busy ? ' disabled' : '') + '>Continue with Google</button>' : '');\n    }\n\n    function render() {\n\
-    \      root.innerHTML = '<div class=\"qb-auth\">' +\n        '<div class=\"side\">' + QB.leaf('wm') +\n          '<div\
-    \ class=\"inner\"><div class=\"badge-logo\">' + (data.logo_url ? '<img alt=\"\" src=\"' + esc(data.logo_url) + '\">' :\
-    \ QB.leaf()) + '</div>' +\n          '<div class=\"kind\">' + esc(data.app_name || 'CAF Guide') + ' · unofficial study\
-    \ guide</div>' +\n          '<h1>' + esc(data.headline || 'Learn about the Canadian Armed Forces') + '</h1>' +\n     \
-    \     '<p>' + esc(data.tagline || 'Public reports, policies, doctrine and history about the CAF, turned into flashcards\
+    \      if (!u) { root.innerHTML = ''; return; } // no top bar until signed in\n      root.innerHTML = '<header class=\"\
+    qb-header\"><div class=\"in\">' +\n        '<button class=\"brand\" data-action=\"nav\" data-page=\"home\"><span class=\"\
+    logo\">' + (S.logo ? '<img alt=\"\" src=\"' + esc(S.logo) + '\">' : QB.leaf()) + '</span>' +\n          '<span><span class=\"\
+    name\">' + esc(S.appName) + '</span><span class=\"sub\">Unofficial CAF study guide · made by a civilian</span></span></button>'\
+    \ +\n        (u ? '<nav>' +\n            '<button data-action=\"nav\" data-page=\"home\" class=\"' + (S.active === 'home'\
+    \ ? 'on' : '') + '\">Home</button>' +\n            '<button data-action=\"nav\" data-page=\"profile\" class=\"' + (S.active\
+    \ === 'profile' ? 'on' : '') + '\">Profile</button>' +\n          '</nav>' +\n          '<div class=\"me\"><button data-action=\"\
+    menu\" aria-haspopup=\"true\" aria-expanded=\"' + S.open + '\">' +\n            '<span class=\"xp\">' + (u.xp || 0) +\
+    \ ' XP' + (u.streak ? ' · \U0001F525 ' + u.streak : '') + '</span>' + QB.avatar(u) + '</button>' +\n            (S.open\
+    \ ? '<div class=\"menu card fade-in\"><div class=\"who\"><strong>' + esc(u.display_name) + '</strong><div class=\"muted\
+    \ small\">' + esc(u.email) + '</div></div>' +\n              '<button data-action=\"nav\" data-page=\"profile\">Your profile</button>'\
+    \ +\n              '<button data-action=\"signout\">Sign out</button></div>' : '') +\n          '</div>' : '') +\n   \
+    \     '</div></header>';\n    }\n\n    root.addEventListener('click', function (e) {\n      var el = e.target.closest('[data-action]');\n\
+    \      e.qbHeader = true; // tells the outside-click handler below to ignore this click\n      if (!el) return;\n    \
+    \  var a = el.dataset.action;\n      if (a === 'menu') { S.open = !S.open; render(); return; }\n      S.open = false;\n\
+    \      if (a === 'nav') { S.active = el.dataset.page; render(); emit('nav', { page: el.dataset.page }); }\n      else\
+    \ if (a === 'signout') { render(); emit('signout', {}); }\n    });\n    document.addEventListener('click', function (e)\
+    \ {\n      if (S.open && !e.qbHeader) { S.open = false; render(); }\n    });\n\n    render();\n    return {\n      setUser:\
+    \ function (json) { S.user = json ? JSON.parse(json) : null; render(); },\n      setActive: function (page) { S.active\
+    \ = page; S.open = false; render(); }\n    };\n  });\n})();\n</script>\n\n<!-- ===== AuthPage component ===== -->\n<style>\n\
+    .qb-auth { min-height: calc(100vh - 60px); display: grid; grid-template-columns: 1.05fr 1fr; }\n.qb-auth .side { background:\
+    \ var(--qb-hero); color: var(--qb-hero-ink); padding: 52px 48px 40px; display: flex; flex-direction: column; justify-content:\
+    \ space-between; gap: 28px; position: relative; overflow: hidden; border-bottom: 6px solid var(--qb-red); }\n.qb-auth\
+    \ .side .inner { position: relative; z-index: 1; }\n.qb-auth .side .badge-logo { width: 88px; height: 88px; border-radius:\
+    \ 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.3); margin-bottom: 26px; background: rgba(255,255,255,.06);\
+    \ display: grid; place-items: center; }\n.qb-auth .side .badge-logo img { width: 100%; height: 100%; object-fit: cover;\
+    \ }\n.qb-auth .side .badge-logo .leaf { width: 52px; height: 52px; color: var(--qb-red); }\n.qb-auth .side .kind { color:\
+    \ #ff8a95; }\n.qb-auth .side h1 { color: inherit; font-size: 3rem; max-width: 13ch; text-transform: uppercase; letter-spacing:\
+    \ .02em; line-height: 1; }\n.qb-auth .side p { opacity: .85; max-width: 40ch; font-size: 1.08rem; }\n.qb-auth .side .wm\
+    \ { position: absolute; right: -90px; bottom: -70px; width: 420px; height: 420px; color: rgba(255,255,255,.05); transform:\
+    \ rotate(-12deg); }\n.qb-auth .side ul { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 11px; }\n\
+    .qb-auth .side .civ { margin-top: 28px; padding: 12px 14px; border: 1px solid rgba(255,255,255,.22); border-radius: 12px;\
+    \ font-size: .88rem; max-width: 46ch; background: rgba(255,255,255,.05); }\n.qb-auth .side .civ strong { display: block;\
+    \ margin-bottom: 2px; }\n.qb-auth .side li { display: flex; align-items: center; gap: 10px; }\n.qb-auth .side li::before\
+    \ { content: \"\"; flex: none; width: 8px; height: 8px; background: var(--qb-red); transform: rotate(45deg); margin: 0\
+    \ 6px 0 4px; }\n.qb-auth .main { display: grid; place-items: center; padding: 40px 16px; }\n.qb-auth .box { width: min(400px,\
+    \ 100%); }\n.qb-auth .tabs { display: flex; gap: 4px; padding: 4px; background: var(--qb-panel-2); border: 1px solid var(--qb-line);\
+    \ border-radius: 12px; margin-bottom: 22px; }\n.qb-auth .tabs button { all: unset; flex: 1; text-align: center; cursor:\
+    \ pointer; padding: 8px; border-radius: 9px; font-weight: 600; font-size: .92rem; color: var(--qb-muted); }\n.qb-auth\
+    \ .tabs button.on { background: var(--qb-panel); color: var(--qb-ink); box-shadow: var(--qb-shadow); }\n.qb-auth form\
+    \ > div + div { margin-top: 14px; }\n.qb-auth .or { display: flex; align-items: center; gap: 10px; color: var(--qb-muted);\
+    \ font-size: .85rem; margin: 18px 0; }\n.qb-auth .or::before, .qb-auth .or::after { content: \"\"; flex: 1; height: 1px;\
+    \ background: var(--qb-line); }\n.qb-auth .link { all: unset; cursor: pointer; color: var(--qb-accent); font-size: .88rem;\
+    \ }\n.qb-auth .link:hover { text-decoration: underline; }\n@media (max-width: 820px) { .qb-auth { grid-template-columns:\
+    \ 1fr; } .qb-auth .side { padding: 32px 20px; } .qb-auth .side h1 { font-size: 1.9rem; } .qb-auth .side ul, .qb-auth .side\
+    \ .wm, .qb-auth .side .badge-logo { display: none; } .qb-auth .side h1 { font-size: 2.1rem; } }\n</style>\n<script>\n\
+    (function () {\n  var QB = window.QB;\n  QB.define('auth', function (root, data, emit) {\n    var esc = QB.esc;\n    var\
+    \ S = { mode: 'login', busy: false, msg: null, email: '' };\n\n    function form() {\n      if (S.mode === 'reset') {\n\
+    \        return '<h2>Reset your password</h2><p class=\"muted small\">We\\'ll email you a link to choose a new one.</p>'\
+    \ +\n          '<form data-form=\"reset\"><div><label class=\"f\" for=\"qbE\">Email</label><input type=\"email\" id=\"\
+    qbE\" name=\"email\" required autocomplete=\"email\" value=\"' + esc(S.email) + '\"></div>' +\n          '<div><button\
+    \ class=\"btn primary block\" type=\"submit\"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '<span class=\"spin\"></span>'\
+    \ : 'Send reset link') + '</button></div></form>' +\n          '<p style=\"margin-top:14px\"><button class=\"link\" data-action=\"\
+    mode\" data-mode=\"login\">← Back to sign in</button></p>';\n      }\n      var signup = S.mode === 'signup';\n      return\
+    \ '<div class=\"tabs\" role=\"tablist\">' +\n          '<button role=\"tab\" data-action=\"mode\" data-mode=\"login\"\
+    \ class=\"' + (!signup ? 'on' : '') + '\">Sign in</button>' +\n          '<button role=\"tab\" data-action=\"mode\" data-mode=\"\
+    signup\" class=\"' + (signup ? 'on' : '') + '\">Create account</button></div>' +\n        '<h2>' + (signup ? 'Create your\
+    \ account' : 'Welcome back') + '</h2>' +\n        '<p class=\"muted small\">' + (signup ? 'Your progress, streak and cards\
+    \ learned are saved to your profile.' : 'Sign in to continue where you left off.') + '</p>' +\n        '<form data-form=\"\
+    ' + S.mode + '\">' +\n          (signup ? '<div><label class=\"f\" for=\"qbN\">Your name</label><input type=\"text\" id=\"\
+    qbN\" name=\"name\" required autocomplete=\"name\" placeholder=\"How should we greet you?\"></div>' : '') +\n        \
+    \  '<div><label class=\"f\" for=\"qbE\">Email</label><input type=\"email\" id=\"qbE\" name=\"email\" required autocomplete=\"\
+    email\" value=\"' + esc(S.email) + '\"></div>' +\n          '<div><label class=\"f\" for=\"qbP\">Password</label><input\
+    \ type=\"password\" id=\"qbP\" name=\"password\" required minlength=\"' + (signup ? 8 : 1) + '\" autocomplete=\"' + (signup\
+    \ ? 'new-password' : 'current-password') + '\">' +\n            (signup ? '<div class=\"hint\">At least 8 characters.</div>'\
+    \ : '<div class=\"hint\" style=\"text-align:right\"><button type=\"button\" class=\"link\" data-action=\"mode\" data-mode=\"\
+    reset\">Forgot password?</button></div>') + '</div>' +\n          '<div><button class=\"btn primary block\" type=\"submit\"\
+    ' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '<span class=\"spin\"></span>' : signup ? 'Create account' : 'Sign in')\
+    \ + '</button></div>' +\n        '</form>' +\n        (data.google ? '<div class=\"or\">or</div><button class=\"btn block\"\
+    \ data-action=\"google\"' + (S.busy ? ' disabled' : '') + '>Continue with Google</button>' : '');\n    }\n\n    function\
+    \ render() {\n      root.innerHTML = '<div class=\"qb-auth\">' +\n        '<div class=\"side\">' + QB.leaf('wm') +\n \
+    \         '<div class=\"inner\"><div class=\"badge-logo\">' + (data.logo_url ? '<img alt=\"\" src=\"' + esc(data.logo_url)\
+    \ + '\">' : QB.leaf()) + '</div>' +\n          '<div class=\"kind\">' + esc(data.app_name || 'CAF Guide') + ' · unofficial\
+    \ study guide</div>' +\n          '<h1>' + esc(data.headline || 'Learn about the Canadian Armed Forces') + '</h1>' +\n\
+    \          '<p>' + esc(data.tagline || 'Public reports, policies, doctrine and history about the CAF, turned into flashcards\
     \ that come back just before you would forget them.') + '</p>' +\n          '<ul><li>' + esc(data.module_line || 'Learning\
     \ modules you work through one by one') + '</li><li>Answer in your head, then reveal the answer</li><li>Track cards learned,\
     \ modules completed and your streak</li></ul>' +\n          '<div class=\"civ\"><strong>Made by a civilian, for learning.</strong>\
