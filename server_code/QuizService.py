@@ -213,7 +213,7 @@ def start_guest(today=None):
 
 @anvil.server.callable
 def end_guest():
-    anvil.server.session.pop(GUEST_KEY, None)
+    anvil.server.session[GUEST_KEY] = None  # the session object has no pop(); None means "no guest"
 
 
 def _require_admin():
