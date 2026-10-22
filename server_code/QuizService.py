@@ -242,7 +242,7 @@ def get_home(today=None):
     cont = None
     if due:
         cont = {"kind": "review", "due": due, "title": "Review %d due card%s" % (due, "" if due == 1 else "s"),
-                "subtitle": "Cards from all your collections that are due today"}
+                "subtitle": "Cards from all your modules that are due today"}
     else:
         for qz in quizzes:
             c = counts[qz.get_id()]
@@ -335,7 +335,7 @@ def get_study(quiz_id=None, scope="due", today=None, collection_id=None):
         live = {q.get_id() for q in quizzes}
         cards = [s["question"] for s in states.values()
                  if s["quiz"] is not None and s["quiz"].get_id() in live and (s["due"] is None or s["due"] <= today)]
-        info = {"id": None, "title": "Daily review", "description": "Due cards from all your collections.",
+        info = {"id": None, "title": "Daily review", "description": "Due cards from all your modules.",
                 "collection_id": None, "collection_title": "Home"}
 
     def is_due(q):

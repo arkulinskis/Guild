@@ -570,25 +570,26 @@ native_deps:
     \ .path-top .big { font-family: var(--qb-serif); font-size: 2rem; font-weight: 700; line-height: 1; }\n.qb-home .segbar\
     \ { display: flex; gap: 3px; margin-top: 12px; }\n.qb-home .segbar i { flex: 1; height: 10px; border-radius: 3px; background:\
     \ var(--qb-line); position: relative; overflow: hidden; }\n.qb-home .segbar i > b { position: absolute; inset: 0 auto\
-    \ 0 0; background: var(--qb-accent); }\n.qb-home .segbar i.done { background: var(--qb-good); }\n.qb-home .modules { display:\
-    \ grid; gap: 8px; }\n.qb-home .mod { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 14px; align-items:\
-    \ center; padding: 12px 16px; transition: border-color .12s, transform .12s; }\n.qb-home .mod:hover { border-color: var(--qb-accent);\
-    \ transform: translateX(2px); }\n.qb-home .mod .num { font-family: var(--qb-serif); font-weight: 700; font-size: 1.35rem;\
-    \ width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; background: var(--qb-panel-2); border:\
-    \ 1px solid var(--qb-line); color: var(--c, var(--qb-accent)); }\n.qb-home .mod.complete .num { background: var(--qb-good-soft);\
-    \ color: var(--qb-good); border-color: transparent; }\n.qb-home .mod .t { font-weight: 600; }\n.qb-home .mod .sub { display:\
-    \ block; font-weight: 400; font-size: .85rem; color: var(--qb-muted); white-space: nowrap; overflow: hidden; text-overflow:\
-    \ ellipsis; }\n.qb-home .mod .mini { display: block; height: 4px; border-radius: 99px; background: var(--qb-line); margin-top:\
-    \ 7px; max-width: 260px; overflow: hidden; }\n.qb-home .mod .mini > span { display: block; height: 100%; background: var(--c,\
-    \ var(--qb-accent)); }\n.qb-home .mod .right { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content:\
-    \ flex-end; }\n.qb-home .filters { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--qb-line); border-radius:\
-    \ 10px; background: var(--qb-panel-2); margin-left: auto; }\n.qb-home .filters button { all: unset; cursor: pointer; padding:\
-    \ 4px 10px; border-radius: 8px; font-size: .85rem; color: var(--qb-muted); }\n.qb-home .filters button.on { background:\
-    \ var(--qb-panel); color: var(--qb-ink); box-shadow: var(--qb-shadow); }\n.qb-home .recent { padding: 6px 0; }\n.qb-home\
-    \ .recent button { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: minmax(0,\
-    \ 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 10px 18px; }\n.qb-home .recent button + button { border-top:\
-    \ 1px solid var(--qb-line); }\n.qb-home .recent button:hover { background: var(--qb-panel-2); }\n@media (max-width: 720px)\
-    \ {\n  .qb-home .stats { grid-template-columns: repeat(2, 1fr); }\n  .qb-home .mod { grid-template-columns: 46px minmax(0,\
+    \ 0 0; background: var(--qb-accent); }\n.qb-home .segbar i.done { background: var(--qb-good); }\n.qb-home .segbar i.done\
+    \ > b { background: var(--qb-good); }\n.qb-home .modules { display: grid; gap: 8px; }\n.qb-home .mod { display: grid;\
+    \ grid-template-columns: 54px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 16px; transition: border-color\
+    \ .12s, transform .12s; }\n.qb-home .mod:hover { border-color: var(--qb-accent); transform: translateX(2px); }\n.qb-home\
+    \ .mod .num { font-family: var(--qb-serif); font-weight: 700; font-size: 1.35rem; width: 54px; height: 54px; border-radius:\
+    \ 12px; display: grid; place-items: center; background: var(--qb-panel-2); border: 1px solid var(--qb-line); color: var(--c,\
+    \ var(--qb-accent)); }\n.qb-home .mod.complete .num { background: var(--qb-good-soft); color: var(--qb-good); border-color:\
+    \ transparent; }\n.qb-home .mod .t { font-weight: 600; }\n.qb-home .mod .sub { display: block; font-weight: 400; font-size:\
+    \ .85rem; color: var(--qb-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\n.qb-home .mod .mini\
+    \ { display: block; height: 4px; border-radius: 99px; background: var(--qb-line); margin-top: 7px; max-width: 260px; overflow:\
+    \ hidden; }\n.qb-home .mod .mini > span { display: block; height: 100%; background: var(--c, var(--qb-accent)); }\n.qb-home\
+    \ .mod .right { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }\n.qb-home\
+    \ .filters { display: inline-flex; gap: 3px; padding: 3px; border: 1px solid var(--qb-line); border-radius: 10px; background:\
+    \ var(--qb-panel-2); margin-left: auto; }\n.qb-home .filters button { all: unset; cursor: pointer; padding: 4px 10px;\
+    \ border-radius: 8px; font-size: .85rem; color: var(--qb-muted); }\n.qb-home .filters button.on { background: var(--qb-panel);\
+    \ color: var(--qb-ink); box-shadow: var(--qb-shadow); }\n.qb-home .recent { padding: 6px 0; }\n.qb-home .recent button\
+    \ { all: unset; box-sizing: border-box; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap:\
+    \ 12px; align-items: center; width: 100%; padding: 10px 18px; }\n.qb-home .recent button + button { border-top: 1px solid\
+    \ var(--qb-line); }\n.qb-home .recent button:hover { background: var(--qb-panel-2); }\n@media (max-width: 720px) {\n \
+    \ .qb-home .stats { grid-template-columns: repeat(2, 1fr); }\n  .qb-home .mod { grid-template-columns: 46px minmax(0,\
     \ 1fr); }\n  .qb-home .mod .num { width: 46px; height: 46px; font-size: 1.15rem; }\n  .qb-home .mod .right { grid-column:\
     \ 2; justify-content: flex-start; }\n  .qb-home .filters { margin-left: 0; }\n}\n</style>\n<script>\n(function () {\n\
     \  var QB = window.QB;\n  QB.define('home', function (root, data, emit) {\n    var esc = QB.esc;\n    var me = data.me\
