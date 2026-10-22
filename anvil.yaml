@@ -395,8 +395,16 @@ native_deps:
     \ none; } }\n\n#qb-toasts { position: fixed; left: 50%; transform: translateX(-50%); bottom: 18px; z-index: 1000; display:\
     \ grid; gap: 8px; font: 15px/1.4 var(--qb-sans); }\n#qb-toasts .t { background: var(--qb-ink); color: var(--qb-bg); padding:\
     \ 10px 16px; border-radius: 10px; box-shadow: var(--qb-shadow); max-width: 90vw; }\n#qb-toasts .t.err { background: var(--qb-bad);\
-    \ color: #fff; }\n@media (max-width: 620px) { .qb h1 { font-size: 1.6rem; } .qb .pad { padding: 18px; } }\n</style>\n\n\
-    <script>\n/* window.QB: shared helpers + component registry.\n   Each form's HTML registers a component with QB.define(name,\
+    \ color: #fff; }\n@media (max-width: 620px) { .qb h1 { font-size: 1.6rem; } .qb .pad { padding: 18px; } }\n\n/* Anvil's\
+    \ loading spinner (#loadingSpinner), replaced by loading_icon.png: the dotted ring\n   spins around the soldier, who sits\
+    \ on a white disc so they read in dark mode too.\n   The two layers come from tools/make_loading_icon.py; sync puts them\
+    \ in the Anvil theme. */\n#loadingSpinner { --anvil-spinner-size: 120px; --anvil-spinner-bg: var(--qb-bg); width: 120px;\
+    \ height: 120px; }\n#loadingSpinner > svg { display: none !important; }\n#loadingSpinner::before, #loadingSpinner::after\
+    \ { content: \"\"; position: absolute; inset: 0; border-radius: 50%; }\n#loadingSpinner::before { background: url(\"_/theme/loading_ring.png\"\
+    ) center / contain no-repeat; animation: qb-spin 2.4s linear infinite; }\n#loadingSpinner::after { background: url(\"\
+    _/theme/loading_soldier.png\") center / contain no-repeat, radial-gradient(circle closest-side, #fff 83%, transparent\
+    \ 84%); }\n@media (prefers-reduced-motion: reduce) { #loadingSpinner::before { animation-duration: 8s; } }\n</style>\n\
+    \n<script>\n/* window.QB: shared helpers + component registry.\n   Each form's HTML registers a component with QB.define(name,\
     \ mountFn).\n   Python mounts it with:  window.QB.mount(name, rootNode, jsonString, emit)\n   and the component talks\
     \ back by calling emit(eventName, payloadObject). */\n(function () {\n  if (window.QB && window.QB.__v) return;\n  var\
     \ QB = window.QB = { __v: 1, components: {} };\n\n  QB.esc = function (s) {\n    return String(s == null ? '' : s).replace(/[&<>\"\
