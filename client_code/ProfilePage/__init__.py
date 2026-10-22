@@ -24,6 +24,8 @@ class ProfilePage(ProfilePageTemplate):
             return res
         if event == "open_quiz":
             get_open_form().go("quiz", quiz_id=p["id"])
+        elif event == "open_collection":
+            get_open_form().go("collection", collection_id=p["id"])
         elif event == "open_review":
             get_open_form().go("quiz", quiz_id=None)  # daily review
         elif event == "signout":

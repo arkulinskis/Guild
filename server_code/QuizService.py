@@ -107,9 +107,18 @@ def _require_admin():
 
 
 def _published_quizzes():
-    """Published quizzes in published collections, in display order."""
-    return [q for q in app_tables.quizzes.search(tables.order_by("position"), published=True)
+    """Published quizzes in published collections, in learning order (module, then part)."""
+    rows = [q for q in app_tables.quizzes.search(published=True)
             if q["collection"] is not None and q["collection"]["published"]]
+    return sorted(rows, key=lambda q: (q["collection"]["position"] or 0, q["position"] or 0))
+
+
+def _source_url(quizzes):
+    """The source link of a module, taken from its parts (when it is a web address)."""
+    for q in quizzes:
+        if str(q["source"] or "").startswith("http"):
+            return q["source"]
+    return ""
 
 
 def _states(user):
@@ -151,12 +160,16 @@ def _collection_summaries(quizzes, counts):
         if not items:
             continue
         cs = [counts[q.get_id()] for q in items]
+        total = sum(c["total"] for c in cs)
+        learned = sum(c["learned"] for c in cs)
         out.append({
-            "id": col.get_id(), "title": col["title"], "description": col["description"] or "",
+            "id": col.get_id(), "number": col["position"] or 0, "title": col["title"],
+            "description": col["description"] or "",
             "kind": col["kind"] or "Collection", "color": col["color"] or COLLECTION_COLORS[0],
-            "quiz_count": len(items), "card_count": sum(c["total"] for c in cs),
-            "learned": sum(c["learned"] for c in cs), "due": sum(c["due"] for c in cs),
+            "quiz_count": len(items), "card_count": total,
+            "learned": learned, "due": sum(c["due"] for c in cs), "mastered": sum(c["mastered"] for c in cs),
             "new": sum(c["new"] for c in cs), "started": any(c["seen"] for c in cs),
+            "complete": total > 0 and learned >= total, "source": _source_url(items),
         })
     return out
 
@@ -164,9 +177,15 @@ def _collection_summaries(quizzes, counts):
 def _session_dict(row):
     quiz = row["quiz"]
     col = quiz["collection"] if quiz else None
+    title = quiz["title"] if quiz else "Daily review"
+    module = row["ratings"].get("module") if isinstance(row["ratings"], dict) else None
+    if quiz is None and module:
+        col = app_tables.collections.get_by_id(module)
+        title = "Whole module" if col else title
     return {
         "quiz_id": quiz.get_id() if quiz else None,
-        "title": quiz["title"] if quiz else "Daily review",
+        "collection_id": col.get_id() if (col and module) else None,
+        "title": title,
         "collection_title": col["title"] if col else "All collections",
         "finished": _iso(row["finished"]),
         "reviewed": row["reviewed"] or 0, "got": row["got"] or 0, "again": row["again"] or 0,
@@ -229,6 +248,7 @@ def get_home(today=None):
             c = counts[qz.get_id()]
             if c["new"]:
                 cont = {"kind": "quiz", "quiz_id": qz.get_id(), "title": qz["title"],
+                        "module": qz["collection"]["position"] or 0,
                         "subtitle": "%s · %d new card%s" % (qz["collection"]["title"], c["new"], "" if c["new"] == 1 else "s"),
                         "started": bool(c["seen"])}
                 break
@@ -243,6 +263,8 @@ def get_home(today=None):
             "total_cards": sum(c["total"] for c in counts.values()),
             "due": due, "next_due": _iso(next_due),
             "mastered": sum(c["mastered"] for c in counts.values()),
+            "modules_total": len(collections), "modules_complete": sum(1 for c in collections if c["complete"]),
+            "modules_started": sum(1 for c in collections if c["started"]),
             "xp": user["xp"] or 0, "streak": _current_streak(user, today),
         },
         "continue": cont,
@@ -260,9 +282,12 @@ def get_collection(collection_id, today=None):
         raise ValueError("That collection was not found.")
     quizzes = list(app_tables.quizzes.search(tables.order_by("position"), collection=col, published=True))
     counts = _quiz_counts(quizzes, _states(user), today)
+    all_modules = [c for c in app_tables.collections.search(tables.order_by("position"), published=True)]
     return {
-        "collection": {"id": col.get_id(), "title": col["title"], "description": col["description"] or "",
-                       "kind": col["kind"] or "Collection", "color": col["color"] or COLLECTION_COLORS[0]},
+        "collection": {"id": col.get_id(), "number": col["position"] or 0, "title": col["title"],
+                       "description": col["description"] or "", "modules_total": len(all_modules),
+                       "kind": col["kind"] or "Collection", "color": col["color"] or COLLECTION_COLORS[0],
+                       "source": _source_url(quizzes)},
         "quizzes": [dict(id=q.get_id(), title=q["title"], description=q["description"] or "",
                          difficulty=q["difficulty"] or "", card_count=counts[q.get_id()]["total"],
                          learned=counts[q.get_id()]["learned"], due=counts[q.get_id()]["due"],
@@ -272,17 +297,29 @@ def get_collection(collection_id, today=None):
 
 
 @anvil.server.callable(require_user=True)
-def get_study(quiz_id=None, scope="due", today=None):
+def get_study(quiz_id=None, scope="due", today=None, collection_id=None):
     """Cards for one study session.
 
-    quiz_id given: that quiz. scope "due" = due + new cards, "all" = every card (study ahead).
-    quiz_id None:  daily review = due cards from every published quiz (no new cards).
+    quiz_id given:       that quiz (part). scope "due" = due + new cards, "all" = every card (study ahead).
+    collection_id given: every part of that module, in order.
+    neither:             daily review = due cards from every published quiz (no new cards).
     """
     user = _user()
     today = _client_today(today)
     states = _states(user)
 
-    if quiz_id:
+    if collection_id and not quiz_id:
+        col = app_tables.collections.get_by_id(collection_id)
+        if col is None or not col["published"]:
+            raise ValueError("That module was not found.")
+        quizzes = list(app_tables.quizzes.search(tables.order_by("position"), collection=col, published=True))
+        cards = []
+        for qz in quizzes:
+            cards += list(app_tables.questions.search(tables.order_by("position"), quiz=qz))
+        info = {"id": None, "module_id": col.get_id(), "number": col["position"] or 0,
+                "title": col["title"], "description": "Every part of this module, in order.",
+                "collection_id": col.get_id(), "collection_title": col["title"], "source": _source_url(quizzes)}
+    elif quiz_id:
         qz = app_tables.quizzes.get_by_id(quiz_id)
         if qz is None or not qz["published"]:
             raise ValueError("That quiz was not found.")
@@ -290,7 +327,9 @@ def get_study(quiz_id=None, scope="due", today=None):
         cards = list(app_tables.questions.search(tables.order_by("position"), quiz=qz))
         col = qz["collection"]
         info = {"id": qz.get_id(), "title": qz["title"], "description": qz["description"] or "",
-                "collection_id": col.get_id() if col else None, "collection_title": col["title"] if col else ""}
+                "collection_id": col.get_id() if col else None, "collection_title": col["title"] if col else "",
+                "number": col["position"] if col else None,
+                "source": qz["source"] if str(qz["source"] or "").startswith("http") else ""}
     else:
         quizzes = _published_quizzes()
         live = {q.get_id() for q in quizzes}
@@ -315,6 +354,8 @@ def get_study(quiz_id=None, scope="due", today=None):
     total = {k: sum(c[k] for c in counts.values()) for k in ("total", "learned", "due", "new")}
     next_due = min((c["next_due"] for c in counts.values() if c["next_due"]), default=None)
     titles = None if quiz_id else {q.get_id(): q["title"] for q in quizzes}
+    if collection_id and not quiz_id and len(quizzes) == 1:
+        titles = None
     return {
         "quiz": info, "scope": scope,
         "cards": [_card_dict(q, states.get(q.get_id()), titles) for q in chosen],
@@ -349,7 +390,7 @@ def rate_card(question_id, knew, today=None):
 
 @anvil.server.callable(require_user=True)
 @tables.in_transaction
-def finish_session(quiz_id, ratings, today=None):
+def finish_session(quiz_id, ratings, today=None, collection_id=None):
     """Record a finished session (ratings were already saved one by one) and award XP + streak."""
     user = _user()
     today = _client_today(today)
@@ -370,8 +411,9 @@ def finish_session(quiz_id, ratings, today=None):
     else:
         streak = 1
     user.update(xp=(user["xp"] or 0) + xp, streak=streak, last_active=today)
+    stored = {"module": collection_id, "ratings": ratings[:500]} if (collection_id and not qz) else ratings[:500]
     app_tables.sessions.add_row(user=user, quiz=qz, finished=_now(), reviewed=len(cards), got=got, again=again,
-                                xp=xp, ratings=ratings[:500])
+                                xp=xp, ratings=stored)
 
     # When does this learner next have something due?
     states = [s for s in app_tables.card_state.search(user=user) if s["due"] is not None]
@@ -399,8 +441,9 @@ def get_profile(today=None):
             "sessions": len(sessions),
             "due": sum(c["due"] for c in counts.values()),
         },
-        "progress": [{"title": c["title"], "color": c["color"], "learned": c["learned"], "total": c["card_count"],
-                      "due": c["due"]} for c in _collection_summaries(quizzes, counts)],
+        "progress": [{"id": c["id"], "number": c["number"], "title": c["title"], "color": c["color"],
+                      "learned": c["learned"], "total": c["card_count"], "due": c["due"], "complete": c["complete"]}
+                     for c in _collection_summaries(quizzes, counts)],
         "history": [_session_dict(r) for r in sessions[:HISTORY_LIMIT]],
         "colors": AVATAR_COLORS,
     }
@@ -436,20 +479,33 @@ def _import_one(item):
         raise ValueError('"%s" has no cards' % title)
 
     col = app_tables.collections.get(title=col_title)
+    col_fields = {}
+    if item.get("collection_description"):
+        col_fields["description"] = str(item["collection_description"])
+    if item.get("kind"):
+        col_fields["kind"] = str(item["kind"])
+    if re.fullmatch(r"#[0-9a-fA-F]{6}", str(item.get("color") or "")):
+        col_fields["color"] = item["color"]
+    if isinstance(item.get("collection_position"), (int, float)):
+        col_fields["position"] = item["collection_position"]
     if col is None:
         n = len(app_tables.collections.search())
-        col = app_tables.collections.add_row(
-            title=col_title, description=str(item.get("collection_description") or ""),
-            kind=str(item.get("kind") or "Collection"), color=COLLECTION_COLORS[n % len(COLLECTION_COLORS)],
-            position=n + 1, published=True, created=_now())
+        base = dict(description="", kind="Collection", color=COLLECTION_COLORS[n % len(COLLECTION_COLORS)], position=n + 1)
+        base.update(col_fields)
+        col = app_tables.collections.add_row(title=col_title, published=True, created=_now(), **base)
+    elif col_fields:
+        col.update(**col_fields)
 
     qz = app_tables.quizzes.get(collection=col, title=title)
     replaced = qz is not None
     fields = dict(description=str(item.get("description") or ""), difficulty=str(item.get("difficulty") or ""),
-                  card_count=len(cards), published=True, source=str(item.get("format") or "import"))
+                  card_count=len(cards), published=True,
+                  source=str(item.get("source") or item.get("format") or "import"))
+    if isinstance(item.get("position"), (int, float)):
+        fields["position"] = item["position"]
     if qz is None:
-        qz = app_tables.quizzes.add_row(collection=col, title=title, created=_now(),
-                                        position=len(app_tables.quizzes.search(collection=col)) + 1, **fields)
+        fields.setdefault("position", len(app_tables.quizzes.search(collection=col)) + 1)
+        qz = app_tables.quizzes.add_row(collection=col, title=title, created=_now(), **fields)
         existing = []
     else:
         qz.update(**fields)
@@ -459,14 +515,20 @@ def _import_one(item):
     by_text = {}
     for row in existing:
         by_text.setdefault(row["text"], row)
-    keep = set()
+    keep, new_rows = set(), []
     for i, c in enumerate(cards):
         row = by_text.pop(c["text"], None)
         if row is None:
-            app_tables.questions.add_row(quiz=qz, position=i + 1, **c)
+            new_rows.append(dict(quiz=qz, position=i + 1, **c))
         else:
             row.update(position=i + 1, **c)
             keep.add(row.get_id())
+    add_rows = getattr(app_tables.questions, "add_rows", None)
+    if add_rows and new_rows:
+        add_rows(new_rows)
+    else:
+        for r in new_rows:
+            app_tables.questions.add_row(**r)
     for row in existing:
         if row.get_id() not in keep:
             for s in app_tables.card_state.search(question=row):

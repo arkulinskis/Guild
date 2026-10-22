@@ -1,4 +1,5 @@
 # CollectionPage — Custom HTML form. HTML: forms/CollectionPage.html
+# One learning module and its parts.
 from ._anvil_designer import CollectionPageTemplate
 from anvil import *
 import anvil.server
@@ -20,3 +21,5 @@ class CollectionPage(CollectionPageTemplate):
             get_open_form().go("home")
         elif event == "open_quiz":
             get_open_form().go("quiz", quiz_id=p["id"])
+        elif event == "study_module":
+            get_open_form().go("quiz", collection_id=p["id"])  # every part of the module, in order
