@@ -16,8 +16,9 @@ from anvil.tables import app_tables
 
 from .DemoData import DEMO_QUIZZES
 
-AVATAR_COLORS = ["#2f6f62", "#3b5bdb", "#7048e8", "#c2255c", "#e8590c", "#2b8a3e", "#1c7ed6", "#5c5f66"]
-COLLECTION_COLORS = ["#2f6f62", "#3b5bdb", "#c2255c", "#e8590c", "#7048e8", "#2b8a3e"]
+# Navy, Canada red, army olive, air force blue, khaki, slate, sea green, maroon
+AVATAR_COLORS = ["#2e4a70", "#c8102e", "#556b2f", "#3b6ea5", "#8a7a4f", "#5c6470", "#2f7a78", "#7a2e3b"]
+COLLECTION_COLORS = ["#2e4a70", "#556b2f", "#c8102e", "#3b6ea5", "#8a7a4f", "#5c6470"]
 BOX_INTERVALS = [0, 1, 3, 7, 16, 35, 90]  # days until due again, by box after "Got it"
 MASTERED_BOX = 4                          # survived a 7-day gap → counts as mastered
 SESSION_LIMIT = 50                        # most cards in one study session

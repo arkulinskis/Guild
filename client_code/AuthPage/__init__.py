@@ -13,7 +13,7 @@ class AuthPage(AuthPageTemplate):
         self.add_event_handler("show", self._on_show)
 
     def _on_show(self, **event_args):
-        qb_ui.mount(self, "auth", {"app_name": qb_ui.APP_NAME, "google": qb_ui.GOOGLE_LOGIN}, self._on_event)
+        qb_ui.mount(self, "auth", {"app_name": qb_ui.APP_NAME, "logo_url": qb_ui.LOGO_URL, "google": qb_ui.GOOGLE_LOGIN}, self._on_event)
 
     def _on_event(self, event, p):
         try:

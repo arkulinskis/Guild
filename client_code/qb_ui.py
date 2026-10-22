@@ -6,7 +6,9 @@ import datetime
 import anvil.js
 from anvil.js import window
 
-APP_NAME = "Quizbook"
+APP_NAME = "CAF Guide"
+# The app logo uploaded in Anvil (Theme → Assets); shown in the header and on the sign-in page.
+LOGO_URL = "_/theme/8ff385ff-2cd5-4868-9642-6374157bd844.jpg"
 # Show a "Continue with Google" button (also needs Google enabled in the Users service).
 GOOGLE_LOGIN = False
 

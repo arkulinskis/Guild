@@ -33,7 +33,7 @@ class Main(MainTemplate):
     def _on_show(self, **event_args):
         if self.header is not None:
             return
-        self.header = qb_ui.mount(self, "header", {"app_name": qb_ui.APP_NAME}, self._on_header_event)
+        self.header = qb_ui.mount(self, "header", {"app_name": qb_ui.APP_NAME, "logo_url": qb_ui.LOGO_URL}, self._on_header_event)
         if anvil.users.get_user():
             self.signed_in()
         else:
