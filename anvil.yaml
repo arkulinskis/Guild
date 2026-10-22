@@ -931,19 +931,27 @@ native_deps:
     theme\" data-t=\"' + t + '\" class=\"' + (t === theme ? 'on' : '') + '\">' + t[0].toUpperCase() + t.slice(1) + '</button>';\n\
     \            }).join('') + '</div></div>' +\n            '<div class=\"row\"><span class=\"spacer\"></span><button class=\"\
     btn primary\" type=\"submit\"' + (S.saving ? ' disabled' : '') + '>' + (S.saving ? '<span class=\"spin\"></span> Saving'\
-    \ : 'Save changes') + '</button></div>' +\n          '</form>' +\n          (me.is_admin ? '<section class=\"card pad\
-    \ stack\"><h2>Import learning modules</h2>' +\n            '<p class=\"muted small\">Choose one or more module files (the\
-    \ <code>modules/*.json</code> files). Each part is imported on its own, so large modules are fine. Importing a module\
-    \ again updates it and keeps everyone\\'s progress on unchanged cards.</p>' +\n            '<div class=\"row\"><input\
-    \ type=\"file\" data-el=\"files\" accept=\".json,application/json\" multiple><span class=\"spacer\"></span><button class=\"\
-    btn primary\" data-action=\"import_files\">Import selected files</button></div>' +\n            '<details><summary class=\"\
-    small\">Or paste JSON</summary><div class=\"stack\" style=\"margin-top:10px\">' +\n              '<textarea class=\"code\"\
-    \ data-el=\"json\" placeholder=\\'{\"collection\": \"My module\", \"title\": \"Part 1\", \"questions\": [{\"question\"\
-    : \"...\", \"answer\": \"...\", \"explanation\": \"...\", \"concept\": \"...\"}]}\\'></textarea>' +\n              '<div\
-    \ class=\"row\"><button class=\"btn\" data-action=\"seed\">Load 27 sample cards</button><span class=\"spacer\"></span><button\
-    \ class=\"btn\" data-action=\"import\">Import pasted JSON</button></div>' +\n            '</div></details>' +\n      \
-    \      '<div data-el=\"adminMsg\"></div></section>' : '') +\n        '</div></div>' +\n\n        '<section class=\"card\
-    \ pad\"><h2>Recent sessions</h2>' + (hist.length ? '<table><thead><tr><th>Studied</th><th class=\"hide-sm\">Date</th><th\
+    \ : 'Save changes') + '</button></div>' +\n          '</form>' +\n          '<form class=\"card pad stack\" data-el=\"\
+    pwForm\" style=\"margin-top:16px\"><h2>Change password</h2>' +\n            '<div><label class=\"f\" for=\"qbPwOld\">Current\
+    \ password</label><input type=\"password\" id=\"qbPwOld\" name=\"old\" autocomplete=\"current-password\" required></div>'\
+    \ +\n            '<div><label class=\"f\" for=\"qbPwNew\">New password</label><input type=\"password\" id=\"qbPwNew\"\
+    \ name=\"new\" autocomplete=\"new-password\" required></div>' +\n            '<div><label class=\"f\" for=\"qbPwNew2\"\
+    >Repeat new password</label><input type=\"password\" id=\"qbPwNew2\" name=\"new2\" autocomplete=\"new-password\" required></div>'\
+    \ +\n            '<div class=\"row\"><button class=\"btn\" type=\"button\" data-action=\"pw_reset\">Forgot it? Email me\
+    \ a link</button><span class=\"spacer\"></span><button class=\"btn primary\" type=\"submit\">Change password</button></div>'\
+    \ +\n            '<div data-el=\"pwMsg\"></div>' +\n          '</form>' +\n          (me.is_admin ? '<section class=\"\
+    card pad stack\"><h2>Import learning modules</h2>' +\n            '<p class=\"muted small\">Choose one or more module\
+    \ files (the <code>modules/*.json</code> files). Each part is imported on its own, so large modules are fine. Importing\
+    \ a module again updates it and keeps everyone\\'s progress on unchanged cards.</p>' +\n            '<div class=\"row\"\
+    ><input type=\"file\" data-el=\"files\" accept=\".json,application/json\" multiple><span class=\"spacer\"></span><button\
+    \ class=\"btn primary\" data-action=\"import_files\">Import selected files</button></div>' +\n            '<details><summary\
+    \ class=\"small\">Or paste JSON</summary><div class=\"stack\" style=\"margin-top:10px\">' +\n              '<textarea\
+    \ class=\"code\" data-el=\"json\" placeholder=\\'{\"collection\": \"My module\", \"title\": \"Part 1\", \"questions\"\
+    : [{\"question\": \"...\", \"answer\": \"...\", \"explanation\": \"...\", \"concept\": \"...\"}]}\\'></textarea>' +\n\
+    \              '<div class=\"row\"><button class=\"btn\" data-action=\"seed\">Load 27 sample cards</button><span class=\"\
+    spacer\"></span><button class=\"btn\" data-action=\"import\">Import pasted JSON</button></div>' +\n            '</div></details>'\
+    \ +\n            '<div data-el=\"adminMsg\"></div></section>' : '') +\n        '</div></div>' +\n\n        '<section class=\"\
+    card pad\"><h2>Recent sessions</h2>' + (hist.length ? '<table><thead><tr><th>Studied</th><th class=\"hide-sm\">Date</th><th\
     \ style=\"text-align:right\">Cards</th></tr></thead><tbody>' +\n          hist.map(function (h) {\n            return\
     \ '<tr class=\"click\" data-action=\"' + (h.quiz_id ? 'quiz' : h.collection_id ? 'col' : 'review') + '\" data-id=\"' +\
     \ esc(h.quiz_id || h.collection_id || '') + '\"><td><strong>' + esc(h.title) + '</strong><div class=\"muted small\">'\
@@ -952,16 +960,29 @@ native_deps:
     \ ' + (h.again ? '<span class=\"badge warn\">' + h.again + ' still learning</span>' : '<span class=\"badge good\">all\
     \ got it</span>') + '</td></tr>';\n          }).join('') + '</tbody></table>' : '<p class=\"muted\">You haven\\'t studied\
     \ any cards yet.</p>') + '</section>' +\n        '</div>';\n      root.querySelector('[data-el=form]').onsubmit = save;\n\
-    \    }\n\n    function tile(v, k) { return '<div><div class=\"v\">' + v + '</div><div class=\"k\">' + k + '</div></div>';\
-    \ }\n\n    function save(e) {\n      e.preventDefault();\n      var f = e.target;\n      var payload = { display_name:\
-    \ f.display_name.value.trim(), bio: f.bio.value.trim(), avatar_color: S.color };\n      S.saving = true;\n      var btn\
-    \ = f.querySelector('button[type=submit]');\n      btn.disabled = true; btn.innerHTML = '<span class=\"spin\"></span>\
-    \ Saving';\n      emit('save', payload).then(function (res) {\n        S.saving = false;\n        if (res && res.ok) {\
-    \ me = Object.assign(me, res.me || payload); render(); QB.toast('Profile saved'); }\n        else { btn.disabled = false;\
-    \ btn.textContent = 'Save changes'; QB.toast((res && res.error) || 'Could not save', true); }\n      }, function (err)\
-    \ { S.saving = false; btn.disabled = false; btn.textContent = 'Save changes'; QB.toast(String(err && err.message || err),\
-    \ true); });\n    }\n\n    function admin(event, payload) {\n      var box = root.querySelector('[data-el=adminMsg]');\n\
-    \      box.innerHTML = '<p class=\"muted small\"><span class=\"spin\"></span> Working…</p>';\n      emit(event, payload).then(function\
+    \      root.querySelector('[data-el=pwForm]').onsubmit = changePassword;\n    }\n\n    function tile(v, k) { return '<div><div\
+    \ class=\"v\">' + v + '</div><div class=\"k\">' + k + '</div></div>'; }\n\n    function save(e) {\n      e.preventDefault();\n\
+    \      var f = e.target;\n      var payload = { display_name: f.display_name.value.trim(), bio: f.bio.value.trim(), avatar_color:\
+    \ S.color };\n      S.saving = true;\n      var btn = f.querySelector('button[type=submit]');\n      btn.disabled = true;\
+    \ btn.innerHTML = '<span class=\"spin\"></span> Saving';\n      emit('save', payload).then(function (res) {\n        S.saving\
+    \ = false;\n        if (res && res.ok) { me = Object.assign(me, res.me || payload); render(); QB.toast('Profile saved');\
+    \ }\n        else { btn.disabled = false; btn.textContent = 'Save changes'; QB.toast((res && res.error) || 'Could not\
+    \ save', true); }\n      }, function (err) { S.saving = false; btn.disabled = false; btn.textContent = 'Save changes';\
+    \ QB.toast(String(err && err.message || err), true); });\n    }\n\n    function pwMsg(ok, text) {\n      root.querySelector('[data-el=pwMsg]').innerHTML\
+    \ = text ? '<div class=\"feedback ' + (ok ? 'good' : 'bad') + '\">' + esc(text) + '</div>' : '';\n    }\n\n    function\
+    \ changePassword(e) {\n      e.preventDefault();\n      var f = e.target;\n      if (f.new.value !== f.new2.value) { pwMsg(false,\
+    \ \"The new passwords don't match.\"); return; }\n      if (f.new.value === f.old.value) { pwMsg(false, 'The new password\
+    \ is the same as the current one.'); return; }\n      var btn = f.querySelector('button[type=submit]');\n      btn.disabled\
+    \ = true; btn.innerHTML = '<span class=\"spin\"></span> Changing';\n      pwMsg(true, '');\n      function done() { btn.disabled\
+    \ = false; btn.textContent = 'Change password'; }\n      emit('change_password', { old: f.old.value, new: f.new.value\
+    \ }).then(function (res) {\n        done();\n        if (res && res.ok) { f.reset(); pwMsg(true, 'Password changed. Use\
+    \ the new one next time you sign in.'); QB.toast('Password changed'); }\n        else pwMsg(false, (res && res.error)\
+    \ || 'Could not change the password.');\n      }, function (err) { done(); pwMsg(false, String(err && err.message || err));\
+    \ });\n    }\n\n    function resetEmail(btn) {\n      btn.disabled = true;\n      emit('reset_email', {}).then(function\
+    \ (res) {\n        btn.disabled = false;\n        pwMsg(!!(res && res.ok), (res && (res.message || res.error)) || 'Could\
+    \ not send the email.');\n      }, function (err) { btn.disabled = false; pwMsg(false, String(err && err.message || err));\
+    \ });\n    }\n\n    function admin(event, payload) {\n      var box = root.querySelector('[data-el=adminMsg]');\n    \
+    \  box.innerHTML = '<p class=\"muted small\"><span class=\"spin\"></span> Working…</p>';\n      emit(event, payload).then(function\
     \ (res) {\n        res = res || {};\n        box.innerHTML = '<div class=\"feedback ' + (res.ok ? 'good' : 'bad') + '\"\
     >' + esc(res.ok ? res.message : res.error) + '</div>';\n      }, function (err) { box.innerHTML = '<div class=\"feedback\
     \ bad\">' + esc(String(err && err.message || err)) + '</div>'; });\n    }\n\n    // Import module files one part at a\
@@ -995,7 +1016,7 @@ native_deps:
     \ emit('open_review', {});\n      else if (a === 'signout') emit('signout', {});\n      else if (a === 'import') admin('import_json',\
     \ { text: root.querySelector('[data-el=json]').value });\n      else if (a === 'import_files') importFiles();\n      else\
     \ if (a === 'col') emit('open_collection', { id: el.dataset.id });\n      else if (a === 'seed') admin('seed_demo', {});\n\
-    \    });\n\n    render();\n    return {};\n  });\n})();\n</script>\n"
+    \      else if (a === 'pw_reset') resetEmail(el);\n    });\n\n    render();\n    return {};\n  });\n})();\n</script>\n"
 package_name: CAF_Guide
 runtime_options:
   client_version: '3'

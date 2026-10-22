@@ -2,6 +2,7 @@
 from ._anvil_designer import ProfilePageTemplate
 from anvil import *
 import anvil.server
+import anvil.users
 
 from .. import qb_ui
 
@@ -34,3 +35,23 @@ class ProfilePage(ProfilePageTemplate):
             return anvil.server.call("import_quiz_json", p.get("text", ""))
         elif event == "seed_demo":
             return anvil.server.call("seed_demo")
+        elif event == "change_password":
+            return self._change_password(p.get("old", ""), p.get("new", ""))
+        elif event == "reset_email":
+            email = self.data["me"]["email"]
+            try:
+                anvil.users.send_password_reset_email(email)
+            except anvil.users.AuthenticationFailed:
+                return {"ok": False, "error": "Could not send a reset email for this account."}
+            return {"ok": True, "message": "A reset link is on its way to " + email + "."}
+
+    def _change_password(self, old, new):
+        try:
+            anvil.users.reset_password(old, new)
+        except anvil.users.TooManyPasswordFailures:
+            return {"ok": False, "error": "Too many wrong attempts. Wait a while, or email yourself a reset link."}
+        except anvil.users.PasswordNotAcceptable as e:
+            return {"ok": False, "error": str(e) or "Please choose a stronger password."}
+        except anvil.users.AuthenticationFailed:
+            return {"ok": False, "error": "Your current password is not right."}
+        return {"ok": True}
