@@ -7,12 +7,13 @@ from anvil import *
 import anvil.server
 import anvil.users
 
-from .. import qb_ui
+from .. import qb_ui, legal
 from ..AuthPage import AuthPage
 from ..HomePage import HomePage
 from ..CollectionPage import CollectionPage
 from ..QuizPage import QuizPage
 from ..ProfilePage import ProfilePage
+from ..CurriculumPage import CurriculumPage
 
 PAGES = {
     "auth": AuthPage,
@@ -20,6 +21,7 @@ PAGES = {
     "collection": CollectionPage,
     "quiz": QuizPage,
     "profile": ProfilePage,
+    "curriculum": CurriculumPage,  # admins only
 }
 
 
@@ -43,6 +45,8 @@ class Main(MainTemplate):
     def go(self, page, **kwargs):
         if page != "auth" and not (anvil.users.get_user() or qb_ui.GUEST[0]):
             page, kwargs = "auth", {}
+        if page == "curriculum" and not (self.me and self.me.get("is_admin")):
+            page, kwargs = "home", {}
         self.clear()
         self.add_component(PAGES[page](**kwargs))
         self.header.setActive(page)
@@ -66,6 +70,7 @@ class Main(MainTemplate):
         qb_ui.pending_name(clear=True)
         self.refresh_user(self.me)
         self.go("home")
+        legal.refresh_soon()  # Privacy & Terms: records the sign-up tick, or reminds people to review
 
     def refresh_user(self, me=None):
         self.me = me or qb_ui.call("get_me", qb_ui.today())
@@ -77,6 +82,7 @@ class Main(MainTemplate):
             qb_ui.GUEST[0] = False
         else:
             anvil.users.logout()
+        legal.signed_out()
         self.me = None
         self.header.setUser(None)
         self.go("auth")

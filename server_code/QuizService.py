@@ -298,14 +298,20 @@ def _session_dict(row):
     col = quiz["collection"] if quiz else None
     title = quiz["title"] if quiz else "Daily review"
     module = row["ratings"].get("module") if isinstance(row["ratings"], dict) else None
+    removed = row["ratings"].get("removed") if isinstance(row["ratings"], dict) else None
+    col_title = None
     if quiz is None and module:
         col = app_tables.collections.get_by_id(module)
         title = "Whole module" if col else title
+        if col is None:
+            title, col_title = "Whole module", "Removed module"
+    if quiz is None and removed:  # its part was deleted by an admin
+        title, col_title = removed.get("title") or "Removed part", removed.get("module") or "Removed module"
     return {
         "quiz_id": quiz.get_id() if quiz else None,
         "collection_id": col.get_id() if (col and module) else None,
         "title": title,
-        "collection_title": col["title"] if col else "All collections",
+        "collection_title": col_title or (col["title"] if col else "All collections"),
         "finished": _iso(row["finished"]),
         "reviewed": row["reviewed"] or 0, "got": row["got"] or 0, "again": row["again"] or 0,
     }
@@ -440,6 +446,7 @@ def _get_study(user, quiz_id=None, scope="due", today=None, collection_id=None):
         live = {q.get_id() for q in quizzes}
         cards = [s["question"] for s in states.values()
                  if s["quiz"] is not None and s["quiz"].get_id() in live and (s["due"] is None or s["due"] <= today)]
+        cards = [q for q in cards if q is not None]  # a guest's card may have been deleted by an admin
         info = {"id": None, "title": "Daily review", "description": "Due cards from all your modules.",
                 "collection_id": None, "collection_title": "Home"}
 
@@ -764,3 +771,256 @@ def import_quiz_json(text):
 def seed_demo():
     _require_admin()
     return {"ok": True, "message": _import_items(DEMO_QUIZZES)}
+
+
+# ---------------------------------------------------------------- admin: managing the curriculum
+# Profile → Manage curriculum (admins only): browse every module (hidden ones too), preview its cards,
+# edit or delete modules, parts and cards in place, and download modules as importable JSON.
+# Edits keep the same rows, so learners keep their progress on edited cards.
+def _num(value):
+    """A position as an int when it is a whole number (Anvil may hand back 3.0)."""
+    return int(value) if isinstance(value, float) and value.is_integer() else value
+
+
+def _admin_part(qz):
+    return {"id": qz.get_id(), "number": _num(qz["position"]) or 0, "title": qz["title"],
+            "description": qz["description"] or "", "source": qz["source"] or "",
+            "published": bool(qz["published"]), "card_count": qz["card_count"] or 0}
+
+
+def _admin_module(col, parts):
+    return {"id": col.get_id(), "number": _num(col["position"]) or 0, "title": col["title"],
+            "description": col["description"] or "", "kind": col["kind"] or "",
+            "color": col["color"] or COLLECTION_COLORS[0], "published": bool(col["published"]),
+            "card_count": sum(p["card_count"] for p in parts), "parts": parts}
+
+
+def _admin_card(q):
+    return {"id": q.get_id(), "number": _num(q["position"]) or 0, "question": q["text"], "answer": q["answer"] or "",
+            "explanation": q["explanation"] or "", "concept": q["concept"] or ""}
+
+
+def _module_parts(col):
+    return list(app_tables.quizzes.search(tables.order_by("position"), collection=col))
+
+
+def _field(fields, key, label, limit, required=False):
+    value = str(fields.get(key) or "").strip()
+    if required and not value:
+        raise ValueError("%s can't be empty." % label)
+    if len(value) > limit:
+        raise ValueError("%s is too long (%d characters at most)." % (label, limit))
+    return value
+
+
+def _position(fields, label):
+    try:
+        n = int(str(fields.get("number")).strip())
+    except (TypeError, ValueError):
+        raise ValueError("%s number must be a whole number." % label)
+    if not 0 <= n <= 9999:
+        raise ValueError("%s number must be between 0 and 9999." % label)
+    return n
+
+
+def _admin_call(fn, *args):
+    _require_admin()
+    try:
+        return dict(fn(*args), ok=True)
+    except ValueError as e:
+        return {"ok": False, "error": str(e)}
+
+
+def _delete_all(rows):
+    """Delete every row of a search (one call on Anvil, row by row elsewhere)."""
+    delete_all = getattr(rows, "delete_all_rows", None)
+    if delete_all:
+        delete_all()
+    else:
+        for r in list(rows):
+            r.delete()
+
+
+def _recount(qz):
+    n = len(app_tables.questions.search(quiz=qz))
+    qz.update(card_count=n)
+    return n
+
+
+@anvil.server.callable(require_user=True)
+def admin_curriculum():
+    """Every module with its parts (no cards, to keep it light), hidden ones included."""
+    _require_admin()
+    by_col = {}
+    for qz in app_tables.quizzes.search(tables.order_by("position")):
+        if qz["collection"] is not None:
+            by_col.setdefault(qz["collection"].get_id(), []).append(_admin_part(qz))
+    return {"modules": [_admin_module(col, by_col.get(col.get_id(), []))
+                        for col in app_tables.collections.search(tables.order_by("position"))],
+            "colors": COLLECTION_COLORS}
+
+
+def _part_cards(quiz_id):
+    qz = app_tables.quizzes.get_by_id(quiz_id) if quiz_id else None
+    if qz is None:
+        raise ValueError("That part was not found. It may have been deleted.")
+    return {"cards": [_admin_card(q) for q in app_tables.questions.search(tables.order_by("position"), quiz=qz)]}
+
+
+@anvil.server.callable(require_user=True)
+def admin_part_cards(quiz_id):
+    return _admin_call(_part_cards, quiz_id)
+
+
+def _save_module(collection_id, fields):
+    col = app_tables.collections.get_by_id(collection_id) if collection_id else None
+    if col is None:
+        raise ValueError("That module was not found. It may have been deleted.")
+    title = _field(fields, "title", "The module title", 200, required=True)
+    if any(c != col for c in app_tables.collections.search(title=title)):
+        raise ValueError("Another module is already called that. Module titles must be unique, "
+                         "because importing a file matches modules by title.")
+    color = str(fields.get("color") or "").strip()
+    if not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
+        raise ValueError("The colour must look like #2e4a70.")
+    number = _position(fields, "The module")
+    changes = dict(title=title, description=_field(fields, "description", "The description", 2000),
+                   color=color, position=number, published=bool(fields.get("published")))
+    if re.fullmatch(r"Module \d+", col["kind"] or ""):  # keep the "Module N" label in step with the number
+        changes["kind"] = "Module %d" % number
+    col.update(**changes)
+    return {"module": _admin_module(col, [_admin_part(q) for q in _module_parts(col)])}
+
+
+@anvil.server.callable(require_user=True)
+def admin_save_module(collection_id, fields):
+    return _admin_call(_save_module, collection_id, fields or {})
+
+
+def _save_part(quiz_id, fields):
+    qz = app_tables.quizzes.get_by_id(quiz_id) if quiz_id else None
+    if qz is None:
+        raise ValueError("That part was not found. It may have been deleted.")
+    title = _field(fields, "title", "The part title", 200, required=True)
+    if any(q != qz for q in app_tables.quizzes.search(collection=qz["collection"], title=title)):
+        raise ValueError("This module already has a part called that. Part titles must be unique within a module.")
+    source = _field(fields, "source", "The source link", 1000)
+    qz.update(title=title, description=_field(fields, "description", "The description", 2000),
+              source=source or "import", position=_position(fields, "The part"),
+              published=bool(fields.get("published")))
+    return {"part": _admin_part(qz)}
+
+
+@anvil.server.callable(require_user=True)
+def admin_save_part(quiz_id, fields):
+    return _admin_call(_save_part, quiz_id, fields or {})
+
+
+def _save_card(quiz_id, card_id, fields):
+    """Edit a card (card_id given) or add one to the end of a part."""
+    qz = app_tables.quizzes.get_by_id(quiz_id) if quiz_id else None
+    if qz is None:
+        raise ValueError("That part was not found. It may have been deleted.")
+    card = app_tables.questions.get_by_id(card_id) if card_id else None
+    if card_id and (card is None or card["quiz"] != qz):
+        raise ValueError("That card was not found. It may have been deleted.")
+    values = dict(text=_field(fields, "question", "The question", 2000, required=True),
+                  answer=_field(fields, "answer", "The answer", 2000, required=True),
+                  explanation=_field(fields, "explanation", "The explanation", 4000),
+                  concept=_field(fields, "concept", "The concept", 200))
+    if any(q != card for q in app_tables.questions.search(quiz=qz, text=values["text"])):
+        raise ValueError("This part already has a card with exactly that question.")
+    if card is None:
+        last = max([q["position"] or 0 for q in app_tables.questions.search(quiz=qz)] or [0])
+        card = app_tables.questions.add_row(quiz=qz, position=_num(last) + 1, **values)
+    else:
+        card.update(**values)
+    return {"card": _admin_card(card), "card_count": _recount(qz)}
+
+
+@anvil.server.callable(require_user=True)
+def admin_save_card(quiz_id, card_id, fields):
+    return _admin_call(_save_card, quiz_id, card_id, fields or {})
+
+
+def _delete_part_rows(qz):
+    """Remove a part, its cards and everyone's progress on them. Study history stays, labelled by title."""
+    col = qz["collection"]
+    removed = {"title": qz["title"], "module": col["title"] if col else ""}
+    for s in app_tables.sessions.search(quiz=qz):
+        old = s["ratings"]
+        s.update(quiz=None, ratings={"removed": removed, "ratings": old if isinstance(old, list) else []})
+    _delete_all(app_tables.card_state.search(quiz=qz))
+    _delete_all(app_tables.questions.search(quiz=qz))
+    qz.delete()
+
+
+@tables.in_transaction
+def _delete(kind, item_id):
+    if kind == "card":
+        card = app_tables.questions.get_by_id(item_id) if item_id else None
+        if card is None:
+            raise ValueError("That card was not found. It may already be deleted.")
+        qz = card["quiz"]
+        _delete_all(app_tables.card_state.search(question=card))
+        card.delete()
+        return {"message": "Card deleted.", "card_count": _recount(qz) if qz else 0}
+    if kind == "part":
+        qz = app_tables.quizzes.get_by_id(item_id) if item_id else None
+        if qz is None:
+            raise ValueError("That part was not found. It may already be deleted.")
+        title = qz["title"]
+        _delete_part_rows(qz)
+        return {"message": 'Deleted the part "%s".' % title}
+    if kind == "module":
+        col = app_tables.collections.get_by_id(item_id) if item_id else None
+        if col is None:
+            raise ValueError("That module was not found. It may already be deleted.")
+        title = col["title"]
+        for qz in _module_parts(col):
+            _delete_part_rows(qz)
+        col.delete()
+        return {"message": 'Deleted the module "%s".' % title}
+    raise ValueError("Unknown kind of item: %s" % kind)
+
+
+@anvil.server.callable(require_user=True)
+def admin_delete(kind, item_id):
+    return _admin_call(_delete, kind, item_id)
+
+
+def _export_part(col, qz, cards):
+    item = {"collection": col["title"], "collection_description": col["description"] or "",
+            "collection_position": _num(col["position"]), "kind": col["kind"] or "", "color": col["color"] or "",
+            "title": qz["title"], "description": qz["description"] or "", "position": _num(qz["position"]),
+            "source": qz["source"] or ""}
+    if qz["difficulty"]:
+        item["difficulty"] = qz["difficulty"]
+    item["questions"] = [{"question": q["text"], "answer": q["answer"] or "", "explanation": q["explanation"] or "",
+                          "concept": q["concept"] or ""}
+                         for q in sorted(cards, key=lambda q: q["position"] or 0)]
+    return item
+
+
+def _export(collection_id=None):
+    """Modules as the same JSON as modules/*.json, so the file can be imported again."""
+    if collection_id:
+        col = app_tables.collections.get_by_id(collection_id)
+        if col is None:
+            raise ValueError("That module was not found. It may have been deleted.")
+        items = [_export_part(col, qz, list(app_tables.questions.search(quiz=qz))) for qz in _module_parts(col)]
+        slug = re.sub(r"[^A-Za-z0-9]+", "-", col["title"]).strip("-") or "module"
+        return {"items": items, "filename": "%02d-%s.json" % (_num(col["position"]) or 0, slug)}
+    by_quiz = {}
+    for q in app_tables.questions.search():
+        if q["quiz"] is not None:
+            by_quiz.setdefault(q["quiz"].get_id(), []).append(q)
+    items = []
+    for col in app_tables.collections.search(tables.order_by("position")):
+        items += [_export_part(col, qz, by_quiz.get(qz.get_id(), [])) for qz in _module_parts(col)]
+    return {"items": items, "filename": "caf-guide-curriculum-%s.json" % _now().date().isoformat()}
+
+
+@anvil.server.callable(require_user=True)
+def admin_export(collection_id=None):
+    return _admin_call(_export, collection_id)
