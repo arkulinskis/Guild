@@ -27,6 +27,8 @@ class ProfilePage(ProfilePageTemplate):
             return {"ok": False, "error": "Create an account to use this."}
         if event == "open_quiz":
             get_open_form().go("quiz", quiz_id=p["id"])
+        elif event == "open_curriculum":
+            get_open_form().go("curriculum")
         elif event == "open_collection":
             get_open_form().go("collection", collection_id=p["id"])
         elif event == "open_review":

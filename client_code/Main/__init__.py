@@ -13,6 +13,7 @@ from ..HomePage import HomePage
 from ..CollectionPage import CollectionPage
 from ..QuizPage import QuizPage
 from ..ProfilePage import ProfilePage
+from ..CurriculumPage import CurriculumPage
 
 PAGES = {
     "auth": AuthPage,
@@ -20,6 +21,7 @@ PAGES = {
     "collection": CollectionPage,
     "quiz": QuizPage,
     "profile": ProfilePage,
+    "curriculum": CurriculumPage,  # admins only
 }
 
 
@@ -43,6 +45,8 @@ class Main(MainTemplate):
     def go(self, page, **kwargs):
         if page != "auth" and not (anvil.users.get_user() or qb_ui.GUEST[0]):
             page, kwargs = "auth", {}
+        if page == "curriculum" and not (self.me and self.me.get("is_admin")):
+            page, kwargs = "home", {}
         self.clear()
         self.add_component(PAGES[page](**kwargs))
         self.header.setActive(page)
