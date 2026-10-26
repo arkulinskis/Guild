@@ -7,7 +7,7 @@ from anvil import *
 import anvil.server
 import anvil.users
 
-from .. import qb_ui
+from .. import qb_ui, legal
 from ..AuthPage import AuthPage
 from ..HomePage import HomePage
 from ..CollectionPage import CollectionPage
@@ -70,6 +70,7 @@ class Main(MainTemplate):
         qb_ui.pending_name(clear=True)
         self.refresh_user(self.me)
         self.go("home")
+        legal.refresh_soon()  # Privacy & Terms: records the sign-up tick, or reminds people to review
 
     def refresh_user(self, me=None):
         self.me = me or qb_ui.call("get_me", qb_ui.today())
@@ -81,6 +82,7 @@ class Main(MainTemplate):
             qb_ui.GUEST[0] = False
         else:
             anvil.users.logout()
+        legal.signed_out()
         self.me = None
         self.header.setUser(None)
         self.go("auth")
