@@ -1106,22 +1106,25 @@ native_deps:
     \ +\n            '<div class=\"row\"><button class=\"btn\" type=\"button\" data-action=\"pw_reset\">Forgot it? Email me\
     \ a link</button><span class=\"spacer\"></span><button class=\"btn primary\" type=\"submit\">Change password</button></div>'\
     \ +\n            '<div data-el=\"pwMsg\"></div>' +\n          '</form>') +\n          (me.is_admin ? '<section class=\"\
-    card pad stack\"><h2>Import learning modules</h2>' +\n            '<p class=\"muted small\">Choose one or more module\
-    \ files (the <code>modules/*.json</code> files). Each part is imported on its own, so large modules are fine. Importing\
-    \ a module again updates it and keeps everyone\\'s progress on unchanged cards.</p>' +\n            '<div class=\"row\"\
-    ><input type=\"file\" data-el=\"files\" accept=\".json,application/json\" multiple><span class=\"spacer\"></span><button\
-    \ class=\"btn primary\" data-action=\"import_files\">Import selected files</button></div>' +\n            '<details><summary\
-    \ class=\"small\">Or paste JSON</summary><div class=\"stack\" style=\"margin-top:10px\">' +\n              '<textarea\
-    \ class=\"code\" data-el=\"json\" placeholder=\\'{\"collection\": \"My module\", \"title\": \"Part 1\", \"questions\"\
-    : [{\"question\": \"...\", \"answer\": \"...\", \"explanation\": \"...\", \"concept\": \"...\"}]}\\'></textarea>' +\n\
-    \              '<div class=\"row\"><button class=\"btn\" data-action=\"seed\">Load 27 sample cards</button><span class=\"\
-    spacer\"></span><button class=\"btn\" data-action=\"import\">Import pasted JSON</button></div>' +\n            '</div></details>'\
-    \ +\n            '<div data-el=\"adminMsg\"></div></section>' : '') +\n        '</div></div>' +\n\n        '<section class=\"\
-    card pad\"><h2>Recent sessions</h2>' + (hist.length ? '<table><thead><tr><th>Studied</th><th class=\"hide-sm\">Date</th><th\
-    \ style=\"text-align:right\">Cards</th></tr></thead><tbody>' +\n          hist.map(function (h) {\n            return\
-    \ '<tr class=\"click\" data-action=\"' + (h.quiz_id ? 'quiz' : h.collection_id ? 'col' : 'review') + '\" data-id=\"' +\
-    \ esc(h.quiz_id || h.collection_id || '') + '\"><td><strong>' + esc(h.title) + '</strong><div class=\"muted small\">'\
-    \ + esc(h.collection_title) + '</div></td>' +\n              '<td class=\"hide-sm muted\">' + esc(QB.fmtDate(h.finished))\
+    card pad stack\"><h2>Manage curriculum</h2>' +\n            '<p class=\"muted small\">Preview, edit or delete modules,\
+    \ parts and cards after they were imported, and download them as JSON.</p>' +\n            '<div class=\"row\"><span class=\"\
+    spacer\"></span><button class=\"btn primary\" data-action=\"curriculum\">Manage curriculum</button></div></section>' :\
+    \ '') +\n          (me.is_admin ? '<section class=\"card pad stack\"><h2>Import learning modules</h2>' +\n           \
+    \ '<p class=\"muted small\">Choose one or more module files (the <code>modules/*.json</code> files). Each part is imported\
+    \ on its own, so large modules are fine. Importing a module again updates it and keeps everyone\\'s progress on unchanged\
+    \ cards.</p>' +\n            '<div class=\"row\"><input type=\"file\" data-el=\"files\" accept=\".json,application/json\"\
+    \ multiple><span class=\"spacer\"></span><button class=\"btn primary\" data-action=\"import_files\">Import selected files</button></div>'\
+    \ +\n            '<details><summary class=\"small\">Or paste JSON</summary><div class=\"stack\" style=\"margin-top:10px\"\
+    >' +\n              '<textarea class=\"code\" data-el=\"json\" placeholder=\\'{\"collection\": \"My module\", \"title\"\
+    : \"Part 1\", \"questions\": [{\"question\": \"...\", \"answer\": \"...\", \"explanation\": \"...\", \"concept\": \"...\"\
+    }]}\\'></textarea>' +\n              '<div class=\"row\"><button class=\"btn\" data-action=\"seed\">Load 27 sample cards</button><span\
+    \ class=\"spacer\"></span><button class=\"btn\" data-action=\"import\">Import pasted JSON</button></div>' +\n        \
+    \    '</div></details>' +\n            '<div data-el=\"adminMsg\"></div></section>' : '') +\n        '</div></div>' +\n\
+    \n        '<section class=\"card pad\"><h2>Recent sessions</h2>' + (hist.length ? '<table><thead><tr><th>Studied</th><th\
+    \ class=\"hide-sm\">Date</th><th style=\"text-align:right\">Cards</th></tr></thead><tbody>' +\n          hist.map(function\
+    \ (h) {\n            return '<tr class=\"click\" data-action=\"' + (h.quiz_id ? 'quiz' : h.collection_id ? 'col' : 'review')\
+    \ + '\" data-id=\"' + esc(h.quiz_id || h.collection_id || '') + '\"><td><strong>' + esc(h.title) + '</strong><div class=\"\
+    muted small\">' + esc(h.collection_title) + '</div></td>' +\n              '<td class=\"hide-sm muted\">' + esc(QB.fmtDate(h.finished))\
     \ + '</td>' +\n              '<td style=\"text-align:right\"><span class=\"badge\">' + h.reviewed + ' reviewed</span>\
     \ ' + (h.again ? '<span class=\"badge warn\">' + h.again + ' still learning</span>' : '<span class=\"badge good\">all\
     \ got it</span>') + '</td></tr>';\n          }).join('') + '</tbody></table>' : '<p class=\"muted\">You haven\\'t studied\
@@ -1182,7 +1185,230 @@ native_deps:
     \ emit('open_review', {});\n      else if (a === 'signout') emit('signout', {});\n      else if (a === 'import') admin('import_json',\
     \ { text: root.querySelector('[data-el=json]').value });\n      else if (a === 'import_files') importFiles();\n      else\
     \ if (a === 'col') emit('open_collection', { id: el.dataset.id });\n      else if (a === 'seed') admin('seed_demo', {});\n\
-    \      else if (a === 'pw_reset') resetEmail(el);\n    });\n\n    render();\n    return {};\n  });\n})();\n</script>\n"
+    \      else if (a === 'curriculum') emit('open_curriculum', {});\n      else if (a === 'pw_reset') resetEmail(el);\n \
+    \   });\n\n    render();\n    return {};\n  });\n})();\n</script>\n\n<!-- ===== CurriculumPage component ===== -->\n<style>\n\
+    .qb-cur .head { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-bottom: 14px; }\n.qb-cur .head h1\
+    \ { margin: 0 0 4px; }\n.qb-cur .tools { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; }\n.qb-cur\
+    \ .tools input { max-width: 360px; }\n.qb-cur .list { display: grid; gap: 10px; }\n.qb-cur .mod { padding: 0; overflow:\
+    \ hidden; border-left: 4px solid var(--c, var(--qb-accent)); }\n.qb-cur .mhead, .qb-cur .phead { display: flex; gap: 10px;\
+    \ align-items: center; flex-wrap: wrap; padding: 12px 16px; }\n.qb-cur .tog { all: unset; cursor: pointer; display: flex;\
+    \ gap: 12px; align-items: center; flex: 1; min-width: 200px; }\n.qb-cur .tog:focus-visible { outline: 2px solid var(--qb-accent);\
+    \ outline-offset: 2px; border-radius: 6px; }\n.qb-cur .tog .chev { color: var(--qb-muted); width: 12px; flex: none; transition:\
+    \ transform .15s; }\n.qb-cur .tog[aria-expanded=true] .chev { transform: rotate(90deg); }\n.qb-cur .num { font-family:\
+    \ var(--qb-serif); font-weight: 700; font-size: 1.1rem; color: var(--c, var(--qb-accent)); min-width: 1.6em; }\n.qb-cur\
+    \ .t { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }\n.qb-cur .sub { display: block; font-weight: 400; font-size:\
+    \ .85rem; color: var(--qb-muted); }\n.qb-cur .acts { display: flex; gap: 6px; flex-wrap: wrap; }\n.qb-cur .body { border-top:\
+    \ 1px solid var(--qb-line); background: var(--qb-panel-2); padding: 12px 16px 16px; }\n.qb-cur .body > * + * { margin-top:\
+    \ 10px; }\n.qb-cur .part { background: var(--qb-panel); border: 1px solid var(--qb-line); border-radius: 10px; }\n.qb-cur\
+    \ .part .phead { padding: 10px 12px; }\n.qb-cur .part .num { font-size: 1rem; color: var(--qb-muted); }\n.qb-cur .pbody\
+    \ { border-top: 1px solid var(--qb-line); padding: 10px 12px 12px; }\n.qb-cur ol.cards { list-style: none; margin: 0;\
+    \ padding: 0; display: grid; gap: 8px; }\n.qb-cur .crd { display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto;\
+    \ gap: 4px 10px; padding: 10px 12px; border: 1px solid var(--qb-line); border-radius: 10px; background: var(--qb-panel-2);\
+    \ }\n.qb-cur .crd .n { color: var(--qb-muted); font-size: .85rem; padding-top: 2px; }\n.qb-cur .crd .q { font-weight:\
+    \ 600; overflow-wrap: anywhere; }\n.qb-cur .crd .a { overflow-wrap: anywhere; }\n.qb-cur .crd .a::before { content: \"\
+    A: \"; color: var(--qb-good); font-weight: 700; }\n.qb-cur .crd .e { font-size: .88rem; color: var(--qb-muted); overflow-wrap:\
+    \ anywhere; margin-top: 2px; }\n.qb-cur .crd .acts { grid-column: 3; grid-row: 1 / span 3; align-self: start; }\n.qb-cur\
+    \ .edit { padding: 14px 16px; border: 1px dashed var(--qb-accent); border-radius: 10px; background: var(--qb-panel); }\n\
+    .qb-cur .edit > * + * { margin-top: 10px; }\n.qb-cur .edit .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap:\
+    \ 10px; }\n.qb-cur .edit input[type=number] { font: inherit; color: var(--qb-ink); background: var(--qb-panel-2); border:\
+    \ 1px solid var(--qb-line); border-radius: 10px; padding: 10px 12px; width: 100%; box-sizing: border-box; }\n.qb-cur .edit\
+    \ input[type=color] { width: 48px; height: 40px; padding: 2px; border: 1px solid var(--qb-line); border-radius: 8px; background:\
+    \ var(--qb-panel-2); cursor: pointer; }\n.qb-cur .edit textarea { min-height: 64px; }\n.qb-cur .err { color: var(--qb-bad);\
+    \ font-size: .9rem; }\n.qb-cur .empty { padding: 28px 16px; }\n/* flashcard preview */\n.qb-cur .pv { position: fixed;\
+    \ inset: 0; z-index: 900; background: rgba(10, 14, 20, .55); display: grid; place-items: center; padding: 16px; }\n.qb-cur\
+    \ .pv .box { width: min(620px, 100%); max-height: calc(100vh - 32px); overflow: auto; background: var(--qb-panel); border-radius:\
+    \ 16px; box-shadow: 0 20px 60px rgba(0,0,0,.35); padding: 22px 24px; }\n.qb-cur .pv .face { min-height: 180px; display:\
+    \ grid; align-content: center; gap: 10px; text-align: center; padding: 18px 6px; }\n.qb-cur .pv .face .qq { font-family:\
+    \ var(--qb-serif); font-size: 1.5rem; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }\n.qb-cur .pv .face\
+    \ .aa { font-size: 1.15rem; font-weight: 600; color: var(--qb-good); overflow-wrap: anywhere; }\n.qb-cur .pv .face .ee\
+    \ { color: var(--qb-muted); overflow-wrap: anywhere; }\n@media (max-width: 620px) {\n  .qb-cur .crd { grid-template-columns:\
+    \ 2em minmax(0, 1fr); }\n  .qb-cur .crd .acts { grid-column: 2; grid-row: auto; }\n  .qb-cur .edit .grid2 { grid-template-columns:\
+    \ 1fr; }\n  .qb-cur .tog { min-width: 0; flex-basis: 100%; }\n}\n</style>\n<script>\n(function () {\n  var QB = window.QB;\n\
+    \  // Hands the browser a file to save. Tests replace QB.saveFile to check what would be downloaded.\n  QB.saveFile =\
+    \ QB.saveFile || function (name, text) {\n    var url = URL.createObjectURL(new Blob([text], { type: 'application/json'\
+    \ }));\n    var a = document.createElement('a');\n    a.href = url; a.download = name; a.style.display = 'none';\n   \
+    \ document.body.appendChild(a); a.click();\n    setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 2000);\n\
+    \  };\n\n  QB.define('curriculum', function (root, data, emit) {\n    var esc = QB.esc;\n    var S = { mods: data.modules\
+    \ || [], colors: data.colors || [], open: {}, openPart: {}, cards: {},\n              edit: null, busy: false, filter:\
+    \ '', pv: null };\n\n    function pad(n) { return String(n || 0).padStart(2, '0'); }\n    function plural(n, w) { return\
+    \ n + ' ' + w + (n === 1 ? '' : 's'); }\n    function findMod(id) { return S.mods.filter(function (m) { return m.id ===\
+    \ id; })[0]; }\n    function findPart(id) {\n      for (var i = 0; i < S.mods.length; i++) {\n        var p = S.mods[i].parts.filter(function\
+    \ (x) { return x.id === id; })[0];\n        if (p) return { mod: S.mods[i], part: p };\n      }\n      return null;\n\
+    \    }\n    function isEditing(kind, id) { return S.edit && S.edit.kind === kind && S.edit.id === id; }\n    function\
+    \ totals() {\n      return S.mods.reduce(function (a, m) { a.parts += m.parts.length; a.cards += m.card_count; return\
+    \ a; }, { parts: 0, cards: 0 });\n    }\n\n    function render() {\n      var t = totals();\n      root.innerHTML = '<div\
+    \ class=\"wrap qb-cur fade-in\">' +\n        '<div class=\"crumbs\"><button data-action=\"back\">← Profile</button></div>'\
+    \ +\n        '<div class=\"head\"><div><div class=\"kind\">Admin</div><h1>Manage curriculum</h1>' +\n          '<div class=\"\
+    muted small\" data-el=\"totals\">' + plural(S.mods.length, 'module') + ' · ' + plural(t.parts, 'part') + ' · ' + plural(t.cards,\
+    \ 'card') + '</div></div>' +\n          '<span class=\"spacer\"></span><button class=\"btn\" data-action=\"export_all\"\
+    >Download all (JSON)</button></div>' +\n        '<p class=\"muted small\" style=\"margin:0 0 14px;max-width:70ch\">Changes\
+    \ go live for learners straight away. Editing a card keeps everyone\\'s progress on it; deleting removes the card and\
+    \ everyone\\'s progress on it. Hidden modules and parts stay here but learners can\\'t see them. A downloaded file can\
+    \ be imported again from your profile.</p>' +\n        '<div class=\"tools\"><input type=\"text\" data-el=\"filter\" placeholder=\"\
+    Filter by module or part title…\" value=\"' + esc(S.filter) + '\" aria-label=\"Filter modules\"></div>' +\n        '<div\
+    \ class=\"list\" data-el=\"list\"></div>' +\n        '</div>' + (S.pv ? pvHtml() : '');\n      root.querySelector('[data-el=filter]').oninput\
+    \ = function (e) { S.filter = e.target.value; renderList(); };\n      renderList();\n    }\n\n    function renderList()\
+    \ {\n      var t = totals();\n      var tot = root.querySelector('[data-el=totals]');\n      if (tot) tot.textContent\
+    \ = plural(S.mods.length, 'module') + ' · ' + plural(t.parts, 'part') + ' · ' + plural(t.cards, 'card');\n      var f\
+    \ = S.filter.trim().toLowerCase();\n      var mods = S.mods.filter(function (m) {\n        if (!f) return true;\n    \
+    \    return (pad(m.number) + ' ' + m.title).toLowerCase().indexOf(f) >= 0 ||\n          m.parts.some(function (p) { return\
+    \ p.title.toLowerCase().indexOf(f) >= 0; });\n      });\n      root.querySelector('[data-el=list]').innerHTML = mods.length\
+    \ ? mods.map(modHtml).join('') :\n        '<div class=\"empty\">' + (S.mods.length ? 'No module matches that filter.'\
+    \ : 'No modules yet. Import module files from your profile.') + '</div>';\n    }\n\n    function hiddenBadge(item) { return\
+    \ item.published ? '' : '<span class=\"badge warn\">Hidden</span>'; }\n\n    function modHtml(m) {\n      var open = !!S.open[m.id];\n\
+    \      return '<article class=\"card mod\" data-mod=\"' + esc(m.id) + '\" style=\"--c:' + esc(m.color) + '\">' +\n   \
+    \     '<div class=\"mhead\"><button class=\"tog\" data-action=\"toggle_mod\" data-id=\"' + esc(m.id) + '\" aria-expanded=\"\
+    ' + open + '\">' +\n          '<span class=\"chev\">▶</span><span class=\"num\">' + pad(m.number) + '</span>' +\n    \
+    \      '<span class=\"t\">' + esc(m.title) + '<span class=\"sub\">' + plural(m.parts.length, 'part') + ' · ' + plural(m.card_count,\
+    \ 'card') + '</span></span></button>' +\n          hiddenBadge(m) +\n          '<div class=\"acts\"><button class=\"btn\
+    \ sm\" data-action=\"edit_mod\" data-id=\"' + esc(m.id) + '\">Edit</button>' +\n            '<button class=\"btn sm\"\
+    \ data-action=\"export_mod\" data-id=\"' + esc(m.id) + '\">Download JSON</button>' +\n            '<button class=\"btn\
+    \ sm danger\" data-action=\"del_mod\" data-id=\"' + esc(m.id) + '\">Delete</button></div></div>' +\n        (isEditing('module',\
+    \ m.id) ? '<div class=\"body\">' + modForm(m) + '</div>' : '') +\n        (open ? '<div class=\"body\">' +\n         \
+    \ (m.description ? '<p class=\"muted small\" style=\"margin:0\">' + esc(m.description) + '</p>' : '') +\n          (m.parts.length\
+    \ ? m.parts.map(partHtml).join('') : '<p class=\"muted small\">This module has no parts.</p>') +\n          (m.published\
+    \ ? '<div><button class=\"btn ghost sm\" data-action=\"view_mod\" data-id=\"' + esc(m.id) + '\">View as a learner →</button></div>'\
+    \ : '') +\n        '</div>' : '') +\n      '</article>';\n    }\n\n    function partHtml(p) {\n      var open = !!S.openPart[p.id];\n\
+    \      return '<div class=\"part\" data-part=\"' + esc(p.id) + '\">' +\n        '<div class=\"phead\"><button class=\"\
+    tog\" data-action=\"toggle_part\" data-id=\"' + esc(p.id) + '\" aria-expanded=\"' + open + '\">' +\n          '<span class=\"\
+    chev\">▶</span><span class=\"num\">' + esc(p.number) + '</span>' +\n          '<span class=\"t\">' + esc(p.title) + '<span\
+    \ class=\"sub\">' + plural(p.card_count, 'card') + '</span></span></button>' +\n          hiddenBadge(p) +\n         \
+    \ '<div class=\"acts\"><button class=\"btn sm\" data-action=\"preview\" data-id=\"' + esc(p.id) + '\"' + (p.card_count\
+    \ ? '' : ' disabled') + '>Preview</button>' +\n            '<button class=\"btn sm\" data-action=\"edit_part\" data-id=\"\
+    ' + esc(p.id) + '\">Edit</button>' +\n            '<button class=\"btn sm danger\" data-action=\"del_part\" data-id=\"\
+    ' + esc(p.id) + '\">Delete</button></div></div>' +\n        (isEditing('part', p.id) ? '<div class=\"pbody\">' + partForm(p)\
+    \ + '</div>' : '') +\n        (open ? '<div class=\"pbody\">' + cardsHtml(p) + '</div>' : '') +\n      '</div>';\n   \
+    \ }\n\n    function cardsHtml(p) {\n      var cs = S.cards[p.id];\n      if (cs === 'loading' || cs === undefined) return\
+    \ '<p class=\"muted small\"><span class=\"spin\"></span> Loading cards…</p>';\n      if (cs.error) return '<div class=\"\
+    feedback bad\">' + esc(cs.error) + '</div>';\n      var adding = isEditing('card', null) && S.edit.quiz === p.id;\n  \
+    \    return (p.description ? '<p class=\"muted small\" style=\"margin:0 0 10px\">' + esc(p.description) + '</p>' : '')\
+    \ +\n        (cs.length ? '<ol class=\"cards\">' + cs.map(function (c, i) {\n          if (isEditing('card', c.id)) return\
+    \ '<li>' + cardForm(c, p.id) + '</li>';\n          return '<li class=\"crd\" data-card=\"' + esc(c.id) + '\"><span class=\"\
+    n\">' + (i + 1) + '</span>' +\n            '<div class=\"q\">' + esc(c.question) + '</div>' +\n            '<div class=\"\
+    acts\"><button class=\"btn sm\" data-action=\"edit_card\" data-id=\"' + esc(c.id) + '\" data-part=\"' + esc(p.id) + '\"\
+    >Edit</button>' +\n              '<button class=\"btn sm danger\" data-action=\"del_card\" data-id=\"' + esc(c.id) + '\"\
+    \ data-part=\"' + esc(p.id) + '\">Delete</button></div>' +\n            '<div class=\"a\" style=\"grid-column:2\">' +\
+    \ esc(c.answer) + '</div>' +\n            (c.explanation || c.concept ? '<div class=\"e\" style=\"grid-column:2\">' +\
+    \ esc(c.explanation) +\n              (c.concept ? ' <span class=\"badge\">' + esc(c.concept) + '</span>' : '') + '</div>'\
+    \ : '') +\n          '</li>';\n        }).join('') + '</ol>' : '<p class=\"muted small\">No cards in this part yet.</p>')\
+    \ +\n        (adding ? '<div style=\"margin-top:8px\">' + cardForm({}, p.id) + '</div>' :\n          '<div style=\"margin-top:10px\"\
+    ><button class=\"btn sm\" data-action=\"add_card\" data-part=\"' + esc(p.id) + '\">+ Add a card</button></div>');\n  \
+    \  }\n\n    function field(label, name, value, opts) {\n      opts = opts || {};\n      var id = 'qbCur' + name + Math.random().toString(36).slice(2,\
+    \ 7);\n      var input = opts.area ? '<textarea id=\"' + id + '\" name=\"' + name + '\"' + (opts.required ? ' required'\
+    \ : '') + '>' + esc(value || '') + '</textarea>' :\n        '<input type=\"' + (opts.type || 'text') + '\" id=\"' + id\
+    \ + '\" name=\"' + name + '\" value=\"' + esc(value == null ? '' : value) + '\"' +\n          (opts.required ? ' required'\
+    \ : '') + (opts.type === 'number' ? ' min=\"0\" max=\"9999\" step=\"1\"' : '') + '>';\n      return '<div><label class=\"\
+    f\" for=\"' + id + '\">' + label + '</label>' + input + (opts.hint ? '<div class=\"hint\">' + opts.hint + '</div>' : '')\
+    \ + '</div>';\n    }\n    function shown(item) {\n      return '<label class=\"toggle\"><input type=\"checkbox\" name=\"\
+    published\"' + (item.published ? ' checked' : '') + '><span>Visible to learners</span></label>';\n    }\n    function\
+    \ formEnd(saveLabel) {\n      return '<div class=\"err\" data-el=\"err\"></div><div class=\"row\"><span class=\"spacer\"\
+    ></span>' +\n        '<button type=\"button\" class=\"btn\" data-action=\"cancel\">Cancel</button>' +\n        '<button\
+    \ type=\"submit\" class=\"btn primary\">' + saveLabel + '</button></div>';\n    }\n\n    function modForm(m) {\n     \
+    \ return '<form class=\"edit\" data-form=\"module\" data-id=\"' + esc(m.id) + '\"><h3 style=\"margin:0\">Edit module</h3>'\
+    \ +\n        '<div class=\"grid2\">' + field('Number', 'number', m.number, { type: 'number', required: true, hint: 'Its\
+    \ place in the learning path.' }) +\n          '<div><label class=\"f\">Colour</label><div class=\"row\"><input type=\"\
+    color\" name=\"color\" value=\"' + esc(m.color) + '\" aria-label=\"Module colour\">' +\n          '<span class=\"muted\
+    \ small\">Used for its number and progress bars.</span></div></div></div>' +\n        field('Title', 'title', m.title,\
+    \ { required: true, hint: 'Importing a file matches modules by title, so renaming means a later import of the old file\
+    \ creates a new module.' }) +\n        field('Description', 'description', m.description, { area: true }) +\n        shown(m)\
+    \ + formEnd('Save module') + '</form>';\n    }\n\n    function partForm(p) {\n      return '<form class=\"edit\" data-form=\"\
+    part\" data-id=\"' + esc(p.id) + '\"><h3 style=\"margin:0\">Edit part</h3>' +\n        '<div class=\"grid2\">' + field('Number',\
+    \ 'number', p.number, { type: 'number', required: true, hint: 'Its order within the module.' }) +\n          field('Source\
+    \ link', 'source', p.source === 'import' ? '' : p.source, { hint: 'Shown to learners as the source.' }) + '</div>' +\n\
+    \        field('Title', 'title', p.title, { required: true }) +\n        field('Description', 'description', p.description,\
+    \ { area: true }) +\n        shown(p) + formEnd('Save part') + '</form>';\n    }\n\n    function cardForm(c, partId) {\n\
+    \      return '<form class=\"edit\" data-form=\"card\" data-id=\"' + esc(c.id || '') + '\" data-part=\"' + esc(partId)\
+    \ + '\"><h3 style=\"margin:0\">' + (c.id ? 'Edit card' : 'New card') + '</h3>' +\n        field('Question', 'question',\
+    \ c.question, { area: true, required: true }) +\n        field('Answer', 'answer', c.answer, { area: true, required: true,\
+    \ hint: 'Keep it short: the learner checks their own recall against it.' }) +\n        field('Explanation <span class=\"\
+    muted\">(optional)</span>', 'explanation', c.explanation, { area: true }) +\n        field('Concept <span class=\"muted\"\
+    >(optional)</span>', 'concept', c.concept) +\n        formEnd(c.id ? 'Save card' : 'Add card') + '</form>';\n    }\n\n\
+    \    // ---- flashcard preview (nothing is recorded)\n    function pvHtml() {\n      var cs = S.cards[S.pv.part] || [],\
+    \ c = cs[S.pv.i] || {}, info = findPart(S.pv.part) || { part: {} };\n      return '<div class=\"pv\" data-action=\"pv_close\"\
+    \ role=\"dialog\" aria-modal=\"true\" aria-label=\"Card preview\"><div class=\"box\" data-el=\"pvbox\">' +\n        '<div\
+    \ class=\"row small\"><span class=\"muted\">' + esc(info.part.title) + '</span><span class=\"spacer\"></span><span class=\"\
+    badge\">' + (S.pv.i + 1) + ' / ' + cs.length + '</span></div>' +\n        '<div class=\"face\">' + (c.concept ? '<div\
+    \ class=\"kind\">' + esc(c.concept) + '</div>' : '') +\n          '<div class=\"qq\">' + esc(c.question) + '</div>' +\n\
+    \          (S.pv.flip ? '<div class=\"aa\">' + esc(c.answer) + '</div>' + (c.explanation ? '<div class=\"ee\">' + esc(c.explanation)\
+    \ + '</div>' : '') : '') + '</div>' +\n        '<div class=\"row\"><button class=\"btn\" data-action=\"pv_prev\"' + (S.pv.i\
+    \ ? '' : ' disabled') + '>← Previous</button><span class=\"spacer\"></span>' +\n          (S.pv.flip ? '' : '<button class=\"\
+    btn primary\" data-action=\"pv_flip\">Show answer</button>') +\n          '<button class=\"btn\" data-action=\"pv_next\"\
+    ' + (S.pv.i < cs.length - 1 ? '' : ' disabled') + '>Next →</button>' +\n          '<button class=\"btn ghost\" data-action=\"\
+    pv_close\">Close</button></div>' +\n        '<p class=\"muted small\" style=\"margin:10px 0 0\">Preview only: nothing\
+    \ is recorded. Keys: space shows the answer, ← → move, Esc closes.</p>' +\n      '</div></div>';\n    }\n    function\
+    \ renderPv() {\n      var old = root.querySelector('.pv');\n      if (old) old.remove();\n      if (S.pv) root.querySelector('.qb-cur').insertAdjacentHTML('beforeend',\
+    \ pvHtml());\n    }\n    function pvMove(d) {\n      var n = (S.cards[S.pv.part] || []).length;\n      var i = Math.max(0,\
+    \ Math.min(n - 1, S.pv.i + d));\n      if (i !== S.pv.i) { S.pv.i = i; S.pv.flip = false; renderPv(); }\n    }\n    function\
+    \ onKey(e) {\n      if (!document.body.contains(root)) { document.removeEventListener('keydown', onKey); return; }\n \
+    \     if (!S.pv) return;\n      if (e.key === 'Escape') { S.pv = null; renderPv(); }\n      else if (e.key === 'ArrowRight')\
+    \ pvMove(1);\n      else if (e.key === 'ArrowLeft') pvMove(-1);\n      else if (e.key === ' ' || e.key === 'Enter') {\
+    \ e.preventDefault(); if (!S.pv.flip) { S.pv.flip = true; renderPv(); } else pvMove(1); }\n    }\n    document.addEventListener('keydown',\
+    \ onKey);\n\n    // ---- server calls\n    function fail(err) { QB.toast(String(err && err.message || err || 'Something\
+    \ went wrong'), true); }\n\n    function loadPart(id) {\n      S.cards[id] = 'loading';\n      return emit('load_part',\
+    \ { id: id }).then(function (res) {\n        S.cards[id] = res && res.ok ? res.cards : { error: (res && res.error) ||\
+    \ 'Could not load the cards.' };\n      }, function (err) { S.cards[id] = { error: String(err && err.message || err) };\
+    \ });\n    }\n\n    function exportJson(id, btn) {\n      btn.disabled = true;\n      var label = btn.innerHTML;\n   \
+    \   btn.innerHTML = '<span class=\"spin\"></span> Preparing';\n      emit('export', { id: id || null }).then(function\
+    \ (res) {\n        btn.disabled = false; btn.innerHTML = label;\n        if (!res || !res.ok) return fail(res && res.error);\n\
+    \        var items = res.items || [];\n        QB.saveFile(res.filename, JSON.stringify(items, null, 1));\n        var\
+    \ n = items.reduce(function (a, it) { return a + (it.questions || []).length; }, 0);\n        QB.toast('Downloaded ' +\
+    \ res.filename + ' (' + plural(items.length, 'part') + ', ' + plural(n, 'card') + ')');\n      }, function (err) { btn.disabled\
+    \ = false; btn.innerHTML = label; fail(err); });\n    }\n\n    function remove(kind, id, btn) {\n      var msg;\n    \
+    \  if (kind === 'module') {\n        var m = findMod(id);\n        msg = 'Delete module ' + pad(m.number) + ' · ' + m.title\
+    \ + '?\\n\\nThis removes its ' + plural(m.parts.length, 'part') + ' and ' + plural(m.card_count, 'card') +\n         \
+    \ ', and every learner\\'s progress on them. It can\\'t be undone.\\n\\nTip: cancel and use \"Download JSON\" first to\
+    \ keep a copy.';\n      } else if (kind === 'part') {\n        var p = findPart(id).part;\n        msg = 'Delete the part\
+    \ \"' + p.title + '\"?\\n\\nThis removes its ' + plural(p.card_count, 'card') + ' and every learner\\'s progress on them.\
+    \ It can\\'t be undone.';\n      } else {\n        msg = 'Delete this card?\\n\\nEvery learner\\'s progress on it is removed\
+    \ too. It can\\'t be undone.';\n      }\n      if (!window.confirm(msg)) return;\n      btn.disabled = true;\n      emit('delete',\
+    \ { kind: kind, id: id }).then(function (res) {\n        if (!res || !res.ok) { btn.disabled = false; return fail(res\
+    \ && res.error); }\n        if (kind === 'module') S.mods = S.mods.filter(function (x) { return x.id !== id; });\n   \
+    \     else if (kind === 'part') { var f = findPart(id); f.mod.parts = f.mod.parts.filter(function (x) { return x.id !==\
+    \ id; }); f.mod.card_count -= f.part.card_count; delete S.cards[id]; }\n        else {\n          var pid = btn.dataset.part,\
+    \ info = findPart(pid);\n          S.cards[pid] = S.cards[pid].filter(function (c) { return c.id !== id; });\n       \
+    \   info.mod.card_count += res.card_count - info.part.card_count; info.part.card_count = res.card_count;\n        }\n\
+    \        if (S.edit && S.edit.id === id) S.edit = null;\n        renderList();\n        QB.toast(res.message);\n     \
+    \ }, function (err) { btn.disabled = false; fail(err); });\n    }\n\n    function submit(form) {\n      var kind = form.dataset.form,\
+    \ id = form.dataset.id || null, f = form.elements;\n      var fields = {};\n      ['number', 'title', 'description', 'color',\
+    \ 'source', 'question', 'answer', 'explanation', 'concept'].forEach(function (k) {\n        if (f[k]) fields[k] = f[k].value;\n\
+    \      });\n      if (f.published) fields.published = f.published.checked;\n      var btn = form.querySelector('button[type=submit]'),\
+    \ label = btn.textContent;\n      var errBox = form.querySelector('[data-el=err]');\n      btn.disabled = true; btn.innerHTML\
+    \ = '<span class=\"spin\"></span> Saving';\n      errBox.textContent = '';\n      var event = kind === 'module' ? 'save_module'\
+    \ : kind === 'part' ? 'save_part' : 'save_card';\n      var payload = kind === 'card' ? { quiz_id: form.dataset.part,\
+    \ id: id, fields: fields } : { id: id, fields: fields };\n      emit(event, payload).then(function (res) {\n        if\
+    \ (!res || !res.ok) { btn.disabled = false; btn.textContent = label; errBox.textContent = (res && res.error) || 'Could\
+    \ not save.'; return; }\n        if (kind === 'module') {\n          var i = S.mods.indexOf(findMod(id));\n          S.mods[i]\
+    \ = res.module;\n          S.mods.sort(function (a, b) { return (a.number || 0) - (b.number || 0); });\n        } else\
+    \ if (kind === 'part') {\n          var f1 = findPart(id), j = f1.mod.parts.indexOf(f1.part);\n          f1.mod.parts[j]\
+    \ = res.part;\n          f1.mod.parts.sort(function (a, b) { return (a.number || 0) - (b.number || 0); });\n        }\
+    \ else {\n          var pid = form.dataset.part, info = findPart(pid), cs = S.cards[pid];\n          if (id) cs[cs.map(function\
+    \ (c) { return c.id; }).indexOf(id)] = res.card; else cs.push(res.card);\n          info.mod.card_count += res.card_count\
+    \ - info.part.card_count; info.part.card_count = res.card_count;\n        }\n        S.edit = null;\n        renderList();\n\
+    \        QB.toast(kind === 'card' ? (id ? 'Card saved' : 'Card added') : (kind === 'module' ? 'Module saved' : 'Part saved'));\n\
+    \      }, function (err) { btn.disabled = false; btn.textContent = label; errBox.textContent = String(err && err.message\
+    \ || err); });\n    }\n\n    function startEdit(kind, id, extra) {\n      S.edit = Object.assign({ kind: kind, id: id\
+    \ }, extra || {});\n      renderList();\n      var form = root.querySelector('form.edit');\n      if (form) { var first\
+    \ = form.querySelector('textarea, input[type=text]'); if (first) first.focus(); form.scrollIntoView({ block: 'nearest'\
+    \ }); }\n    }\n\n    root.addEventListener('submit', function (e) {\n      var form = e.target.closest('form.edit');\n\
+    \      if (!form) return;\n      e.preventDefault();\n      submit(form);\n    });\n\n    root.addEventListener('click',\
+    \ function (e) {\n      var el = e.target.closest('[data-action]');\n      if (!el || el.disabled) return;\n      var\
+    \ a = el.dataset.action, id = el.dataset.id;\n      if (a === 'pv_close' && el.classList.contains('pv') && e.target !==\
+    \ el) return; // clicks inside the card keep it open\n      if (a === 'back') emit('back', {});\n      else if (a ===\
+    \ 'toggle_mod') { S.open[id] = !S.open[id]; renderList(); }\n      else if (a === 'toggle_part') {\n        S.openPart[id]\
+    \ = !S.openPart[id];\n        if (S.openPart[id] && (S.cards[id] === undefined || S.cards[id].error)) loadPart(id).then(renderList);\n\
+    \        renderList();\n      }\n      else if (a === 'edit_mod') startEdit('module', isEditing('module', id) ? null :\
+    \ id);\n      else if (a === 'edit_part') startEdit('part', isEditing('part', id) ? null : id);\n      else if (a ===\
+    \ 'edit_card') startEdit('card', id);\n      else if (a === 'add_card') startEdit('card', null, { quiz: el.dataset.part\
+    \ });\n      else if (a === 'cancel') { S.edit = null; renderList(); }\n      else if (a === 'del_mod') remove('module',\
+    \ id, el);\n      else if (a === 'del_part') remove('part', id, el);\n      else if (a === 'del_card') remove('card',\
+    \ id, el);\n      else if (a === 'export_mod') exportJson(id, el);\n      else if (a === 'export_all') exportJson(null,\
+    \ el);\n      else if (a === 'view_mod') emit('open_collection', { id: id });\n      else if (a === 'preview') {\n   \
+    \     var go = function () { if (Array.isArray(S.cards[id]) && S.cards[id].length) { S.pv = { part: id, i: 0, flip: false\
+    \ }; renderPv(); } else if (S.cards[id] && S.cards[id].error) fail(S.cards[id].error); };\n        if (Array.isArray(S.cards[id]))\
+    \ go();\n        else { el.disabled = true; loadPart(id).then(function () { el.disabled = false; if (S.openPart[id]) renderList();\
+    \ go(); }); }\n      }\n      else if (a === 'pv_flip') { S.pv.flip = true; renderPv(); }\n      else if (a === 'pv_next')\
+    \ pvMove(1);\n      else if (a === 'pv_prev') pvMove(-1);\n      else if (a === 'pv_close') { S.pv = null; renderPv();\
+    \ }\n    });\n\n    render();\n    return {};\n  });\n})();\n</script>\n"
 package_name: CAF_Guide
 runtime_options:
   client_version: '3'
