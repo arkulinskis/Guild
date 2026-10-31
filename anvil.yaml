@@ -341,7 +341,7 @@ metadata:
   title: CAF Guide
 name: CAF Guide
 native_deps:
-  head_html: "<script src=\"_/theme/legal-kit.js?v=6d75e9d00c\"></script>\n\n<!--\n  CAF GUIDE — SHARED THEME + CORE HELPERS\n\
+  head_html: "<script src=\"_/theme/legal-kit.js?v=72d156b96c\"></script>\n\n<!--\n  CAF GUIDE — SHARED THEME + CORE HELPERS\n\
     \  Goes into: Anvil IDE → Native Libraries (tools/sync_to_anvil.py does this for you).\n  Fonts, colour tokens (light\
     \ + dark), base styles every component uses, and window.QB.\n  Palette: navy from the app logo, Canada red for highlights,\
     \ olive/CADPAT-style greens.\n-->\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\"\
