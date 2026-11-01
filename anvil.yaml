@@ -336,16 +336,50 @@ db_schema:
     server: full
     title: Users
 metadata:
-  description: Learn up on the CAF
+  description: 'An unofficial study app for the Canadian Armed Forces: active-recall flashcards on ranks, structure, training,
+    history and acronyms, with a daily review.'
   logo_img: asset:8ff385ff-2cd5-4868-9642-6374157bd844.jpg
-  title: CAF Guide
+  title: 'CAF Guide: flashcards to learn the Canadian Armed Forces'
 name: CAF Guide
 native_deps:
-  head_html: "<script src=\"_/theme/legal-kit.js?v=72d156b96c\"></script>\n\n<!--\n  CAF GUIDE — SHARED THEME + CORE HELPERS\n\
-    \  Goes into: Anvil IDE → Native Libraries (tools/sync_to_anvil.py does this for you).\n  Fonts, colour tokens (light\
-    \ + dark), base styles every component uses, and window.QB.\n  Palette: navy from the app logo, Canada red for highlights,\
-    \ olive/CADPAT-style greens.\n-->\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\"\
-    \ href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap\"\
+  head_html: "<script src=\"_/theme/legal-kit.js?v=72d156b96c\"></script>\n\n<!-- seo:start (APP_MAKER/seo: edit seo/apps/guild.json\
+    \ and run seo.py, not here) -->\n<link rel=\"canonical\" href=\"https://caf-guide.anvil.app/\">\n<meta name=\"robots\"\
+    \ content=\"index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1\">\n<meta name=\"keywords\" content=\"\
+    Canadian Armed Forces study guide, CAF flashcards, CAF ranks, CAF acronyms, military flashcards Canada, join the Canadian\
+    \ Armed Forces, spaced repetition flashcards, Canadian military history quiz, CAF recruit study app\">\n<meta name=\"\
+    author\" content=\"Arkvital\">\n<meta property=\"og:type\" content=\"website\">\n<meta property=\"og:site_name\" content=\"\
+    CAF Guide\">\n<meta property=\"og:title\" content=\"CAF Guide: flashcards to learn the Canadian Armed Forces\">\n<meta\
+    \ property=\"og:description\" content=\"An unofficial study app for the Canadian Armed Forces: active-recall flashcards\
+    \ on ranks, structure, training, history and acronyms, with a daily review.\">\n<meta property=\"og:locale\" content=\"\
+    en_CA\">\n<meta property=\"og:url\" content=\"https://caf-guide.anvil.app/\">\n<meta property=\"og:image\" content=\"\
+    https://caf-guide.anvil.app/_/theme/og-image.png\">\n<meta property=\"og:image:width\" content=\"1200\"><meta property=\"\
+    og:image:height\" content=\"630\">\n<meta property=\"og:image:alt\" content=\"CAF Guide: Learn the Canadian Armed Forces\
+    \ with spaced-repetition flashcards\">\n<meta name=\"twitter:card\" content=\"summary_large_image\">\n<meta name=\"twitter:title\"\
+    \ content=\"CAF Guide: flashcards to learn the Canadian Armed Forces\">\n<meta name=\"twitter:description\" content=\"\
+    An unofficial study app for the Canadian Armed Forces: active-recall flashcards on ranks, structure, training, history\
+    \ and acronyms, with a daily review.\">\n<meta name=\"twitter:image\" content=\"https://caf-guide.anvil.app/_/theme/og-image.png\"\
+    >\n<link rel=\"alternate\" type=\"text/plain\" title=\"CAF Guide for AI assistants\" href=\"https://caf-guide.anvil.app/llms.txt\"\
+    >\n<script type=\"application/ld+json\">{\"@context\": \"https://schema.org\", \"@graph\": [{\"@type\": \"WebApplication\"\
+    , \"@id\": \"https://caf-guide.anvil.app/#app\", \"name\": \"CAF Guide\", \"url\": \"https://caf-guide.anvil.app/\", \"\
+    description\": \"An unofficial study app for the Canadian Armed Forces: active-recall flashcards on ranks, structure,\
+    \ training, history and acronyms, with a daily review.\", \"image\": \"https://caf-guide.anvil.app/_/theme/og-image.png\"\
+    , \"inLanguage\": \"en\", \"publisher\": {\"@id\": \"https://arkvital.com/#org\"}, \"keywords\": \"Canadian Armed Forces\
+    \ study guide, CAF flashcards, CAF ranks, CAF acronyms, military flashcards Canada, join the Canadian Armed Forces, spaced\
+    \ repetition flashcards, Canadian military history quiz, CAF recruit study app\", \"applicationCategory\": \"EducationalApplication\"\
+    , \"operatingSystem\": \"Any (web browser)\", \"browserRequirements\": \"Requires JavaScript and a modern web browser\"\
+    , \"featureList\": [\"Active-recall flashcards: think of the answer, then reveal it\", \"Spaced repetition: known cards\
+    \ return after 1, 3, 7, 16, 35 and 90 days\", \"A daily review of every card that is due\", \"Ready-made cards on CAF\
+    \ structure, training, ranks and history\", \"A lookup dictionary of CAF acronyms\", \"Streaks, collections and your own\
+    \ quizzes\"], \"audience\": {\"@type\": \"Audience\", \"audienceType\": \"Recruits, applicants and anyone learning about\
+    \ the Canadian Armed Forces\"}}, {\"@type\": \"WebSite\", \"@id\": \"https://caf-guide.anvil.app/#site\", \"url\": \"\
+    https://caf-guide.anvil.app/\", \"name\": \"CAF Guide\", \"publisher\": {\"@id\": \"https://arkvital.com/#org\"}}, {\"\
+    @type\": \"Organization\", \"@id\": \"https://arkvital.com/#org\", \"name\": \"Arkvital\", \"url\": \"https://arkvital.com\"\
+    , \"email\": \"arkvital@outlook.com\", \"address\": {\"@type\": \"PostalAddress\", \"addressLocality\": \"Montreal\",\
+    \ \"addressRegion\": \"QC\", \"addressCountry\": \"CA\"}}]}</script>\n<!-- seo:end -->\n<!--\n  CAF GUIDE — SHARED THEME\
+    \ + CORE HELPERS\n  Goes into: Anvil IDE → Native Libraries (tools/sync_to_anvil.py does this for you).\n  Fonts, colour\
+    \ tokens (light + dark), base styles every component uses, and window.QB.\n  Palette: navy from the app logo, Canada red\
+    \ for highlights, olive/CADPAT-style greens.\n-->\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link\
+    \ rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link href=\"https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap\"\
     \ rel=\"stylesheet\">\n\n<style>\n:root {\n  --qb-bg: #f1f0eb; --qb-panel: #ffffff; --qb-panel-2: #f8f7f3; --qb-ink: #1b2230;\
     \ --qb-muted: #5d6573; --qb-line: #dedbd2;\n  --qb-accent: #2e4a70; --qb-accent-ink: #ffffff; --qb-accent-soft: #e2e8f1;\n\
     \  --qb-red: #c8102e; --qb-red-soft: #fbe5e8;\n  --qb-good: #4d6a2c; --qb-good-soft: #e8eedd; --qb-bad: #b3261e; --qb-bad-soft:\
