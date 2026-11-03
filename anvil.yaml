@@ -342,7 +342,7 @@ metadata:
   title: 'CAF Guide: flashcards to learn the Canadian Armed Forces'
 name: CAF Guide
 native_deps:
-  head_html: "<script src=\"_/theme/legal-kit.js?v=0355f76868\"></script>\n\n<!-- seo:start (APP_MAKER/seo: edit seo/apps/guild.json\
+  head_html: "<script src=\"_/theme/legal-kit.js?v=5f62dc30b2\"></script>\n\n<!-- seo:start (APP_MAKER/seo: edit seo/apps/guild.json\
     \ and run seo.py, not here) -->\n<link rel=\"canonical\" href=\"https://caf-guide.anvil.app/\">\n<meta name=\"robots\"\
     \ content=\"index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1\">\n<meta name=\"keywords\" content=\"\
     Canadian Armed Forces study guide, CAF flashcards, CAF ranks, CAF acronyms, military flashcards Canada, join the Canadian\
@@ -724,15 +724,42 @@ native_deps:
     \ unset; cursor: pointer; color: var(--qb-accent); font-size: .88rem; }\n.qb-auth .link:hover { text-decoration: underline;\
     \ }\n@media (max-width: 820px) { .qb-auth { grid-template-columns: 1fr; } .qb-auth .side { padding: 32px 20px; } .qb-auth\
     \ .side h1 { font-size: 1.9rem; } .qb-auth .side ul, .qb-auth .side .wm, .qb-auth .side .badge-logo { display: none; }\
-    \ .qb-auth .side h1 { font-size: 2.1rem; } }\n</style>\n<script>\n(function () {\n  var QB = window.QB;\n  QB.define('auth',\
-    \ function (root, data, emit) {\n    var esc = QB.esc;\n    var S = { mode: 'login', busy: false, msg: null, email: ''\
-    \ };\n\n    function form() {\n      if (S.mode === 'reset') {\n        return '<h2>Reset your password</h2><p class=\"\
-    muted small\">We\\'ll email you a link to choose a new one.</p>' +\n          '<form data-form=\"reset\"><div><label class=\"\
-    f\" for=\"qbE\">Email</label><input type=\"email\" id=\"qbE\" name=\"email\" required autocomplete=\"email\" value=\"\
-    ' + esc(S.email) + '\"></div>' +\n          '<div><button class=\"btn primary block\" type=\"submit\"' + (S.busy ? ' disabled'\
-    \ : '') + '>' + (S.busy ? '<span class=\"spin\"></span>' : 'Send reset link') + '</button></div></form>' +\n         \
-    \ '<p style=\"margin-top:14px\"><button class=\"link\" data-action=\"mode\" data-mode=\"login\">← Back to sign in</button></p>';\n\
-    \      }\n      var signup = S.mode === 'signup';\n      return '<div class=\"tabs\" role=\"tablist\">' +\n          '<button\
+    \ .qb-auth .side h1 { font-size: 2.1rem; } }\n/* Watch section: the app's YouTube video. Click to play; nothing loads\
+    \ from YouTube before the click. */\n.ytf .ytf-in { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);\
+    \ gap: 40px; align-items: center; max-width: 1040px; margin: 0 auto; }\n.ytf .ytf-copy .eyebrow { display: inline-flex;\
+    \ align-items: center; gap: 8px; }\n.ytf .ytf-copy h2 { margin: 6px 0 10px; }\n.ytf .ytf-copy p { color: var(--c-muted);\
+    \ margin: 0 0 16px; }\n.ytf .ytf-link { font-weight: 700; }\n.ytf .ytf-frame { position: relative; aspect-ratio: 16 /\
+    \ 9; border-radius: var(--radius, 16px); overflow: hidden; background: #000; border: 1px solid var(--c-line); box-shadow:\
+    \ var(--shadow-lg); }\n.ytf .ytf-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }\n\
+    .ytf .ytf-cover { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; padding: 0; margin: 0; border:\
+    \ 0; border-radius: 0; background: none; box-shadow: none; color: inherit; font: inherit; cursor: pointer; display: block;\
+    \ }\n.ytf .ytf-cover img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease,\
+    \ filter .3s; }\n.ytf .ytf-cover:hover img { transform: scale(1.02); filter: brightness(.92); }\n.ytf .ytf-play { position:\
+    \ absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); line-height: 0; filter: drop-shadow(0 6px 18px rgba(0,\
+    \ 0, 0, .35)); transition: transform .2s; }\n.ytf .ytf-cover:hover .ytf-play, .ytf .ytf-cover:focus-visible .ytf-play\
+    \ { transform: translate(-50%, -50%) scale(1.08); }\n.ytf .ytf-cover:focus-visible { outline: 3px solid var(--c-brand);\
+    \ outline-offset: -3px; }\n.ytf .ytf-len { position: absolute; right: 10px; bottom: 10px; background: rgba(0, 0, 0, .78);\
+    \ color: #fff; font-size: .78rem; font-weight: 700; line-height: 1.3; padding: 3px 7px; border-radius: 5px; }\n.ytf .ytf-note\
+    \ { font-size: .8rem; color: var(--c-muted); margin: 10px 2px 0; }\n@media (max-width: 800px) { .ytf .ytf-in { grid-template-columns:\
+    \ minmax(0, 1fr); gap: 22px; } }\n@media (max-width: 480px) { .ytf .ytf-play svg { width: 56px; height: 40px; } }\n.ytf\
+    \ { --c-muted: var(--qb-muted); --c-line: var(--qb-line); --shadow-lg: var(--qb-shadow); --c-brand: var(--qb-accent);\
+    \ --radius: var(--qb-radius); }\n.ytf .ytf-kick { display: inline-flex; align-items: center; gap: 8px; }\n.qb-watch {\
+    \ padding: 56px 20px; border-top: 1px solid var(--qb-line); }\n.qb-watch .ytf-link { color: var(--qb-accent); }\n</style>\n\
+    <script>\n  // Watch section: swap the video's cover for YouTube's player (privacy-enhanced) only when it's pressed.\n\
+    \  if (!window.__ytFilm) {\n    window.__ytFilm = true;\n    document.addEventListener('click', function (e) {\n     \
+    \ var b = e.target && e.target.closest ? e.target.closest('[data-yt-film]') : null;\n      if (!b) return;\n      var\
+    \ f = document.createElement('iframe');\n      f.src = 'https://www.youtube-nocookie.com/embed/' + b.getAttribute('data-yt-film')\
+    \ + '?autoplay=1&rel=0&playsinline=1';\n      f.title = b.getAttribute('data-yt-title') || 'Video';\n      f.allow = 'autoplay;\
+    \ encrypted-media; picture-in-picture; fullscreen';\n      f.allowFullscreen = true;\n      f.referrerPolicy = 'strict-origin-when-cross-origin';\n\
+    \      b.parentNode.replaceChild(f, b);\n    });\n  }\n(function () {\n  var QB = window.QB;\n  QB.define('auth', function\
+    \ (root, data, emit) {\n    var esc = QB.esc;\n    var S = { mode: 'login', busy: false, msg: null, email: '' };\n\n \
+    \   function form() {\n      if (S.mode === 'reset') {\n        return '<h2>Reset your password</h2><p class=\"muted small\"\
+    >We\\'ll email you a link to choose a new one.</p>' +\n          '<form data-form=\"reset\"><div><label class=\"f\" for=\"\
+    qbE\">Email</label><input type=\"email\" id=\"qbE\" name=\"email\" required autocomplete=\"email\" value=\"' + esc(S.email)\
+    \ + '\"></div>' +\n          '<div><button class=\"btn primary block\" type=\"submit\"' + (S.busy ? ' disabled' : '')\
+    \ + '>' + (S.busy ? '<span class=\"spin\"></span>' : 'Send reset link') + '</button></div></form>' +\n          '<p style=\"\
+    margin-top:14px\"><button class=\"link\" data-action=\"mode\" data-mode=\"login\">← Back to sign in</button></p>';\n \
+    \     }\n      var signup = S.mode === 'signup';\n      return '<div class=\"tabs\" role=\"tablist\">' +\n          '<button\
     \ role=\"tab\" data-action=\"mode\" data-mode=\"login\" class=\"' + (!signup ? 'on' : '') + '\">Sign in</button>' +\n\
     \          '<button role=\"tab\" data-action=\"mode\" data-mode=\"signup\" class=\"' + (signup ? 'on' : '') + '\">Create\
     \ account</button></div>' +\n        '<h2>' + (signup ? 'Create your account' : 'Welcome back') + '</h2>' +\n        '<p\
@@ -761,49 +788,62 @@ native_deps:
     \ in your head, then reveal the answer</li><li>Track cards learned, modules completed and your streak</li></ul>' +\n \
     \         '<div class=\"civ\"><strong>Made by a civilian, for learning.</strong> This is a personal study project by someone\
     \ interested in the field. It is not an official CAF or DND website and is not endorsed by them.</div></div>' +\n    \
-    \      '</div>' +\n        '<div class=\"main\"><div class=\"box fade-in\">' + form() + '<div data-el=\"msg\"></div></div></div></div>';\n\
-    \      var f = root.querySelector('form');\n      if (f) f.onsubmit = submit;\n      showMsg();\n      var first = root.querySelector('form\
-    \ input:not([value]), form input[value=\"\"]');\n      if (first) first.focus();\n    }\n\n    function showMsg() {\n\
-    \      var box = root.querySelector('[data-el=msg]');\n      if (box) box.innerHTML = S.msg ? '<div class=\"feedback '\
-    \ + (S.msg.ok ? 'good' : 'bad') + '\">' + esc(S.msg.text) + '</div>' : '';\n    }\n\n    // Toggle the busy state in place\
-    \ so typed values are kept.\n    function setBusy(on) {\n      S.busy = on;\n      root.querySelectorAll('.box button[type=submit],\
-    \ .box [data-action=google], .box [data-action=guest]').forEach(function (b) {\n        b.disabled = on;\n        if (b.type\
-    \ === 'submit') {\n          if (on) { b.dataset.label = b.innerHTML; b.innerHTML = '<span class=\"spin\"></span>'; }\n\
-    \          else if (b.dataset.label) b.innerHTML = b.dataset.label;\n        }\n      });\n    }\n\n    function run(event,\
-    \ payload) {\n      if (S.busy) return;\n      S.msg = null; showMsg(); setBusy(true);\n      emit(event, payload).then(function\
-    \ (res) {\n        setBusy(false);\n        res = res || {};\n        if (res.ok && !res.message) return; // Python navigates\
-    \ away on success\n        S.msg = res.ok ? { ok: true, text: res.message } : { ok: false, text: res.error || 'Something\
-    \ went wrong.' };\n        if (res.mode && res.mode !== S.mode) { S.mode = res.mode; render(); } else showMsg();\n   \
-    \   }, function (err) {\n        setBusy(false); S.msg = { ok: false, text: (err && err.message) || String(err) }; showMsg();\n\
-    \      });\n    }\n\n    function submit(e) {\n      e.preventDefault();\n      if (e.target.dataset.form === 'signup'\
-    \ && window.LegalKit && !LegalKit.consentChecked(e.target)) return;\n      var fd = new FormData(e.target), v = {};\n\
-    \      fd.forEach(function (val, key) { v[key] = String(val); });\n      S.email = v.email || '';\n      run(e.target.dataset.form,\
-    \ v);\n    }\n\n    root.addEventListener('click', function (e) {\n      var el = e.target.closest('[data-action]');\n\
-    \      if (!el) return;\n      if (el.dataset.action === 'mode') {\n        var em = root.querySelector('input[name=email]');\n\
-    \        if (em) S.email = em.value;\n        S.mode = el.dataset.mode; S.msg = null; render();\n      } else if (el.dataset.action\
-    \ === 'google') run('google', {});\n      else if (el.dataset.action === 'guest') run('guest', {});\n    });\n\n    render();\n\
-    \    return {};\n  });\n})();\n</script>\n\n<!-- ===== HomePage component ===== -->\n<style>\n.qb-home .hero { display:\
-    \ flex; gap: 16px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; margin-bottom: 22px; }\n.qb-home\
-    \ .hero p { margin: 0; }\n.qb-home .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom:\
-    \ 22px; }\n.qb-home .stat { padding: 16px 18px; }\n.qb-home .stat .v { font-family: var(--qb-serif); font-size: 1.9rem;\
-    \ font-weight: 700; line-height: 1.1; }\n.qb-home .stat .k { font-size: .82rem; color: var(--qb-muted); }\n.qb-home .continue\
-    \ { width: 100%; display: flex; gap: 16px; align-items: center; padding: 18px 22px; margin-bottom: 26px; border-color:\
-    \ var(--qb-accent); background: linear-gradient(120deg, var(--qb-accent-soft), var(--qb-panel) 70%); }\n.qb-home .continue.calm\
-    \ { border-color: var(--qb-line); background: var(--qb-panel); cursor: default; }\n.qb-home .continue .ico { width: 44px;\
-    \ height: 44px; border-radius: 12px; background: var(--qb-accent); color: var(--qb-accent-ink); display: grid; place-items:\
-    \ center; font-size: 1.2rem; flex: none; }\n.qb-home section + section { margin-top: 30px; }\n.qb-home .sechead { display:\
-    \ flex; align-items: baseline; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }\n.qb-home .sechead h2 { margin: 0; font-size:\
-    \ 1.35rem; }\n.qb-home .path-top { padding: 18px 22px; margin-bottom: 14px; }\n.qb-home .path-top .big { font-family:\
-    \ var(--qb-serif); font-size: 2rem; font-weight: 700; line-height: 1; }\n.qb-home .segbar { display: flex; gap: 3px; margin-top:\
-    \ 12px; }\n.qb-home .segbar i { flex: 1; height: 10px; border-radius: 3px; background: var(--qb-line); position: relative;\
-    \ overflow: hidden; }\n.qb-home .segbar i > b { position: absolute; inset: 0 auto 0 0; background: var(--qb-accent); }\n\
-    .qb-home .segbar i.done { background: var(--qb-good); }\n.qb-home .segbar i.done > b { background: var(--qb-good); }\n\
-    .qb-home .modules { display: grid; gap: 8px; }\n.qb-home .mod { display: grid; grid-template-columns: 54px minmax(0, 1fr)\
-    \ auto; gap: 14px; align-items: center; padding: 12px 16px; transition: border-color .12s, transform .12s; }\n.qb-home\
-    \ .mod:hover { border-color: var(--qb-accent); transform: translateX(2px); }\n.qb-home .mod .num { font-family: var(--qb-serif);\
-    \ font-weight: 700; font-size: 1.35rem; width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center;\
-    \ background: var(--qb-panel-2); border: 1px solid var(--qb-line); color: var(--c, var(--qb-accent)); }\n.qb-home .mod.complete\
-    \ .num { background: var(--qb-good-soft); color: var(--qb-good); border-color: transparent; }\n.qb-home .mod .t { font-weight:\
+    \      '</div>' +\n        '<div class=\"main\"><div class=\"box fade-in\">' + form() + '<div data-el=\"msg\"></div></div></div></div>'\
+    \ +\n        '<section class=\"qb-watch ytf\" id=\"watch\"><div class=\"ytf-in\"><div class=\"ytf-copy\"><div class=\"\
+    kind ytf-kick\"><svg viewBox=\"0 0 28 20\" width=\"20\" height=\"14\" aria-hidden=\"true\"><rect width=\"28\" height=\"\
+    20\" rx=\"5\" fill=\"#FF0033\"/><path d=\"M11.2 5.8v8.4l7.3-4.2z\" fill=\"#fff\"/></svg>Watch</div><h2>See CAF Guide in\
+    \ about a minute</h2><p>A short video tour of how CAF Guide works: the learning path, the flashcards and your progress.</p><a\
+    \ class=\"ytf-link\" href=\"https://www.youtube.com/watch?v=DHVV7YRVxX0\" target=\"_blank\" rel=\"noopener\">Watch on\
+    \ YouTube &#8599;</a></div><div><div class=\"ytf-frame\"><button type=\"button\" class=\"ytf-cover\"  data-yt-film=\"\
+    DHVV7YRVxX0\" data-yt-title=\"CAF Guide video\" aria-label=\"Play the CAF Guide video (1:14)\"><img src=\"_/theme/yt-cover.jpg\"\
+    \ alt=\"\" loading=\"lazy\" decoding=\"async\" width=\"960\" height=\"540\"><span class=\"ytf-play\" aria-hidden=\"true\"\
+    ><svg viewBox=\"0 0 68 48\" width=\"68\" height=\"48\"><path d=\"M66.5 7.7a8.5 8.5 0 0 0-6-6C55.3.3 34 .3 34 .3s-21.3\
+    \ 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6c5.2 1.4 26.5 1.4 26.5 1.4s21.3 0 26.5-1.4a8.5\
+    \ 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z\" fill=\"#FF0033\"/><path d=\"M45 24 27 14v20z\" fill=\"#fff\"\
+    /></svg></span><span class=\"ytf-len\">1:14</span></button></div><p class=\"ytf-note\">The video loads from YouTube when\
+    \ you press play.</p></div></div></section>';\n      var f = root.querySelector('form');\n      if (f) f.onsubmit = submit;\n\
+    \      showMsg();\n      var first = root.querySelector('form input:not([value]), form input[value=\"\"]');\n      if\
+    \ (first) first.focus();\n    }\n\n    function showMsg() {\n      var box = root.querySelector('[data-el=msg]');\n  \
+    \    if (box) box.innerHTML = S.msg ? '<div class=\"feedback ' + (S.msg.ok ? 'good' : 'bad') + '\">' + esc(S.msg.text)\
+    \ + '</div>' : '';\n    }\n\n    // Toggle the busy state in place so typed values are kept.\n    function setBusy(on)\
+    \ {\n      S.busy = on;\n      root.querySelectorAll('.box button[type=submit], .box [data-action=google], .box [data-action=guest]').forEach(function\
+    \ (b) {\n        b.disabled = on;\n        if (b.type === 'submit') {\n          if (on) { b.dataset.label = b.innerHTML;\
+    \ b.innerHTML = '<span class=\"spin\"></span>'; }\n          else if (b.dataset.label) b.innerHTML = b.dataset.label;\n\
+    \        }\n      });\n    }\n\n    function run(event, payload) {\n      if (S.busy) return;\n      S.msg = null; showMsg();\
+    \ setBusy(true);\n      emit(event, payload).then(function (res) {\n        setBusy(false);\n        res = res || {};\n\
+    \        if (res.ok && !res.message) return; // Python navigates away on success\n        S.msg = res.ok ? { ok: true,\
+    \ text: res.message } : { ok: false, text: res.error || 'Something went wrong.' };\n        if (res.mode && res.mode !==\
+    \ S.mode) { S.mode = res.mode; render(); } else showMsg();\n      }, function (err) {\n        setBusy(false); S.msg =\
+    \ { ok: false, text: (err && err.message) || String(err) }; showMsg();\n      });\n    }\n\n    function submit(e) {\n\
+    \      e.preventDefault();\n      if (e.target.dataset.form === 'signup' && window.LegalKit && !LegalKit.consentChecked(e.target))\
+    \ return;\n      var fd = new FormData(e.target), v = {};\n      fd.forEach(function (val, key) { v[key] = String(val);\
+    \ });\n      S.email = v.email || '';\n      run(e.target.dataset.form, v);\n    }\n\n    root.addEventListener('click',\
+    \ function (e) {\n      var el = e.target.closest('[data-action]');\n      if (!el) return;\n      if (el.dataset.action\
+    \ === 'mode') {\n        var em = root.querySelector('input[name=email]');\n        if (em) S.email = em.value;\n    \
+    \    S.mode = el.dataset.mode; S.msg = null; render();\n      } else if (el.dataset.action === 'google') run('google',\
+    \ {});\n      else if (el.dataset.action === 'guest') run('guest', {});\n    });\n\n    render();\n    return {};\n  });\n\
+    })();\n</script>\n\n<!-- ===== HomePage component ===== -->\n<style>\n.qb-home .hero { display: flex; gap: 16px; align-items:\
+    \ flex-end; justify-content: space-between; flex-wrap: wrap; margin-bottom: 22px; }\n.qb-home .hero p { margin: 0; }\n\
+    .qb-home .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }\n.qb-home .stat\
+    \ { padding: 16px 18px; }\n.qb-home .stat .v { font-family: var(--qb-serif); font-size: 1.9rem; font-weight: 700; line-height:\
+    \ 1.1; }\n.qb-home .stat .k { font-size: .82rem; color: var(--qb-muted); }\n.qb-home .continue { width: 100%; display:\
+    \ flex; gap: 16px; align-items: center; padding: 18px 22px; margin-bottom: 26px; border-color: var(--qb-accent); background:\
+    \ linear-gradient(120deg, var(--qb-accent-soft), var(--qb-panel) 70%); }\n.qb-home .continue.calm { border-color: var(--qb-line);\
+    \ background: var(--qb-panel); cursor: default; }\n.qb-home .continue .ico { width: 44px; height: 44px; border-radius:\
+    \ 12px; background: var(--qb-accent); color: var(--qb-accent-ink); display: grid; place-items: center; font-size: 1.2rem;\
+    \ flex: none; }\n.qb-home section + section { margin-top: 30px; }\n.qb-home .sechead { display: flex; align-items: baseline;\
+    \ gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }\n.qb-home .sechead h2 { margin: 0; font-size: 1.35rem; }\n.qb-home\
+    \ .path-top { padding: 18px 22px; margin-bottom: 14px; }\n.qb-home .path-top .big { font-family: var(--qb-serif); font-size:\
+    \ 2rem; font-weight: 700; line-height: 1; }\n.qb-home .segbar { display: flex; gap: 3px; margin-top: 12px; }\n.qb-home\
+    \ .segbar i { flex: 1; height: 10px; border-radius: 3px; background: var(--qb-line); position: relative; overflow: hidden;\
+    \ }\n.qb-home .segbar i > b { position: absolute; inset: 0 auto 0 0; background: var(--qb-accent); }\n.qb-home .segbar\
+    \ i.done { background: var(--qb-good); }\n.qb-home .segbar i.done > b { background: var(--qb-good); }\n.qb-home .modules\
+    \ { display: grid; gap: 8px; }\n.qb-home .mod { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 14px;\
+    \ align-items: center; padding: 12px 16px; transition: border-color .12s, transform .12s; }\n.qb-home .mod:hover { border-color:\
+    \ var(--qb-accent); transform: translateX(2px); }\n.qb-home .mod .num { font-family: var(--qb-serif); font-weight: 700;\
+    \ font-size: 1.35rem; width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; background:\
+    \ var(--qb-panel-2); border: 1px solid var(--qb-line); color: var(--c, var(--qb-accent)); }\n.qb-home .mod.complete .num\
+    \ { background: var(--qb-good-soft); color: var(--qb-good); border-color: transparent; }\n.qb-home .mod .t { font-weight:\
     \ 600; }\n.qb-home .mod .sub { display: block; font-weight: 400; font-size: .85rem; color: var(--qb-muted); white-space:\
     \ nowrap; overflow: hidden; text-overflow: ellipsis; }\n.qb-home .mod .mini { display: block; height: 4px; border-radius:\
     \ 99px; background: var(--qb-line); margin-top: 7px; max-width: 260px; overflow: hidden; }\n.qb-home .mod .mini > span\
