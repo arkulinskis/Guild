@@ -1,0 +1,21 @@
+<anvil-form layout="CAF_Guide.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap qb-cur kit-in">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="#profile"><i class="ic ic-back"></i> Profile</a></nav>
+      <div class="head">
+        <div>
+          <anvil-component type="Label" name="title" prop:role='["page-title"]' prop:text="Manage curriculum"></anvil-component>
+          <anvil-component type="Label" name="totals" prop:role='["muted-small"]'></anvil-component>
+        </div>
+        <span class="ui-spacer"></span>
+        <anvil-component type="Button" name="export_all_button" prop:text="Download all (JSON)" prop:role='["btn", "ic-download"]'></anvil-component>
+      </div>
+      <p class="muted small note">Changes go live for learners straight away. Editing a card keeps everyone's progress on it; deleting removes the card and everyone's progress on it. Hidden modules and parts stay here but learners can't see them. A downloaded file can be imported again from your profile.</p>
+      <div class="tools">
+        <anvil-component type="TextBox" name="filter_box" prop:placeholder="Filter by module or part title…"></anvil-component>
+      </div>
+      <anvil-component type="RepeatingPanel" name="mods_panel" prop:item_template="CAF_Guide.Items.CurModule" prop:role='["cur-list"]'></anvil-component>
+      <div class="ui-empty" anvil:name="empty"><span anvil:dom-node="empty_text"></span></div>
+    </div>
+  </anvil-block>
+</anvil-form>

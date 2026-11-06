@@ -1,0 +1,23 @@
+<div class="part">
+  <div class="phead">
+    <button type="button" class="tog" anvil:dom-node="tog" anvil:on-dom:click="self.tog_click" aria-expanded="false">
+      <i class="ic ic-chevron chev"></i><span class="num" anvil:dom-node="num"></span>
+      <span class="t"><span anvil:dom-node="title"></span><span class="sub" anvil:dom-node="sub"></span></span>
+    </button>
+    <span class="badge warn" anvil:name="hidden_badge">Hidden</span>
+    <div class="acts">
+      <anvil-component type="Button" name="preview_button" prop:text="Preview" prop:role='["btn", "btn-sm"]'></anvil-component>
+      <anvil-component type="Button" name="edit_button" prop:text="Edit" prop:role='["btn", "btn-sm"]'></anvil-component>
+      <anvil-component type="Button" name="delete_button" prop:text="Delete" prop:role='["btn", "btn-sm", "btn-danger"]'></anvil-component>
+    </div>
+  </div>
+  <div class="pbody" anvil:name="body">
+    <p class="muted small desc" anvil:dom-node="desc"></p>
+    <anvil-component type="Label" name="load_msg" prop:role='["msg-error"]' prop:visible="false"></anvil-component>
+    <div class="cards" role="list" anvil:name="cards_list">
+      <anvil-component type="RepeatingPanel" name="cards_panel" prop:item_template="CAF_Guide.Items.CurCard" prop:role='["contents"]'></anvil-component>
+    </div>
+    <p class="muted small" anvil:name="no_cards">No cards in this part yet.</p>
+    <anvil-component type="Button" name="add_button" prop:text="Add a card" prop:role='["btn", "btn-sm", "ic-plus"]'></anvil-component>
+  </div>
+</div>

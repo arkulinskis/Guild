@@ -1,0 +1,83 @@
+<anvil-form layout="CAF_Guide.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="qb-auth-page">
+      <div class="qb-auth">
+        <div class="side">
+          <svg class="wm" viewBox="-2015 -2000 4030 4030" aria-hidden="true"><path fill="currentColor" d="m-90 2030 45-863a95 95 0 0 0-111-98l-859 151 116-320a65 65 0 0 0-20-73l-941-762 212-99a65 65 0 0 0 34-79l-186-572 542 115a65 65 0 0 0 73-38l105-247 423 454a65 65 0 0 0 111-57l-204-1052 327 189a65 65 0 0 0 91-27l332-652 332 652a65 65 0 0 0 91 27l327-189-204 1052a65 65 0 0 0 111 57l423-454 105 247a65 65 0 0 0 73 38l542-115-186 572a65 65 0 0 0 34 79l212 99-941 762a65 65 0 0 0-20 73l116 320-859-151a95 95 0 0 0-111 98l45 863z"/></svg>
+          <div class="inner">
+            <div class="badge-logo"><img src="_/theme/8ff385ff-2cd5-4868-9642-6374157bd844.jpg" alt="CAF Guide logo" width="88" height="88"></div>
+            <h1>Learn about the Canadian Armed Forces</h1>
+            <p>CAF Guide is an unofficial study guide: public reports, policies, doctrine and history about the CAF, turned into flashcards that come back just before you would forget them.</p>
+            <ul>
+              <li>Learning modules you work through one by one</li>
+              <li>Answer in your head, then reveal the answer</li>
+              <li>Track cards learned, modules completed and your streak</li>
+            </ul>
+            <div class="civ"><strong>Made by a civilian, for learning.</strong> This is a personal study project by someone interested in the field. It is not an official CAF or DND website and is not endorsed by them.</div>
+          </div>
+        </div>
+
+        <div class="main">
+          <div class="box au-card kit-in">
+            <div class="ui-seg tabs" role="group" aria-label="Sign in or create an account" anvil:name="mode_tabs">
+              <button type="button" anvil:name="tab_login" data-mode="login" anvil:on-dom:click="self.mode_click">Sign in</button>
+              <button type="button" anvil:name="tab_signup" data-mode="signup" anvil:on-dom:click="self.mode_click">Create account</button>
+            </div>
+            <anvil-component type="Label" name="heading" prop:role='["au-title"]' prop:text="Welcome back"></anvil-component>
+            <anvil-component type="Label" name="sub" prop:role='["au-sub"]' prop:text="Sign in to continue where you left off."></anvil-component>
+
+            <div class="ui-stack au-form">
+              <label class="ui-field" anvil:name="name_field"><span>Your name</span>
+                <anvil-component type="TextBox" name="name_box" prop:placeholder="How should we greet you?"></anvil-component>
+              </label>
+              <label class="ui-field"><span>Email</span>
+                <anvil-component type="TextBox" name="email_box" prop:type="email"></anvil-component>
+              </label>
+              <div anvil:name="password_field">
+                <label class="ui-field"><span>Password</span>
+                  <span class="au-pw">
+                    <anvil-component type="TextBox" name="password_box" prop:hide_text="true"></anvil-component>
+                    <anvil-component type="Button" name="show_button" prop:text="Show" prop:role='["au-show"]'></anvil-component>
+                  </span>
+                </label>
+                <p class="ui-hint" anvil:name="pw_hint">At least 8 characters.</p>
+                <p class="ui-hint right" anvil:name="forgot_row"><a href="#auth/reset" data-mode="reset" anvil:on-dom:click="self.mode_click">Forgot password?</a></p>
+              </div>
+              <div anvil:name="consent_box" anvil:dom-node="consent"></div>
+              <anvil-component type="Label" name="message" prop:visible="false"></anvil-component>
+              <anvil-component type="Button" name="submit_button" prop:text="Sign in" prop:role='["btn", "btn-primary", "btn-block"]'></anvil-component>
+            </div>
+
+            <p class="au-back" anvil:name="back_row"><a href="#auth" data-mode="login" anvil:on-dom:click="self.mode_click"><i class="ic ic-back"></i> Back to sign in</a></p>
+
+            <div anvil:name="guest_part">
+              <div class="au-or">or</div>
+              <anvil-component type="Button" name="guest_button" prop:text="Try it without signing in" prop:role='["btn", "btn-block"]'></anvil-component>
+              <p class="ui-hint guest-note">Everything works, but your progress is only kept until you close this tab.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="qb-watch ytf" id="watch">
+        <div class="ytf-in">
+          <div class="ytf-copy">
+            <h2>See CAF Guide in about a minute</h2>
+            <p>A short video tour of how CAF Guide works: the learning path, the flashcards and your progress.</p>
+            <a class="ytf-link" href="https://www.youtube.com/watch?v=DHVV7YRVxX0" target="_blank" rel="noopener"><svg viewBox="0 0 28 20" width="20" height="14" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#FF0033"/><path d="M11.2 5.8v8.4l7.3-4.2z" fill="#fff"/></svg>Watch on YouTube &#8599;</a>
+          </div>
+          <div>
+            <div class="ytf-frame" anvil:dom-node="yt_frame">
+              <button type="button" class="ytf-cover" anvil:dom-node="yt_cover" aria-label="Play the CAF Guide video (1:14)">
+                <img src="_/theme/yt-cover.jpg" alt="" loading="lazy" decoding="async" width="960" height="540">
+                <span class="ytf-play" aria-hidden="true"><svg viewBox="0 0 68 48" width="68" height="48"><path d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.3.3 34 .3 34 .3s-21.3 0-26.5 1.4a8.5 8.5 0 0 0-6 6C.1 13 .1 24 .1 24s0 11 1.4 16.3a8.5 8.5 0 0 0 6 6c5.2 1.4 26.5 1.4 26.5 1.4s21.3 0 26.5-1.4a8.5 8.5 0 0 0 6-6C67.9 35 67.9 24 67.9 24s0-11-1.4-16.3z" fill="#FF0033"/><path d="M45 24 27 14v20z" fill="#fff"/></svg></span>
+                <span class="ytf-len">1:14</span>
+              </button>
+            </div>
+            <p class="ytf-note">The video loads from YouTube when you press play.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </anvil-block>
+</anvil-form>

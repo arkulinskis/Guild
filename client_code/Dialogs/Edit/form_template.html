@@ -1,0 +1,58 @@
+<div class="ui qb cur-edit">
+  <anvil-component type="Label" name="heading" prop:role='["dlg-h"]'></anvil-component>
+  <div class="ui-stack">
+    <div class="grid2" anvil:name="top_row">
+      <div>
+        <label class="ui-field"><span>Number</span>
+          <anvil-component type="TextBox" name="number_box"></anvil-component>
+        </label>
+        <p class="ui-hint" anvil:dom-node="number_hint"></p>
+      </div>
+      <div anvil:name="color_field">
+        <label class="ui-field"><span>Colour</span>
+          <span class="ui-row tight"><anvil-component type="TextBox" name="color_box" prop:role='["color-in"]'></anvil-component><span class="muted small">Used for its number and progress bars.</span></span>
+        </label>
+      </div>
+      <div anvil:name="source_field">
+        <label class="ui-field"><span>Source link</span>
+          <anvil-component type="TextBox" name="source_box" prop:type="url"></anvil-component>
+        </label>
+        <p class="ui-hint">Shown to learners as the source.</p>
+      </div>
+    </div>
+    <div anvil:name="title_field">
+      <label class="ui-field"><span>Title</span>
+        <anvil-component type="TextBox" name="title_box"></anvil-component>
+      </label>
+      <p class="ui-hint" anvil:name="title_hint">Importing a file matches modules by title, so renaming means a later import of the old file creates a new module.</p>
+    </div>
+    <label class="ui-field" anvil:name="description_field"><span>Description</span>
+      <anvil-component type="TextArea" name="description_box" prop:height="80"></anvil-component>
+    </label>
+    <div anvil:name="card_fields" class="ui-stack">
+      <label class="ui-field"><span>Question</span>
+        <anvil-component type="TextArea" name="question_box" prop:height="70"></anvil-component>
+      </label>
+      <div>
+        <label class="ui-field"><span>Answer</span>
+          <anvil-component type="TextArea" name="answer_box" prop:height="60"></anvil-component>
+        </label>
+        <p class="ui-hint">Keep it short: the learner checks their own recall against it.</p>
+      </div>
+      <label class="ui-field"><span>Explanation <span class="muted">(optional)</span></span>
+        <anvil-component type="TextArea" name="explanation_box" prop:height="60"></anvil-component>
+      </label>
+      <label class="ui-field"><span>Concept <span class="muted">(optional)</span></span>
+        <anvil-component type="TextBox" name="concept_box"></anvil-component>
+      </label>
+    </div>
+    <div anvil:name="published_field">
+      <anvil-component type="CheckBox" name="published_box" prop:text="Visible to learners"></anvil-component>
+    </div>
+    <anvil-component type="Label" name="message" prop:role='["msg-error"]' prop:visible="false"></anvil-component>
+    <div class="ui-row end">
+      <anvil-component type="Button" name="cancel_button" prop:text="Cancel" prop:role='["btn", "btn-ghost"]'></anvil-component>
+      <anvil-component type="Button" name="save_button" prop:text="Save" prop:role='["btn", "btn-primary"]'></anvil-component>
+    </div>
+  </div>
+</div>

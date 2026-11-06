@@ -1,0 +1,20 @@
+<div class="ui qb cur-pv">
+  <div class="ui-row small">
+    <anvil-component type="Label" name="part_label" prop:role='["dlg-h"]'></anvil-component>
+    <span class="ui-spacer"></span><span class="badge" anvil:dom-node="pos"></span>
+  </div>
+  <div class="face" aria-live="polite">
+    <span class="concept muted small" anvil:dom-node="concept"></span>
+    <div class="qq" anvil:dom-node="qq"></div>
+    <div class="aa" anvil:dom-node="aa"></div>
+    <div class="ee" anvil:dom-node="ee"></div>
+  </div>
+  <div class="ui-row">
+    <anvil-component type="Button" name="prev_button" prop:text="Previous" prop:role='["btn", "ic-back"]'></anvil-component>
+    <span class="ui-spacer"></span>
+    <anvil-component type="Button" name="flip_button" prop:text="Show answer" prop:role='["btn", "btn-primary"]'></anvil-component>
+    <anvil-component type="Button" name="next_button" prop:text="Next" prop:role='["btn"]'></anvil-component>
+    <anvil-component type="Button" name="close_button" prop:text="Close" prop:role='["btn", "btn-ghost"]'></anvil-component>
+  </div>
+  <p class="muted small keys">Preview only: nothing is recorded. Keys: space shows the answer, ← → move, Esc closes.</p>
+</div>

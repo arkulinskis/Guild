@@ -1,0 +1,60 @@
+---
+layout_metadata:
+  title: App frame
+  description: The header (Lookup, XP and streak, the account menu, the guest strip), the page, and the footer with the civilian disclaimer
+---
+<div class="ui qb ui-shell">
+  <header class="qb-header" anvil:name="header">
+    <div class="in">
+      <a class="brand" href="#home" aria-label="CAF Guide: your learning path">
+        <span class="logo"><img src="_/theme/8ff385ff-2cd5-4868-9642-6374157bd844.jpg" alt="" width="36" height="36"></span>
+        <span><span class="name">CAF Guide</span><span class="sub">Unofficial CAF study guide · made by a civilian</span></span>
+      </a>
+      <nav class="tools" aria-label="Tools">
+        <button type="button" class="look" anvil:name="lookup_button" anvil:on-dom:click="self.lookup_click" aria-expanded="false" aria-controls="qb-dict" aria-label="Look up an abbreviation"><i class="ic ic-search"></i><span>Lookup</span></button>
+      </nav>
+      <div class="me">
+        <button type="button" class="me-btn" anvil:name="me_button" anvil:on-dom:click="self.me_click" aria-haspopup="true" aria-expanded="false" aria-label="Your account">
+          <span class="xp" anvil:dom-node="xp"></span><span class="avatar" anvil:dom-node="avatar"></span>
+        </button>
+        <div class="ui-menu qb-menu" anvil:name="menu">
+          <div class="who">
+            <anvil-component type="Label" name="menu_name" prop:role='["menu-name"]'></anvil-component>
+            <anvil-component type="Label" name="menu_email" prop:role='["menu-email"]'></anvil-component>
+          </div>
+          <a href="#profile"><i class="ic ic-user"></i>Your profile</a>
+          <a href="#curriculum" anvil:name="admin_link"><i class="ic ic-book"></i>Manage curriculum</a>
+          <button type="button" anvil:on-dom:click="self.feedback_click"><i class="ic ic-chat"></i>Submit feedback</button>
+          <button type="button" data-lk-open="overview"><i class="ic ic-lock"></i>Privacy &amp; Terms</button>
+          <button type="button" anvil:on-dom:click="self.sign_out_click"><i class="ic ic-logout"></i><span anvil:dom-node="sign_out_text">Sign out</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="guest" anvil:name="guest_strip">
+      <span><strong>Guest mode.</strong> Your progress is kept only until you close this tab.</span>
+      <button type="button" anvil:on-dom:click="self.sign_out_click">Sign in or create an account</button>
+    </div>
+  </header>
+
+  <div class="qb-dict" id="qb-dict" anvil:name="lookup" role="dialog" aria-labelledby="qb-dict-title">
+    <div class="top">
+      <h2 id="qb-dict-title">Lookup</h2>
+      <button type="button" class="x" anvil:on-dom:click="self.lookup_close_click" aria-label="Close the lookup"><i class="ic ic-x"></i></button>
+    </div>
+    <anvil-component type="TextBox" name="lookup_box" prop:placeholder="Abbreviation or words, e.g. CJOC or LGen"></anvil-component>
+    <div class="res">
+      <anvil-component type="Label" name="lookup_note" prop:role='["dict-note"]'></anvil-component>
+      <anvil-component type="RepeatingPanel" name="hits_panel" prop:item_template="CAF_Guide.Items.Acronym"></anvil-component>
+    </div>
+    <a class="ui-btn btn-sm block google" anvil:name="google_link" href="https://www.google.com/" target="_blank" rel="noopener"><span anvil:dom-node="google_text"></span><i class="ic ic-external"></i></a>
+  </div>
+
+  <main class="ui-main qb-page">
+    <anvil-slot name="content"></anvil-slot>
+  </main>
+
+  <footer class="qb-footer" anvil:name="footer">
+    <p><strong>An independent study project by a civilian.</strong> CAF Guide was made by a member of the public with an interest in the Canadian Armed Forces. It is not an official site, and it is not affiliated with, endorsed by, or speaking for the Department of National Defence or the Canadian Armed Forces. The study cards summarize publicly available sources, which are linked in each module; for official and current information, go to canada.ca.</p>
+    <p class="links"><a href="https://prepsto.com/#f/jfr2n3p" target="_blank" rel="noopener" data-prepsto-open>Submit feedback</a> · <button type="button" class="linkish" data-lk-open="overview">Privacy &amp; Terms</button> · <span class="org">Contact developer: <a href="https://arkvital.com" target="_blank" rel="noopener">arkvital.com</a></span> · <span class="org">Parent company: <a href="https://addanapp.com" target="_blank" rel="noopener">addanapp.com</a></span></p>
+  </footer>
+</div>

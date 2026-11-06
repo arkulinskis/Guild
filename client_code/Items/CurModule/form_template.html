@@ -1,0 +1,22 @@
+<div class="item-host">
+<article class="ui-card mod" anvil:name="box">
+  <div class="mhead">
+    <button type="button" class="tog" anvil:dom-node="tog" anvil:on-dom:click="self.tog_click" aria-expanded="false">
+      <i class="ic ic-chevron chev"></i><span class="num" anvil:dom-node="num"></span>
+      <span class="t"><span anvil:dom-node="title"></span><span class="sub" anvil:dom-node="sub"></span></span>
+    </button>
+    <span class="badge warn" anvil:name="hidden_badge">Hidden</span>
+    <div class="acts">
+      <anvil-component type="Button" name="edit_button" prop:text="Edit" prop:role='["btn", "btn-sm"]'></anvil-component>
+      <anvil-component type="Button" name="export_button" prop:text="Download JSON" prop:role='["btn", "btn-sm"]'></anvil-component>
+      <anvil-component type="Button" name="delete_button" prop:text="Delete" prop:role='["btn", "btn-sm", "btn-danger"]'></anvil-component>
+    </div>
+  </div>
+  <div class="body" anvil:name="body">
+    <p class="muted small desc" anvil:dom-node="desc"></p>
+    <anvil-component type="RepeatingPanel" name="parts_panel" prop:item_template="CAF_Guide.Items.CurPart" prop:role='["cur-parts"]'></anvil-component>
+    <p class="muted small" anvil:name="no_parts">This module has no parts.</p>
+    <p anvil:name="learner_row"><a class="ui-btn ghost btn-sm" anvil:name="learner_link" href="#home">View as a learner <i class="ic ic-arrow"></i></a></p>
+  </div>
+</article>
+</div>

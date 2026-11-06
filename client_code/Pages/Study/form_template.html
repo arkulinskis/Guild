@@ -1,0 +1,129 @@
+<anvil-form layout="CAF_Guide.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap qb-study">
+      <div class="ui-narrow">
+
+        <!-- intro: what this session is, the three steps, Start -->
+        <div anvil:name="intro">
+          <nav class="crumbs" aria-label="Breadcrumb"><a anvil:name="back_link" href="#home"><i class="ic ic-back"></i> <span anvil:dom-node="back_text">Back</span></a></nav>
+          <div class="ui-card pad intro-card kit-in" anvil:name="intro_card">
+            <div>
+              <anvil-component type="Label" name="title" prop:role='["page-title"]'></anvil-component>
+              <anvil-component type="Label" name="description" prop:role='["lead"]'></anvil-component>
+              <p class="muted small context" anvil:name="context"><span anvil:dom-node="context_text"></span><span anvil:name="source_part"> Source: <a anvil:name="source_link" href="https://www.canada.ca/" target="_blank" rel="noopener"><span anvil:dom-node="source_host"></span></a>, summarized into study cards. Check the original for full context.</span></p>
+              <div class="counts" anvil:name="counts">
+                <span class="badge" anvil:dom-node="c_total"></span>
+                <span class="badge good" anvil:dom-node="c_learned"></span>
+                <span class="badge warn" anvil:dom-node="c_due"></span>
+                <span class="badge accent" anvil:dom-node="c_new"></span>
+              </div>
+            </div>
+
+            <div anvil:name="ready">
+              <ol class="how">
+                <li><b>1. Recall</b>Read the question and answer it in your head.</li>
+                <li><b>2. Reveal</b>Click the card (or press Space) to see the answer.</li>
+                <li><b>3. Be honest</b>"Got it" pushes the card further out. "Still learning" keeps it coming back.</li>
+              </ol>
+              <div class="toggle">
+                <anvil-component type="CheckBox" name="shuffle_box" prop:text="Shuffle cards"></anvil-component>
+                <p class="ui-hint">Mix up the order instead of following the quiz.</p>
+              </div>
+              <div class="ui-row">
+                <anvil-component type="Button" name="start_button" prop:text="Start" prop:role='["btn", "btn-primary"]'></anvil-component>
+                <span class="muted small" anvil:dom-node="start_note"></span>
+              </div>
+            </div>
+
+            <div anvil:name="caught_up">
+              <div class="ui-row caught">
+                <div class="done-ico" aria-hidden="true"><i class="ic ic-check"></i></div>
+                <div><h2>All caught up</h2><div class="muted" anvil:dom-node="next_text"></div></div>
+              </div>
+              <div class="ui-row">
+                <anvil-component type="Button" name="all_button" prop:text="Study all anyway" prop:role='["btn", "btn-primary"]'></anvil-component>
+                <a class="ui-btn ghost" anvil:name="back_button" href="#home">Back</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- one card: question, then the answer and the two honest ratings -->
+        <div anvil:name="card_view">
+          <div class="qhead">
+            <anvil-component type="Button" name="stop_button" prop:text="Stop" prop:role='["btn", "btn-ghost", "btn-sm", "ic-x"]'></anvil-component>
+            <span class="title" anvil:dom-node="q_title"></span><span class="ui-spacer"></span><span anvil:dom-node="left"></span>
+          </div>
+          <div class="bar sess-bar" role="progressbar" aria-label="Session progress" aria-valuemin="0" aria-valuemax="100" anvil:dom-node="sess_bar"><span anvil:dom-node="sess_fill"></span></div>
+          <div class="ui-card flash" anvil:name="flash">
+            <div class="front" anvil:name="front" anvil:on-dom:click="self.front_click">
+              <div class="meta">
+                <span class="badge accent" anvil:dom-node="m_concept"></span>
+                <span class="badge" anvil:dom-node="m_part"></span>
+                <span class="badge warn" anvil:dom-node="m_new">new</span>
+                <span class="badge" anvil:dom-node="m_again">again</span>
+                <span class="level" title="How well you know this card" role="img" anvil:dom-node="level"><i anvil:dom-node="d1"></i><i anvil:dom-node="d2"></i><i anvil:dom-node="d3"></i><i anvil:dom-node="d4"></i><i anvil:dom-node="d5"></i></span>
+              </div>
+              <anvil-component type="Label" name="qtext" prop:role='["qtext"]'></anvil-component>
+              <div class="reveal" anvil:name="reveal_row">
+                <anvil-component type="Button" name="reveal_button" prop:text="Show answer" prop:role='["btn", "btn-primary", "btn-lg"]'></anvil-component>
+              </div>
+            </div>
+            <div class="back" anvil:name="back_side" tabindex="-1">
+              <span class="ui-sr">Answer:</span>
+              <anvil-component type="Label" name="answer" prop:role='["answer"]'></anvil-component>
+              <anvil-component type="Label" name="explanation" prop:role='["expl"]'></anvil-component>
+              <div class="rate">
+                <button type="button" class="ui-btn again" anvil:name="again_button" anvil:on-dom:click="self.again_click"><span><i class="ic ic-refresh"></i> Still learning</span><small>keep it in rotation</small></button>
+                <button type="button" class="ui-btn got" anvil:name="got_button" anvil:on-dom:click="self.got_click"><span><i class="ic ic-check"></i> Got it</span><small anvil:dom-node="gap_text"></small></button>
+              </div>
+            </div>
+          </div>
+          <p class="keys" anvil:dom-node="keys"></p>
+        </div>
+
+        <!-- the summary after the last card -->
+        <div anvil:name="done_view">
+          <nav class="crumbs" aria-label="Breadcrumb"><a anvil:name="done_back" href="#home"><i class="ic ic-back"></i> <span anvil:dom-node="done_back_text">Back</span></a></nav>
+          <div class="ui-card pad summary-card kit-in">
+            <anvil-component type="Label" name="done_title" prop:role='["done-title"]'></anvil-component>
+            <div class="ui-row result">
+              <div class="big" anvil:dom-node="n_reviewed"></div><div class="big-k" anvil:dom-node="n_reviewed_k"></div>
+              <span class="ui-spacer"></span>
+              <div class="ui-row tight" anvil:name="gains_saving"><span class="badge"><span class="spin" aria-hidden="true"></span> saving…</span></div>
+              <div class="ui-row tight" anvil:name="gains">
+                <span class="badge accent" anvil:dom-node="g_xp"></span>
+                <span class="badge warn" anvil:dom-node="g_streak"></span>
+                <span class="badge good" anvil:dom-node="g_saved">Saved</span>
+                <span class="badge bad" anvil:dom-node="g_failed">Session not saved</span>
+              </div>
+            </div>
+            <div>
+              <div class="split" aria-hidden="true"><span class="g" anvil:dom-node="split_g"></span><span class="a" anvil:dom-node="split_a"></span></div>
+              <div class="ui-row small tight">
+                <span class="badge good" anvil:dom-node="r_first"></span>
+                <span class="badge accent" anvil:dom-node="r_recovered"></span>
+                <span class="badge warn" anvil:dom-node="r_still"></span>
+              </div>
+            </div>
+            <anvil-component type="Label" name="next_label" prop:role='["muted"]'></anvil-component>
+            <div class="ui-row">
+              <anvil-component type="Button" name="again_all_button" prop:text="Go again" prop:role='["btn", "btn-primary"]'></anvil-component>
+              <anvil-component type="Button" name="done_button" prop:text="Done" prop:role='["btn"]'></anvil-component>
+            </div>
+            <div anvil:name="still_part">
+              <h2 class="still-h">Still in rotation</h2>
+              <anvil-component type="RepeatingPanel" name="still_panel" prop:item_template="CAF_Guide.Items.StillCard" prop:role='["still"]'></anvil-component>
+            </div>
+          </div>
+        </div>
+
+        <div class="ui-empty" anvil:name="missing">
+          <h1>Nothing to study here</h1>
+          <p>This part or module may have been removed or hidden.</p>
+          <a class="ui-btn primary" href="#home">Back to the learning path</a>
+        </div>
+      </div>
+    </div>
+  </anvil-block>
+</anvil-form>
