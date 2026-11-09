@@ -1,0 +1,61 @@
+<anvil-form layout="CAF_Guide.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap qb-home kit-in">
+      <div class="hero">
+        <anvil-component type="Label" name="greeting" prop:role='["page-title"]'></anvil-component>
+        <anvil-component type="Label" name="lead" prop:role='["lead"]'></anvil-component>
+      </div>
+
+      <div class="stats">
+        <div class="ui-card stat"><div class="v"><span anvil:dom-node="s_done"></span><span class="of" anvil:dom-node="s_done_of"></span></div><div class="k">modules complete</div></div>
+        <div class="ui-card stat"><div class="v"><span anvil:dom-node="s_learned"></span><span class="of" anvil:dom-node="s_learned_of"></span></div><div class="k">cards learned</div></div>
+        <div class="ui-card stat"><div class="v"><span anvil:dom-node="s_due"></span></div><div class="k">due today</div></div>
+        <div class="ui-card stat"><div class="v"><span anvil:dom-node="s_streak"></span></div><div class="k">day streak</div></div>
+      </div>
+
+      <a class="ui-card continue" href="#review" anvil:name="cont_link">
+        <span class="ico" aria-hidden="true"><i class="ic" anvil:dom-node="cont_icon"></i></span>
+        <span class="body"><strong anvil:dom-node="cont_title"></strong><span class="meta" anvil:dom-node="cont_meta"></span></span>
+        <span class="badge" anvil:dom-node="cont_badge"></span>
+      </a>
+      <div class="ui-card continue calm" anvil:name="calm_box">
+        <span class="ico" aria-hidden="true"><i class="ic ic-check"></i></span>
+        <span class="body"><strong>All caught up: nothing is due right now.</strong><span class="meta" anvil:dom-node="calm_next"></span></span>
+      </div>
+
+      <section>
+        <div class="sechead">
+          <h2>Your learning path</h2>
+          <span class="muted small" anvil:dom-node="n_modules"></span>
+          <div class="ui-seg filters" role="group" aria-label="Show modules">
+            <button type="button" data-f="all" anvil:name="f_all" anvil:on-dom:click="self.filter_click">All</button>
+            <button type="button" data-f="todo" anvil:name="f_todo" anvil:on-dom:click="self.filter_click">To do</button>
+            <button type="button" data-f="due" anvil:name="f_due" anvil:on-dom:click="self.filter_click">Due</button>
+            <button type="button" data-f="done" anvil:name="f_done" anvil:on-dom:click="self.filter_click">Complete</button>
+          </div>
+        </div>
+        <div class="ui-card path-top" anvil:name="path_top">
+          <div class="ui-row">
+            <span class="big" anvil:dom-node="path_big"></span>
+            <span class="muted" anvil:dom-node="path_sub"></span>
+            <span class="ui-spacer"></span>
+            <span class="muted small">A module is complete when every card has been marked "Got it".</span>
+          </div>
+          <div aria-hidden="true">
+            <anvil-component type="RepeatingPanel" name="seg_panel" prop:item_template="CAF_Guide.Items.Seg" prop:role='["segbar"]'></anvil-component>
+          </div>
+        </div>
+        <anvil-component type="RepeatingPanel" name="modules_panel" prop:item_template="CAF_Guide.Items.ModuleRow" prop:role='["modules"]'></anvil-component>
+        <div class="ui-empty" anvil:name="no_modules"><h3>No modules yet</h3><p>Once the learning modules are imported they will show up here.</p></div>
+        <div class="ui-empty" anvil:name="no_match">Nothing in this view.</div>
+      </section>
+
+      <section anvil:name="recent_section">
+        <div class="sechead"><h2>Recent sessions</h2></div>
+        <div class="ui-card recent">
+          <anvil-component type="RepeatingPanel" name="recent_panel" prop:item_template="CAF_Guide.Items.SessionRow"></anvil-component>
+        </div>
+      </section>
+    </div>
+  </anvil-block>
+</anvil-form>

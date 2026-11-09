@@ -1,0 +1,128 @@
+<anvil-form layout="CAF_Guide.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap qb-prof kit-in">
+      <div class="top">
+        <span class="avatar lg" aria-hidden="true" anvil:dom-node="avatar"></span>
+        <div class="who">
+          <anvil-component type="Label" name="name_label" prop:role='["page-title"]'></anvil-component>
+          <div class="muted small"><span anvil:dom-node="sub_line"></span> <span class="badge accent" anvil:name="admin_badge">admin</span></div>
+          <anvil-component type="Label" name="bio_label" prop:role='["bio"]'></anvil-component>
+        </div>
+        <span class="ui-spacer"></span>
+        <anvil-component type="Button" name="sign_out_button" prop:text="Sign out" prop:role='["btn"]'></anvil-component>
+      </div>
+
+      <div class="cols">
+        <div>
+          <div class="ui-card pad">
+            <h2>Your stats</h2>
+            <div class="stats">
+              <div><div class="v"><span anvil:dom-node="t_learned"></span><span class="of" anvil:dom-node="t_total"></span></div><div class="k">cards learned</div></div>
+              <div><div class="v" anvil:dom-node="t_mastered"></div><div class="k">mastered (7+ days)</div></div>
+              <div><div class="v" anvil:dom-node="t_due"></div><div class="k">due today</div></div>
+              <div><div class="v" anvil:dom-node="t_reviews"></div><div class="k">reviews</div></div>
+              <div><div class="v" anvil:dom-node="t_sessions"></div><div class="k">sessions</div></div>
+              <div><div class="v" anvil:dom-node="t_streak"></div><div class="k">day streak</div></div>
+            </div>
+          </div>
+          <section class="ui-card pad">
+            <h2>Modules</h2>
+            <p class="muted small" anvil:dom-node="prog_line"></p>
+            <anvil-component type="RepeatingPanel" name="progress_panel" prop:item_template="CAF_Guide.Items.ProgressRow" prop:role='["prog"]'></anvil-component>
+            <p class="muted" anvil:name="no_prog">No modules yet.</p>
+          </section>
+        </div>
+
+        <div>
+          <div class="ui-card pad ui-stack">
+            <h2>Edit profile</h2>
+            <label class="ui-field"><span>Display name</span>
+              <anvil-component type="TextBox" name="name_box"></anvil-component>
+            </label>
+            <label class="ui-field"><span>About you <span class="muted">(optional)</span></span>
+              <anvil-component type="TextArea" name="bio_box" prop:placeholder="What are you learning, and why?"></anvil-component>
+            </label>
+            <div class="ui-field"><span id="qb-colour-label">Avatar colour</span>
+              <div role="group" aria-labelledby="qb-colour-label">
+                <anvil-component type="RepeatingPanel" name="swatch_panel" prop:item_template="CAF_Guide.Items.Swatch" prop:role='["swatches"]'></anvil-component>
+              </div>
+            </div>
+            <div class="ui-field"><span id="qb-theme-label">Theme <span class="muted">(this device)</span></span>
+              <div class="ui-seg" role="group" aria-labelledby="qb-theme-label">
+                <button type="button" data-t="auto" anvil:name="th_auto" anvil:on-dom:click="self.theme_click">Auto</button>
+                <button type="button" data-t="light" anvil:name="th_light" anvil:on-dom:click="self.theme_click">Light</button>
+                <button type="button" data-t="dark" anvil:name="th_dark" anvil:on-dom:click="self.theme_click">Dark</button>
+              </div>
+            </div>
+            <div class="ui-row end">
+              <anvil-component type="Button" name="save_button" prop:text="Save changes" prop:role='["btn", "btn-primary"]'></anvil-component>
+            </div>
+          </div>
+
+          <section class="ui-card pad ui-stack" anvil:name="guest_card">
+            <h2>Save your progress</h2>
+            <p class="muted small">You are trying CAF Guide as a guest. Nothing is saved to an account, and your progress ends when you close this tab. Create a free account to keep your cards, streak and completed modules.</p>
+            <div class="ui-row end">
+              <anvil-component type="Button" name="join_button" prop:text="Sign in or create an account" prop:role='["btn", "btn-primary"]'></anvil-component>
+            </div>
+          </section>
+
+          <section class="ui-card pad ui-stack" anvil:name="pw_card">
+            <h2>Change password</h2>
+            <label class="ui-field"><span>Current password</span>
+              <anvil-component type="TextBox" name="old_box" prop:hide_text="true"></anvil-component>
+            </label>
+            <label class="ui-field"><span>New password</span>
+              <anvil-component type="TextBox" name="new_box" prop:hide_text="true"></anvil-component>
+            </label>
+            <label class="ui-field"><span>Repeat new password</span>
+              <anvil-component type="TextBox" name="new2_box" prop:hide_text="true"></anvil-component>
+            </label>
+            <div class="ui-row">
+              <anvil-component type="Button" name="reset_button" prop:text="Forgot it? Email me a link" prop:role='["btn"]'></anvil-component>
+              <span class="ui-spacer"></span>
+              <anvil-component type="Button" name="pw_button" prop:text="Change password" prop:role='["btn", "btn-primary"]'></anvil-component>
+            </div>
+            <anvil-component type="Label" name="pw_msg" prop:visible="false"></anvil-component>
+          </section>
+
+          <section class="ui-card pad ui-stack" anvil:name="cur_card">
+            <h2>Manage curriculum</h2>
+            <p class="muted small">Preview, edit or delete modules, parts and cards after they were imported, and download them as JSON.</p>
+            <div class="ui-row end"><a class="ui-btn primary" href="#curriculum">Manage curriculum</a></div>
+          </section>
+
+          <section class="ui-card pad ui-stack" anvil:name="import_card">
+            <h2>Import learning modules</h2>
+            <p class="muted small">Choose one or more module files (the <code>modules/*.json</code> files). Each part is imported on its own, so large modules are fine. Importing a module again updates it and keeps everyone's progress on unchanged cards.</p>
+            <div class="ui-row">
+              <anvil-component type="FileLoader" name="files_loader" prop:text="Choose files" prop:multiple="true" prop:file_types=".json,application/json" prop:role='["btn"]'></anvil-component>
+              <span class="muted small" anvil:dom-node="files_note">No files chosen</span>
+              <span class="ui-spacer"></span>
+              <anvil-component type="Button" name="import_files_button" prop:text="Import selected files" prop:role='["btn", "btn-primary"]'></anvil-component>
+            </div>
+            <details>
+              <summary class="small">Or paste JSON</summary>
+              <div class="ui-stack paste">
+                <anvil-component type="TextArea" name="json_box" prop:role='["code"]' prop:placeholder='{"collection": "My module", "title": "Part 1", "questions": [{"question": "...", "answer": "...", "explanation": "...", "concept": "..."}]}'></anvil-component>
+                <div class="ui-row">
+                  <anvil-component type="Button" name="seed_button" prop:text="Load 27 sample cards" prop:role='["btn"]'></anvil-component>
+                  <span class="ui-spacer"></span>
+                  <anvil-component type="Button" name="import_json_button" prop:text="Import pasted JSON" prop:role='["btn"]'></anvil-component>
+                </div>
+              </div>
+            </details>
+            <anvil-component type="Label" name="admin_msg" prop:visible="false"></anvil-component>
+          </section>
+        </div>
+      </div>
+
+      <section class="ui-card pad history">
+        <h2>Recent sessions</h2>
+        <div class="hist-head" anvil:name="hist_head" aria-hidden="true"><span>Studied</span><span class="hide-sm">Date</span><span class="r">Cards</span></div>
+        <anvil-component type="RepeatingPanel" name="history_panel" prop:item_template="CAF_Guide.Items.HistoryRow" prop:role='["hist"]'></anvil-component>
+        <p class="muted" anvil:name="no_hist">You haven't studied any cards yet.</p>
+      </section>
+    </div>
+  </anvil-block>
+</anvil-form>

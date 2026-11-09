@@ -1,1 +1,27 @@
+/* theme.css: Anvil puts this file in the page itself, so it applies before the app has loaded.
+   The page background (light and dark, in step with app.css) and Anvil's loading spinner as the CAF Guide soldier:
+   the dotted ring (loading_ring.png) turns around the soldier (loading_soldier.png), who sits on a white disc so they
+   read in dark mode too. The two layers came from tools/make_loading_icon.py in the old project.
+   Anvil substitutes its theme-colour tokens (percent sign, "color:", a name, percent sign) in this file,
+   so never write that pattern here. */
+html, body { background: #f1f0eb; }
+@media (prefers-color-scheme: dark) { html:not([data-theme="light"]), html:not([data-theme="light"]) body { background: #0f1318; } }
+html[data-theme="dark"], html[data-theme="dark"] body { background: #0f1318; }
 
+html .anvil-spinner, #loadingSpinner {
+  --anvil-spinner-size: 120px;
+  width: 120px !important; height: 120px !important; top: calc(50% - 60px); left: calc(50% - 60px);
+  background: transparent !important; background-image: none !important; border: 0 !important; box-shadow: none !important;
+}
+html .anvil-spinner .anvil-spinner-svg, #loadingSpinner > svg, #loadingSpinner > img { display: none !important; }
+html .anvil-spinner::before, html .anvil-spinner::after, #loadingSpinner::before, #loadingSpinner::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+}
+html .anvil-spinner::before, #loadingSpinner::before {
+  background: url("_/theme/loading_ring.png") center / contain no-repeat; animation: qb-spin 2.4s linear infinite;
+}
+html .anvil-spinner::after, #loadingSpinner::after {
+  background: url("_/theme/loading_soldier.png") center / contain no-repeat, radial-gradient(circle closest-side, #fff 83%, transparent 84%);
+}
+@keyframes qb-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { html .anvil-spinner::before, #loadingSpinner::before { animation-duration: 8s; } }

@@ -1,0 +1,39 @@
+<anvil-form layout="CAF_Guide.Layouts.Shell">
+  <anvil-block slot="content">
+    <div class="ui-wrap qb-col kit-in" anvil:name="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="#home"><i class="ic ic-back"></i> Learning path</a><span class="sep" anvil:dom-node="crumb_mod"></span></nav>
+
+      <div anvil:name="found">
+        <div class="head">
+          <div>
+            <anvil-component type="Label" name="title" prop:role='["page-title"]'></anvil-component>
+            <anvil-component type="Label" name="description" prop:role='["lead"]'></anvil-component>
+            <p class="src muted" anvil:name="src_line">Source: <a anvil:name="src_link" href="https://www.canada.ca/" target="_blank" rel="noopener"><span anvil:dom-node="src_host"></span></a> (summarized for study)</p>
+          </div>
+          <anvil-component type="Button" name="study_button" prop:text="Study this module" prop:role='["btn", "btn-primary"]'></anvil-component>
+        </div>
+
+        <div class="ui-card summary" anvil:name="summary">
+          <div class="ui-row small">
+            <strong anvil:dom-node="sum_learned"></strong><span class="muted" anvil:dom-node="sum_pct"></span>
+            <span class="ui-spacer"></span>
+            <span class="badge good" anvil:name="b_complete">✓ module complete</span>
+            <span class="badge warn" anvil:dom-node="b_due"></span>
+            <span class="badge accent" anvil:dom-node="b_new"></span>
+          </div>
+          <div class="bar" role="progressbar" aria-label="Cards learned in this module" aria-valuemin="0" aria-valuemax="100" anvil:dom-node="bar"><span anvil:dom-node="bar_fill"></span></div>
+          <div class="muted small" anvil:dom-node="sum_parts"></div>
+        </div>
+
+        <anvil-component type="RepeatingPanel" name="parts_panel" prop:item_template="CAF_Guide.Items.PartRow" prop:role='["parts"]'></anvil-component>
+        <div class="ui-empty" anvil:name="no_parts">No parts in this module yet.</div>
+      </div>
+
+      <div class="ui-empty" anvil:name="missing">
+        <h1>Module not found</h1>
+        <p>It may have been removed or hidden. Your learning path has every module you can study.</p>
+        <a class="ui-btn primary" href="#home">Back to the learning path</a>
+      </div>
+    </div>
+  </anvil-block>
+</anvil-form>
