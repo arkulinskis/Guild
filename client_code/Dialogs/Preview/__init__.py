@@ -56,12 +56,16 @@ class Preview(PreviewTemplate):
         self.raise_event("x-close-alert", value=None)
 
     def _key(self, event):
+        # Browser autofill fires "keydown" events that carry no key.
+        key = getattr(event, "key", None)
+        if not key:
+            return
         tag = str(getattr(event.target, "tagName", "") or "")
-        if event.key == "ArrowRight":
+        if key == "ArrowRight":
             self._move(1)
-        elif event.key == "ArrowLeft":
+        elif key == "ArrowLeft":
             self._move(-1)
-        elif event.key in (" ", "Enter") and tag != "BUTTON":
+        elif key in (" ", "Enter") and tag != "BUTTON":
             event.preventDefault()
             if not self.flip:
                 self.flip_button_click()
