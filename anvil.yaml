@@ -229,7 +229,7 @@ metadata: {description: 'An unofficial study app for the Canadian Armed Forces: 
 name: CAF Guide
 native_deps:
   head_html: |
-    <script src="_/theme/legal-kit.js?v=cedacab371"></script>
+    <script src="_/theme/legal-kit.js?v=62599f271f"></script>
 
     <!-- seo:start (APP_MAKER/seo: edit seo/apps/guild.json and run seo.py, not here) -->
     <link rel="canonical" href="https://caf-guide.anvil.app/">
