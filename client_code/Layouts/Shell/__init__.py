@@ -167,7 +167,7 @@ class Shell(ShellTemplate):
             self._open_lookup(False)
 
     def _key(self, event):
-        if event.key == "Escape":
+        if getattr(event, "key", None) == "Escape":
             if self.lookup.visible:
                 self._open_lookup(False)
                 getattr(anvil.js.get_dom_node(self.lookup_button), "focus")()
