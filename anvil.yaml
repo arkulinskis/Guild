@@ -3,47 +3,31 @@ db_schema:
   card_state:
     client: none
     columns:
-    - admin_ui:
-        order: 0
-        width: 200
+    - admin_ui: {order: 0, width: 200}
       name: user
       target: users
       type: link_single
-    - admin_ui:
-        order: 1
-        width: 200
+    - admin_ui: {order: 1, width: 200}
       name: question
       target: questions
       type: link_single
-    - admin_ui:
-        order: 2
-        width: 200
+    - admin_ui: {order: 2, width: 200}
       name: quiz
       target: quizzes
       type: link_single
-    - admin_ui:
-        order: 3
-        width: 200
+    - admin_ui: {order: 3, width: 200}
       name: box
       type: number
-    - admin_ui:
-        order: 4
-        width: 200
+    - admin_ui: {order: 4, width: 200}
       name: due
       type: date
-    - admin_ui:
-        order: 5
-        width: 200
+    - admin_ui: {order: 5, width: 200}
       name: reviews
       type: number
-    - admin_ui:
-        order: 6
-        width: 200
+    - admin_ui: {order: 6, width: 200}
       name: lapses
       type: number
-    - admin_ui:
-        order: 7
-        width: 200
+    - admin_ui: {order: 7, width: 200}
       name: last_reviewed
       type: datetime
     indexes: []
@@ -52,39 +36,25 @@ db_schema:
   collections:
     client: none
     columns:
-    - admin_ui:
-        order: 0
-        width: 200
+    - admin_ui: {order: 0, width: 200}
       name: title
       type: string
-    - admin_ui:
-        order: 1
-        width: 200
+    - admin_ui: {order: 1, width: 200}
       name: description
       type: string
-    - admin_ui:
-        order: 2
-        width: 200
+    - admin_ui: {order: 2, width: 200}
       name: kind
       type: string
-    - admin_ui:
-        order: 3
-        width: 200
+    - admin_ui: {order: 3, width: 200}
       name: color
       type: string
-    - admin_ui:
-        order: 4
-        width: 200
+    - admin_ui: {order: 4, width: 200}
       name: position
       type: number
-    - admin_ui:
-        order: 5
-        width: 200
+    - admin_ui: {order: 5, width: 200}
       name: published
       type: bool
-    - admin_ui:
-        order: 6
-        width: 200
+    - admin_ui: {order: 6, width: 200}
       name: created
       type: datetime
     indexes: []
@@ -93,35 +63,23 @@ db_schema:
   questions:
     client: none
     columns:
-    - admin_ui:
-        order: 0
-        width: 200
+    - admin_ui: {order: 0, width: 200}
       name: quiz
       target: quizzes
       type: link_single
-    - admin_ui:
-        order: 1
-        width: 200
+    - admin_ui: {order: 1, width: 200}
       name: position
       type: number
-    - admin_ui:
-        order: 2
-        width: 200
+    - admin_ui: {order: 2, width: 200}
       name: text
       type: string
-    - admin_ui:
-        order: 3
-        width: 200
+    - admin_ui: {order: 3, width: 200}
       name: answer
       type: string
-    - admin_ui:
-        order: 4
-        width: 200
+    - admin_ui: {order: 4, width: 200}
       name: explanation
       type: string
-    - admin_ui:
-        order: 5
-        width: 200
+    - admin_ui: {order: 5, width: 200}
       name: concept
       type: string
     indexes: []
@@ -130,50 +88,32 @@ db_schema:
   quizzes:
     client: none
     columns:
-    - admin_ui:
-        order: 0
-        width: 200
+    - admin_ui: {order: 0, width: 200}
       name: collection
       target: collections
       type: link_single
-    - admin_ui:
-        order: 1
-        width: 200
+    - admin_ui: {order: 1, width: 200}
       name: title
       type: string
-    - admin_ui:
-        order: 2
-        width: 200
+    - admin_ui: {order: 2, width: 200}
       name: description
       type: string
-    - admin_ui:
-        order: 3
-        width: 200
+    - admin_ui: {order: 3, width: 200}
       name: difficulty
       type: string
-    - admin_ui:
-        order: 4
-        width: 200
+    - admin_ui: {order: 4, width: 200}
       name: position
       type: number
-    - admin_ui:
-        order: 5
-        width: 200
+    - admin_ui: {order: 5, width: 200}
       name: card_count
       type: number
-    - admin_ui:
-        order: 6
-        width: 200
+    - admin_ui: {order: 6, width: 200}
       name: published
       type: bool
-    - admin_ui:
-        order: 7
-        width: 200
+    - admin_ui: {order: 7, width: 200}
       name: source
       type: string
-    - admin_ui:
-        order: 8
-        width: 200
+    - admin_ui: {order: 8, width: 200}
       name: created
       type: datetime
     indexes: []
@@ -182,46 +122,30 @@ db_schema:
   sessions:
     client: none
     columns:
-    - admin_ui:
-        order: 0
-        width: 200
+    - admin_ui: {order: 0, width: 200}
       name: user
       target: users
       type: link_single
-    - admin_ui:
-        order: 1
-        width: 200
+    - admin_ui: {order: 1, width: 200}
       name: quiz
       target: quizzes
       type: link_single
-    - admin_ui:
-        order: 2
-        width: 200
+    - admin_ui: {order: 2, width: 200}
       name: finished
       type: datetime
-    - admin_ui:
-        order: 3
-        width: 200
+    - admin_ui: {order: 3, width: 200}
       name: reviewed
       type: number
-    - admin_ui:
-        order: 4
-        width: 200
+    - admin_ui: {order: 4, width: 200}
       name: got
       type: number
-    - admin_ui:
-        order: 5
-        width: 200
+    - admin_ui: {order: 5, width: 200}
       name: again
       type: number
-    - admin_ui:
-        order: 6
-        width: 200
+    - admin_ui: {order: 6, width: 200}
       name: xp
       type: number
-    - admin_ui:
-        order: 7
-        width: 200
+    - admin_ui: {order: 7, width: 200}
       name: ratings
       type: simpleObject
     indexes: []
@@ -230,116 +154,78 @@ db_schema:
   users:
     client: none
     columns:
-    - admin_ui:
-        order: 0
-        width: 200
+    - admin_ui: {order: 0, width: 200}
       client_hidden: false
       name: email
       type: string
-    - admin_ui:
-        order: 1
-        width: 200
+    - admin_ui: {order: 1, width: 200}
       client_hidden: true
       name: enabled
       type: bool
-    - admin_ui:
-        order: 2
-        width: 200
+    - admin_ui: {order: 2, width: 200}
       client_hidden: true
       name: last_login
       type: datetime
-    - admin_ui:
-        order: 3
-        width: 200
+    - admin_ui: {order: 3, width: 200}
       client_hidden: true
       name: password_hash
       type: string
-    - admin_ui:
-        order: 4
-        width: 200
+    - admin_ui: {order: 4, width: 200}
       client_hidden: true
       name: n_password_failures
       type: number
-    - admin_ui:
-        order: 5
-        width: 200
+    - admin_ui: {order: 5, width: 200}
       client_hidden: true
       name: confirmed_email
       type: bool
-    - admin_ui:
-        order: 6
-        width: 200
+    - admin_ui: {order: 6, width: 200}
       client_hidden: true
       name: signed_up
       type: datetime
-    - admin_ui:
-        order: 7
-        width: 200
+    - admin_ui: {order: 7, width: 200}
       client_hidden: false
       name: display_name
       type: string
-    - admin_ui:
-        order: 8
-        width: 200
+    - admin_ui: {order: 8, width: 200}
       client_hidden: false
       name: bio
       type: string
-    - admin_ui:
-        order: 9
-        width: 200
+    - admin_ui: {order: 9, width: 200}
       client_hidden: false
       name: avatar_color
       type: string
-    - admin_ui:
-        order: 10
-        width: 200
+    - admin_ui: {order: 10, width: 200}
       client_hidden: false
       name: is_admin
       type: bool
-    - admin_ui:
-        order: 11
-        width: 200
+    - admin_ui: {order: 11, width: 200}
       client_hidden: false
       name: xp
       type: number
-    - admin_ui:
-        order: 12
-        width: 200
+    - admin_ui: {order: 12, width: 200}
       client_hidden: false
       name: streak
       type: number
-    - admin_ui:
-        order: 13
-        width: 200
+    - admin_ui: {order: 13, width: 200}
       client_hidden: false
       name: last_active
       type: date
-    - admin_ui:
-        order: 14
-        width: 200
+    - admin_ui: {order: 14, width: 200}
       client_hidden: false
       name: legal_version
       type: string
-    - admin_ui:
-        order: 15
-        width: 200
+    - admin_ui: {order: 15, width: 200}
       client_hidden: false
       name: legal_accepted_at
       type: datetime
-    - admin_ui:
-        order: 16
-        width: 200
+    - admin_ui: {order: 16, width: 200}
       client_hidden: false
       name: legal_source
       type: string
     indexes: []
     server: full
     title: Users
-metadata:
-  description: 'An unofficial study app for the Canadian Armed Forces: active-recall flashcards on ranks, structure, training,
-    history and acronyms, with a daily review.'
-  logo_img: asset:8ff385ff-2cd5-4868-9642-6374157bd844.jpg
-  title: 'CAF Guide: flashcards to learn the Canadian Armed Forces'
+metadata: {description: 'An unofficial study app for the Canadian Armed Forces: active-recall flashcards on ranks, structure, training, history and acronyms, with a daily review.', logo_img: 'asset:8ff385ff-2cd5-4868-9642-6374157bd844.jpg', title: 'CAF Guide: flashcards to learn the Canadian Armed Forces'}
 name: CAF Guide
 native_deps:
   head_html: |
@@ -382,27 +268,16 @@ native_deps:
 package_name: CAF_Guide
 runtime_options:
   client_version: '3'
-  server_spec:
-    base: python314
+  server_spec: {base: python314}
   version: 3
 services:
-- client_config:
-    enable_v2: true
-  server_config:
-    auto_create_missing_columns: false
+- client_config: {enable_v2: true}
+  server_config: {auto_create_missing_columns: false}
   source: /runtime/services/tables.yml
-- client_config:
-    allow_signup: true
-    confirm_email: false
-    enable_automatically: true
-    use_email: true
-    use_google: false
-  server_config:
-    user_table: users
+- client_config: {allow_signup: true, confirm_email: false, enable_automatically: true, use_email: true, use_google: false}
+  server_config: {user_table: users}
   source: /runtime/services/anvil/users.yml
 - client_config: {}
   server_config: {}
   source: /runtime/services/google.yml
-startup:
-  module: startup
-  type: module
+startup: {module: startup, type: module}

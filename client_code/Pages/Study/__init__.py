@@ -362,12 +362,12 @@ class Study(StudyTemplate):
 
     # ------------------------------------------------------------ keyboard
     def _key(self, event):
-        if self.screen != "card" or event.ctrlKey or event.metaKey or event.altKey:
+        k = getattr(event, "key", None)  # browser autofill fires "keydown" events that carry no key
+        if not k or self.screen != "card" or getattr(event, "ctrlKey", False) or getattr(event, "metaKey", False) or getattr(event, "altKey", False):
             return
         tag = str(getattr(event.target, "tagName", "") or "")
         if tag in ("INPUT", "TEXTAREA", "SELECT"):
             return
-        k = event.key
         if not self.revealed and k in (" ", "Enter") and tag != "BUTTON":  # a focused button does its own job
             event.preventDefault()
             self._reveal()
