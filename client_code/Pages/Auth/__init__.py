@@ -10,19 +10,16 @@ HEADINGS = {"login": ("Welcome back", "Sign in to continue where you left off.",
                        "Create account"),
             "reset": ("Reset your password", "We'll email you a link to choose a new one.", "Send reset link")}
 EMAIL = re.compile(r"^\S+@\S+\.\S+$")
-# The app's video on the Addanapp YouTube channel (APP_MAKER/youtube/manifest.json), shown in the Watch section.
-YT_VIDEO = "DHVV7YRVxX0"
 
 
 class Auth(AuthTemplate):
     """The front page (Persuade + a form): the navy hero with the civilian note, sign in (#auth), create an account
-    (#auth/signup), reset the password (#auth/reset), "Try it without signing in" (guest mode), and the Watch
-    section. Sign-up needs the Privacy & Terms tick box (the legal kit draws it)."""
+    (#auth/signup), reset the password (#auth/reset), "Try it without signing in" (guest mode).
+    Sign-up needs the Privacy & Terms tick box (the legal kit draws it)."""
 
     def __init__(self, args=(), **properties):
         super().__init__(**properties)
         self.dom_nodes["consent"].innerHTML = legal.consent_field()
-        self.dom_nodes["yt_cover"].addEventListener("click", self._play)
         self._mode = args[0] if args and args[0] in ("signup", "reset") else "login"
         state.heading(self.heading, 2)
         state.set_control_attr(self.name_box, "autocomplete", "name")
@@ -50,13 +47,6 @@ class Auth(AuthTemplate):
         self.message.visible = bool(message)
         self.message.text = message or ""
         self.message.role = "msg-error" if is_error else "msg-note"
-
-    def _play(self, event):
-        """Swap the video's cover for YouTube's player (privacy-enhanced); nothing loads from YouTube before this click."""
-        self.dom_nodes["yt_frame"].innerHTML = (
-            '<iframe src="https://www.youtube-nocookie.com/embed/' + YT_VIDEO + '?autoplay=1&rel=0&playsinline=1" '
-            'title="CAF Guide video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen '
-            'referrerpolicy="strict-origin-when-cross-origin"></iframe>')
 
     # ---- switching between Sign in / Create account / Reset
     def mode_click(self, event):
