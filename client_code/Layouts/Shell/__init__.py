@@ -51,8 +51,8 @@ def lookup(query):
 
 class Shell(ShellTemplate):
     """The frame around every page: the header (signed-in learners and guests only, as before: the sign-in page has
-    no top bar), the Lookup panel, the guest strip, and the footer with the civilian disclaimer and its four links
-    (Submit feedback, Privacy & Terms, Contact developer, Parent company).
+    no top bar), the Lookup panel, the guest strip, and the footer with the civilian disclaimer and its two links
+    (Submit feedback, Privacy & Terms).
 
     Anvil keeps ONE Shell while pages come and go (open_form only swaps the "content" slot when the layout matches),
     so everything that depends on who is signed in or which page is open is drawn in refresh(), which router.show()
