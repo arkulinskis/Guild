@@ -222,6 +222,10 @@ db_schema:
       client_hidden: false
       name: legal_source
       type: string
+    - admin_ui: {order: 17, width: 200}
+      client_hidden: true
+      name: remembered_logins
+      type: simpleObject
     indexes: []
     server: full
     title: Users
@@ -274,7 +278,7 @@ services:
 - client_config: {enable_v2: true}
   server_config: {auto_create_missing_columns: false}
   source: /runtime/services/tables.yml
-- client_config: {allow_signup: true, confirm_email: false, enable_automatically: true, use_email: true, use_google: false}
+- client_config: {allow_remember_me: true, allow_signup: true, confirm_email: false, enable_automatically: true, remember_me_days: 30, use_email: true, use_google: false}
   server_config: {user_table: users}
   source: /runtime/services/anvil/users.yml
 - client_config: {}
