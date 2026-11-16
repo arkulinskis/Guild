@@ -35,7 +35,7 @@ description: Context, workflow and recipes for CAF Guide (folder Guild-forms), t
 3. `python tools/check.py` (no -I) -> **ALL CHECKS PASSED** (Anvil validator, JS syntax, asset hashes, server tests, design check).
 4. `python -I tools/ui_test.py` (Docker Desktop running) -> **ALL UI TESTS PASSED** (flow, phone 390 px, admin, a11y,
    design). `--shots DIR` = screenshots of every page: Read them.
-5. Commit only your files as `arkulinskis <arkulinskis@gmail.com>` ending with
+5. Commit only your files as the user's git identity ending with
    `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`; push the branch.
    New tables/columns: tell the user to accept the **Schema Mismatch** alert ("The schema of the source code is correct");
    until they do, the app errors with `NoSuchColumnError`.
