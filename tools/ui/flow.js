@@ -10,20 +10,17 @@
   const button = (re, root) => $$((root || '') + ' button').filter(vis).find((b) => re.test(b.textContent));
 
   try {
-    // ---- the front page (visitors): hero, form, Watch section, the four footer links, no header
+    // ---- the front page (visitors): hero, form, footer links, no header (no video: removed at the user's request 2026-11-09)
     await GL.signOut();
     await page('#auth', () => $('.qb-auth'));
     ok(/Learn about the Canadian Armed Forces/.test(text('.qb-auth h1')), 'front page: the hero heading');
     ok(/unofficial/i.test(text('.qb-auth .side')) && /civilian/i.test(text('.qb-auth .civ')), 'front page: says it is unofficial, made by a civilian');
-    ok($('#watch .ytf-cover') && !$('#watch iframe'), 'front page: Watch section (nothing loads from YouTube before the click)');
+    ok(!$('#watch') && !$('iframe[src*="youtube"]'), 'front page: no video section (removed 2026-11-09)');
     ok(!vis($('.qb-header')), 'front page: no top bar while signed out (as before)');
     const foot = $('.qb-footer');
     ok(foot.querySelector('[data-prepsto-open][href*="prepsto.com/#f/jfr2n3p"]') && foot.querySelector('[data-lk-open]') &&
-       foot.querySelector('a[href="https://arkvital.com"]') && foot.querySelector('a[href="https://addanapp.com"]'), 'footer: Submit feedback, Privacy & Terms, Contact developer, Parent company');
+       !foot.querySelector('a[href="https://arkvital.com"]') && !foot.querySelector('a[href="https://addanapp.com"]'), 'footer: Submit feedback and Privacy & Terms (no Contact developer / Parent company, 2026-11-09)');
     ok(/independent study project by a civilian/.test(foot.textContent), 'footer: the civilian disclaimer');
-    $('#watch .ytf-cover').click();
-    await until(() => $('#watch iframe[src*="youtube-nocookie.com/embed/DHVV7YRVxX0"]'), 'the video player');
-    ok(true, 'Watch: pressing play loads the privacy-enhanced player');
 
     // ---- the local admin and the sample cards (first account = admin)
     await GL.ensureContent();
