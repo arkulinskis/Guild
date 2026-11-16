@@ -15,6 +15,8 @@ os.environ["ANVIL_APP_YAML"] = str(PROJECT / "anvil.yaml")
 sys.path[:0] = [str(HERE / "mock"), str(_tmp)]
 import json, datetime as dt
 import anvil.users
+import anvil.secrets  # noqa: E402
+anvil.secrets.SECRETS["admin_emails"] = "admin@example.com"  # the App Secret, faked
 from anvil.tables import app_tables as T
 from app import QuizService as S
 from app.DemoData import DEMO_QUIZZES
