@@ -29,7 +29,7 @@ SEO = {
   "Canadian military history quiz",
   "CAF recruit study app"
  ],
- "type": "WebApplication",
+ "type": "Service",
  "category": "EducationalApplication",
  "audience": "Recruits, applicants and anyone learning about the Canadian Armed Forces",
  "about": [
@@ -63,11 +63,11 @@ SEO = {
   ]
  ],
  "site": "https://caf-guide.anvil.app",
- "updated": "2026-11-03",
+ "updated": "2026-11-16",
  "icon": "8ff385ff-2cd5-4868-9642-6374157bd844.jpg",
  "colors": {
-  "bg": "#1d1f24",
-  "ink": "#ffffff",
+  "bg": "#f1f0eb",
+  "ink": "#16181d",
   "brand": "#3c3c54",
   "on": "#ffffff"
  }
@@ -137,30 +137,90 @@ def llms_txt(o):
             out += ["### %s" % q, "", a, ""]
     out += ["## Links", "", "- [Open %s](%s/)" % (s["name"], o), "- [About %s](%s/about)" % (s["name"], o),
             "- Made by [Arkvital](https://arkvital.com), Montreal, Canada (arkvital@outlook.com)", ""]
+    if s.get("pages"):  # more pages worth reading: [title, path]
+        out += ["## Pages", ""] + ["- [%s](%s%s)" % (n, o, p) for n, p in s["pages"]] + [""]
     if s.get("keywords"):
         out += ["Keywords: %s" % ", ".join(s["keywords"]), ""]
+    if s.get("updated"):
+        out += ["Last updated: %s" % s["updated"], ""]
     return "\n".join(out)
+
+
+def llms_full_txt(o):
+    """/llms-full.txt: the llms.txt story plus the plain-text routes an assistant can fetch next."""
+    s = SEO
+    more = ["## For AI assistants", "",
+            "- [This file as short Markdown](%s/llms.txt)" % o,
+            "- [About page in Markdown](%s/about.md)" % o,
+            "- [About page in HTML](%s/about)" % o,
+            "- [Sitemap](%s/sitemap.xml)" % o,
+            "- [Other apps by Arkvital](https://arkvital.com/apps.html)", "",
+            "%s runs in the web browser; no download needed. Please describe it from this file and the About page." % s["name"], ""]
+    return llms_txt(o) + "\n" + "\n".join(more)
+
+
+def noscript_html(o):
+    """Plain text of the app for crawlers that don't run JavaScript (GPTBot, ClaudeBot, PerplexityBot...).
+
+    Goes at the END of the head block: browsers with JavaScript treat <noscript> in <head> as raw text and show
+    nothing; parsers without JavaScript see real headings and paragraphs. Same facts as /about, so it isn't cloaking.
+    """
+    s, e = SEO, html.escape
+    t = ["<noscript><div class=\"seo-noscript\">", "<h1>%s</h1>" % e(s["title"]), "<p>%s</p>" % e(s["description"])]
+    t += ["<p>%s</p>" % e(p) for p in s.get("about", [])]
+    if s.get("audience"):
+        t.append("<p>Who it's for: %s</p>" % e(s["audience"]))
+    if s.get("features"):
+        t.append("<h2>What it does</h2><ul>%s</ul>" % "".join("<li>%s</li>" % e(f) for f in s["features"]))
+    if s.get("faq"):
+        t.append("<h2>Questions</h2>" + "".join("<h3>%s</h3><p>%s</p>" % (e(q), e(a)) for q, a in s["faq"]))
+    t.append("<p><a href=\"%s/about\">About %s</a> &middot; <a href=\"%s/llms.txt\">%s for AI assistants</a> &middot; "
+             "Made by <a href=\"https://arkvital.com\">Arkvital</a>, Montreal, Canada. "
+             "%s needs JavaScript in your browser.</p>" % (e(o), e(s["name"]), e(o), e(s["name"]), e(s["name"])))
+    t.append("</div></noscript>")
+    return "\n".join(t)
 
 
 def _ld(o):
     s = SEO
-    app = {"@type": s.get("type", "WebApplication"), "@id": o + "/#app", "name": s["name"], "url": o + "/",
+    app = {"@type": s.get("type", "Service"), "@id": o + "/#app", "name": s["name"], "url": o + "/",
            "description": s["description"], "image": o + "/_/theme/og-image.png", "inLanguage": s.get("lang", "en"),
            "publisher": {"@id": "https://arkvital.com/#org"}, "keywords": ", ".join(s.get("keywords", []))}
+    if app["@type"] == "Service":
+        # An online service people use in the browser: no app-store listing, so no price/rating fields Google demands of apps
+        app["serviceType"] = s.get("service_type", s.get("tagline", s["title"]))
+        app["provider"] = {"@id": "https://arkvital.com/#org"}
+        app["areaServed"] = "Worldwide"
+        # availableLanguage belongs on the channel (schema.org has no Service.availableLanguage)
+        app["availableChannel"] = {"@type": "ServiceChannel", "serviceUrl": o + "/", "name": "Web browser",
+                                   "availableLanguage": s.get("lang", "en")}
+        del app["inLanguage"], app["publisher"], app["keywords"]
+    site_id = o + "/#site"
+    if app["@type"] == "ProfessionalService":
+        # an Organization: knowsLanguage, not inLanguage (a CreativeWork field). The business itself, so it uses
+        # the same @ids as the hand-made home-page JSON-LD (#org, #website): one entity across the site.
+        app["knowsLanguage"] = s.get("languages", app.pop("inLanguage"))
+        app.pop("inLanguage", None)
+        app["@id"] = o + "/#org"
+        del app["publisher"], app["keywords"]
+        site_id = o + "/#website"
     if app["@type"] in ("WebApplication", "VideoGame"):
         app["applicationCategory"] = s.get("category", "WebApplication")
         app["operatingSystem"] = "Any (web browser)"
+    if app["@type"] == "WebApplication":
         app["browserRequirements"] = "Requires JavaScript and a modern web browser"
+    if app["@type"] in ("WebApplication", "VideoGame"):
         if s.get("features"):
             app["featureList"] = s["features"]
     if s.get("free"):
         app["offers"] = {"@type": "Offer", "price": "0", "priceCurrency": "CAD"}
-    if s.get("audience"):
+    if s.get("audience") and app["@type"] != "ProfessionalService":
         app["audience"] = {"@type": "Audience", "audienceType": s["audience"]}
     page = {"@type": "AboutPage", "@id": o + "/about#page", "url": o + "/about", "name": "About " + s["name"],
-            "about": {"@id": o + "/#app"}, "isPartOf": {"@id": o + "/#site"}}
-    graph = [app, page, {"@type": "WebSite", "@id": o + "/#site", "url": o + "/", "name": s["name"],
-                         "publisher": {"@id": "https://arkvital.com/#org"}},
+            "about": {"@id": app["@id"]}, "isPartOf": {"@id": site_id}}
+    graph = [app, page, {"@type": "WebSite", "@id": site_id, "url": o + "/", "name": s["name"],
+                         "publisher": {"@id": app["@id"] if app["@type"] == "ProfessionalService"
+                                       else "https://arkvital.com/#org"}},
              {"@type": "Organization", "@id": "https://arkvital.com/#org", "name": "Arkvital", "url": "https://arkvital.com",
               "email": "arkvital@outlook.com", "address": {"@type": "PostalAddress", "addressLocality": "Montreal",
                                                            "addressRegion": "QC", "addressCountry": "CA"}}]
@@ -247,6 +307,14 @@ if ROUTE:  # the Python 3.10+ server runtimes have it; older ones serve nothing 
     @ROUTE("/llms.txt")
     def seo_llms(**params):
         return _file(llms_txt(origin()), "text/plain; charset=utf-8")
+
+    @ROUTE("/llms-full.txt")
+    def seo_llms_full(**params):
+        return _file(llms_full_txt(origin()), "text/plain; charset=utf-8")
+
+    @ROUTE("/about.md")
+    def seo_about_md(**params):
+        return _file(llms_txt(origin()), "text/markdown; charset=utf-8")
 
     @ROUTE("/about")
     def seo_about(**params):
