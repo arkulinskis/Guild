@@ -42,7 +42,7 @@ SEO = {
   "A daily review of every card that is due",
   "Ready-made cards on CAF structure, training, ranks and history",
   "A lookup dictionary of CAF acronyms",
-  "Streaks, collections and your own quizzes"
+  "A study plan: pick a track, set a date and see how ready you are"
  ],
  "faq": [
   [
@@ -55,7 +55,7 @@ SEO = {
   ],
   [
    "What topics does it cover?",
-   "The demo cards cover CAF structure, training, ranks and history, and the app includes a dictionary of military acronyms. You can also make your own quizzes."
+   "29 learning modules (about 2,000 cards) cover CAF structure, ranks, abbreviations and slang, defence policy, doctrine and planning, reading lists and Afghanistan, and the app includes a dictionary of military acronyms."
   ],
   [
    "Do I need an account?",

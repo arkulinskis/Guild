@@ -38,9 +38,52 @@ def _end_guest():
         state.set_me(None)
 
 
+def leave_guest_keep():
+    """Leave guest mode for the sign-in page WITHOUT discarding the progress: the server session keeps it, and
+    claim_guest moves it into the account signed in to or created next. (Exit guest mode = sign_out still discards.)
+    A copy goes into this tab's storage in case the server session doesn't survive signing in."""
+    if not state.is_guest():
+        return
+    try:
+        data = anvil.server.call_s("guest_export")
+    except Exception:
+        data = None
+    state.keep_guest(data if isinstance(data, dict) else {})
+    state.set_me(None)  # no end_guest: the data stays in the server session
+    legal.signed_out()
+
+
+def _claim():
+    """Guest progress kept by leave_guest_keep joins this account. The direct call (not state.learn): the client
+    no longer counts as a guest, and claim_guest needs the signed-in user."""
+    kept = state.kept_guest()
+    if kept is None:
+        return None
+    try:
+        res = anvil.server.call("claim_guest", state.today(), kept or None)
+    except Exception:
+        res = None
+    state.keep_guest(None)
+    return res if isinstance(res, dict) else None
+
+
+def claim_message(claimed):
+    """'Your 23 cards and today's streak are now saved to your account.' (None when nothing came across.)"""
+    if not claimed or not (claimed.get("cards") or claimed.get("sessions")):
+        return None
+    n, streak = claimed.get("cards") or 0, claimed.get("streak") or 0
+    what = ("Your card" if n == 1 else "Your %d cards" % n) if n else "Your guest sessions"
+    if streak == 1:
+        what += " and today's streak"
+    elif streak > 1:
+        what += " and your %d-day streak" % streak
+    return what + (" is" if (n == 1 and not streak) else " are") + " now saved to your account."
+
+
 def _signed_in():
-    """After sign-in or sign-up: the learner, with the name typed at sign-up if the account still has the
-    made-up one (as the old app did)."""
+    """After sign-in or sign-up: guest progress from this tab joins the account (claim_guest), then the learner,
+    with the name typed at sign-up if the account still has the made-up one (as the old app did)."""
+    claimed = _claim()
     _end_guest()
     me = anvil.server.call("get_me", state.today())
     name = state.pending_name()
@@ -49,7 +92,7 @@ def _signed_in():
     state.pending_name(clear=True)
     state.set_me(me)
     legal.refresh_soon()  # records the sign-up tick box, or reminds people to review new terms
-    return {"ok": True}
+    return {"ok": True, "claimed": claim_message(claimed)}
 
 
 def sign_in(email, password):
@@ -83,7 +126,9 @@ def reset(email):
 
 
 def try_as_guest():
-    """Try the app without an account: progress is kept for this browser session only."""
+    """Try the app without an account: progress is kept for this browser session only. Progress kept on the way
+    to the sign-in page comes back (start_guest resumes the session's data)."""
+    state.keep_guest(None)
     state.set_me(anvil.server.call("start_guest", state.today()))
     return {"ok": True}
 
@@ -92,6 +137,7 @@ def sign_out():
     """Sign out, or leave guest mode (guest progress is discarded)."""
     if state.is_guest():
         _end_guest()
+        state.keep_guest(None)
     else:
         anvil.users.logout()
         state.set_me(None)

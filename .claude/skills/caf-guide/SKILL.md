@@ -53,7 +53,7 @@ client_code/
   Pages/              Auth, Home (learning path), Collection (= module page), Study (study session + daily review),
                       Profile, Curriculum (admin: manage modules/parts/cards; also serves #admin)
   Items/              ModuleRow, PartRow, SessionRow, HistoryRow, ProgressRow, StillCard, Cur*, Acronym, Seg, Swatch
-  Dialogs/            Edit, Preview
+  Dialogs/            Edit, Preview, Plan (mission plan: track + target date)
 server_code/          QuizService.py (ALL data access, scheduling, XP/streak, import, guest twins), DemoData.py,
                       legal_server.py, SchemaCheck
 theme/assets/         app.css (tokens + pages), app-kit.js, acronyms.js, legal-kit.js, theme.css (spinner)
@@ -75,10 +75,30 @@ Patterns (pages, lists, dialogs, buttons, a11y, design kit) are those of
   learner call; signed-in callables keep `require_user=True`. Both call one internal `_<name>(user, ...)`; guest data
   lives in `anvil.server.session`, never in tables. A new learner function needs both versions and a guest test in
   `tools/testing/test_server.py`.
+- **Keep guest progress** (2026-11-20): the guest strip's and Profile's "Sign in or create an account" call
+  `auth.leave_guest_keep()` (no `end_guest`; a `guest_export()` copy goes into sessionStorage `qb.guestKeep`), the
+  Auth page shows "Your guest progress will be added...", and `auth._signed_in()` calls `claim_guest(today, kept)`
+  directly (not `state.learn`) before anything else. The server trusts `anvil.server.session["guest"]` and only falls
+  back to the checked browser copy (`_clean_kept`). Merge: new cards added, the newer `last_reviewed` wins (a newer box
+  is never lowered), sessions added with `ratings={"module", "from_guest": True, "guest_id"}` (a second claim of the
+  same guest id adds nothing), XP adds up, streaks join (`_merge_streak`), plan and shields carried over.
+  "Exit guest mode" (menu) still discards.
+- **Mission plan**: `TRACKS` / `PLAN_LABELS` in QuizService.py (module numbers = `collections.position`, missing ones
+  skipped). Table `plans` (user, track, target_date, label, updated); guests keep `plan` in their session dict.
+  `save_plan` / `guest_save_plan` validate (track, date tomorrow..2 years, label). `get_home` adds `plan` (Ready = box
+  2+, Shaky = seen with box 0-1, Not started; `days_left`; `new_per_day` = not started / (days left - 7 when more than
+  14 days are left, else days left)), `plan_ready` (False while the table is missing: the card hides), `tracks`,
+  `away_days`. "Continue" walks the track's parts first; Home's filter row gains "My track".
+- **Comeback kit**: optional `users.shields` read through `_shields()` (None = column missing = old streak rules).
+  `_finish_session`: a gap of 1..shields missed days keeps the streak (shields spent); each new multiple of 7 earns one
+  (max 2); returns `shield_used` / `shield_earned`. `_current_streak` keeps a streak alive while shields can cover the
+  gap. Home: shield count on the streak tile + hint; "welcome back" Continue card when more than 50 are due or after
+  3+ days away (`#review/light` = a 25-card session). Study intro: size switch 10 · 25 · 50 (`sessSize` on this
+  device, default 50 = the old limit); `_start` takes the first N (most overdue first).
 - The browser sends `today`; `_client_today` accepts it only within ±1 day of UTC.
 - Scheduling: "Got it" -> `box + 1`, due after `BOX_INTERVALS = [0,1,3,7,16,35,90]` days; "Still learning" -> box 0,
   due today. Learned = box ≥ 1, mastered = box ≥ 4, module complete = all its cards learned.
-- Tables: `users` (+ display_name, bio, avatar_color, is_admin, xp, streak, last_active, legal_*), `collections`
+- Tables: `users` (+ display_name, bio, avatar_color, is_admin, xp, streak, shields, last_active, legal_*), `plans`, `collections`
   (= modules, `position`), `quizzes` (= parts: position, card_count, source), `questions` (text, answer,
   explanation, concept), `card_state` (user × card: box, due, reviews, lapses), `sessions`.
 
@@ -97,6 +117,13 @@ Patterns (pages, lists, dialogs, buttons, a11y, design kit) are those of
 - No `gh` CLI: pushes go over HTTPS through Git Credential Manager; if it asks for sign-in, tell the user.
 - Heredocs in the Bash tool mangle quotes: write files with the Write tool.
 - The template guide's gotchas (local App Server lag, alert widths, headless Chrome) apply here too.
+- `client_code/Pages/Study/__init__.py` and `Dialogs/Preview/__init__.py` are stored with CRLF line endings in git:
+  keep them that way in patch scripts (or the whole file shows as changed).
+- `tools/assets.py` re-dumps anvil.yaml with sorted keys (a huge diff on this repo's hand-ordered file): after a CSS
+  change you can instead set `app.css?v=` to `sha1(file)[:10]` by hand.
+- Privacy & Terms facts for the unmerged `improve-2026-11` branch are in `APP_MAKER/legal-kit/apps/_pending/guild.json`
+  (study plan, guest progress joining an account, session size). Copy it over `apps/guild.json` when the branch is
+  merged, then build + install.
 
 ## Privacy & Terms (legal kit)
 

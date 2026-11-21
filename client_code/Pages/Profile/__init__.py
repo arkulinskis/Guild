@@ -123,7 +123,7 @@ class Profile(ProfileTemplate):
 
     @handle("join_button", "click")
     def join_button_click(self, **event_args):
-        auth.sign_out()
+        auth.leave_guest_keep()  # the guest's cards, streak and sessions join the new account (claim_guest)
         router.go("auth", "signup")
 
     # ---- password (members)

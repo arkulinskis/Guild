@@ -41,6 +41,13 @@ class Auth(AuthTemplate):
         self.consent_box.visible = mode == "signup"
         self.back_row.visible = mode == "reset"
         self.guest_part.visible = mode != "reset"
+        kept = state.kept_guest() is not None  # a guest on the way to an account: their progress comes along
+        n = state.kept_count()
+        self.kept_note.visible = kept and mode != "reset"
+        self.kept_note.text = "Your guest progress%s will be added to the account you %s." % (
+            (" (%s)" % state.plural(n, "card")) if n else "", "create" if mode == "signup" else "sign in to")
+        self.guest_button.text = "Back to guest mode" if kept else "Try it without signing in"
+        self.guest_note.visible = not kept
         self._say(message, is_error)
 
     def _say(self, message, is_error=True):
@@ -110,7 +117,7 @@ class Auth(AuthTemplate):
             router.replace("auth")
             self._draw(r["message"], False)
         else:
-            state.toast("Welcome to CAF Guide!" if mode == "signup" else "Welcome back!", "ok")
+            state.toast(r.get("claimed") or ("Welcome to CAF Guide!" if mode == "signup" else "Welcome back!"), "ok")
             router.after_sign_in()
 
     @handle("guest_button", "click")

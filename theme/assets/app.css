@@ -476,6 +476,78 @@ kbd { font: inherit; font-size: .78rem; border: 1px solid var(--c-line); border-
 .qb-home .mod .mini > span, .qb-col .item .mini > span { display: block; height: 100%; background: var(--c, var(--c-brand)); }
 .qb-home .mod .right, .qb-col .item .badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .qb-home .recent { padding: 6px 0; overflow: hidden; }
+
+/* Comeback kit: streak shields (Home tile + hint, study summary) and the session size switch */
+.qb-home .stat .shields { display: inline-flex; align-items: center; gap: 3px; margin-left: 8px; font: 600 .95rem/1 var(--font-body);
+  color: var(--c-brand); vertical-align: middle; }
+.qb-home .stat .shields[hidden], .qb-home .shield-hint[hidden], .qb-study .shield-note[hidden] { display: none; }
+.qb-home .stat .shields .ic { width: 16px; height: 16px; }
+.qb-home .shield-hint { display: flex; align-items: center; gap: 6px; margin: -12px 0 20px; }
+.qb-home .shield-hint .ic { width: 15px; height: 15px; color: var(--c-brand); }
+.qb-study .size-row { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; margin: 2px 0 16px; }
+.qb-study .size-row .ui-seg button { min-width: 44px; font-variant-numeric: lining-nums tabular-nums; }
+.qb-study .shield-note { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 14px; border-radius: var(--radius-sm);
+  background: var(--c-good-soft); color: var(--c-ink); font-weight: 500; }
+.qb-study .shield-note .ic { color: var(--c-good); }
+
+/* Mission plan: the Home card (track, date, readiness bar, pace) and its dialog (Dialogs/Plan) */
+.qb-home .plan-card { padding: 18px 22px; margin-bottom: 14px; }
+.qb-home .plan-card .ico { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; flex: none;
+  background: var(--c-brand-soft); color: var(--c-brand); }
+.qb-home .plan-card .ico .ic { width: 22px; height: 22px; }
+.qb-home .plan-empty { display: flex; align-items: center; gap: 16px; }
+.qb-home .plan-empty .body { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.qb-home .plan-empty strong { font-size: 1.08rem; }
+.qb-home .plan-card .meta { color: var(--c-muted); font-size: .9rem; }
+.qb-home .plan-top { display: flex; align-items: center; gap: 14px; }
+.qb-home .plan-top .body { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.qb-home .plan-top h2 { margin: 0; font-size: 1.3rem; }
+.qb-home .plan-top .pct { display: grid; justify-items: end; line-height: 1; }
+.qb-home .plan-top .pct b { font: 700 1.8rem/1 var(--font-display); font-variant-numeric: lining-nums tabular-nums; }
+.qb-home .plan-top .pct span { font-size: .8rem; color: var(--c-muted); }
+.qb-home .plan-bar { display: flex; gap: 2px; height: 12px; margin: 14px 0 10px; border-radius: 99px; overflow: hidden; background: var(--c-surface-2); }
+.qb-home .plan-bar > span { display: block; height: 100%; min-width: 0; transition: width var(--dur-slow) var(--ease-out); }
+.qb-home .plan-bar .r { background: var(--c-good); }
+.qb-home .plan-bar .s { background: var(--c-warn); }
+.qb-home .plan-bar .n { background: var(--c-line); }
+.qb-home .plan-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .88rem; color: var(--c-muted); }
+.qb-home .plan-legend .k { display: inline-flex; align-items: center; gap: 6px; }
+.qb-home .plan-legend b { color: var(--c-ink); font-variant-numeric: lining-nums tabular-nums; }
+.qb-home .plan-legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--c-line); }
+.qb-home .plan-legend .r i { background: var(--c-good); }
+.qb-home .plan-legend .s i { background: var(--c-warn); }
+.qb-home .plan-pace { margin: 10px 0 0; font-weight: 500; }
+.plan-dlg .plan-lead { margin: 4px 0 14px; }
+.plan-dlg .plan-tracks { display: grid; gap: 8px; }
+.plan-dlg .plan-track { display: grid; gap: 2px; text-align: left; padding: 12px 14px; border: 1px solid var(--c-line); border-radius: var(--radius-sm);
+  background: var(--c-surface); color: var(--c-ink); font: inherit; cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), transform var(--dur-press) var(--ease-out); }
+.plan-dlg .plan-track strong { font-size: 1rem; }
+.plan-dlg .plan-track .who { font-size: .88rem; color: var(--c-muted); }
+.plan-dlg .plan-track .n { font-size: .82rem; color: var(--c-brand); font-weight: 600; }
+.plan-dlg .plan-track.on { border-color: var(--c-brand); background: color-mix(in srgb, var(--c-brand-soft) 70%, var(--c-surface));
+  box-shadow: inset 0 0 0 1px var(--c-brand); }
+.plan-dlg .plan-track:active { transform: scale(.99); }
+.plan-dlg .plan-for { margin: 12px 0 6px; font-size: .9rem; font-weight: 600; }
+.plan-dlg .plan-labels { display: flex; flex-wrap: wrap; gap: 6px; }
+.plan-dlg .plan-chip { font: 500 .88rem/1.2 var(--font-body); padding: 8px 12px; min-height: 36px; border-radius: 99px; border: 1px solid var(--c-line);
+  background: var(--c-surface); color: var(--c-ink); cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out); }
+.plan-dlg .plan-chip.on { background: var(--c-brand); border-color: var(--c-brand); color: var(--c-brand-ink); }
+@media (hover: hover) and (pointer: fine) {
+  .plan-dlg .plan-track:hover, .plan-dlg .plan-chip:hover { border-color: var(--c-brand); }
+}
+@media (max-width: 620px) {
+  .qb-home .plan-card { padding: 16px; }
+  .qb-home .plan-empty { flex-wrap: wrap; }
+  .qb-home .plan-empty .anvil-role-btn { width: 100%; }
+  .qb-home .plan-top { flex-wrap: wrap; }
+  .qb-home .plan-top .body { flex-basis: calc(100% - 58px); }
+  .qb-home .plan-top .pct { justify-items: start; }
+  .qb-home .plan-top .pct { flex-direction: row; display: flex; align-items: baseline; gap: 6px; }
+  .qb-home .plan-top .anvil-role-btn { margin-left: auto; }
+  .qb-home .shield-hint { margin-top: -10px; }
+}
 .sess { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 18px; color: inherit; text-decoration: none;
   border-bottom: 1px solid var(--c-line); margin-bottom: -1px; transition: background-color var(--dur-fast) var(--ease-out); }
 .sess .what, .hist-row .what { display: grid; min-width: 0; overflow-wrap: anywhere; }

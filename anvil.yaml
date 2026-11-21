@@ -91,6 +91,28 @@ db_schema:
     indexes: []
     server: full
     title: Collections
+  plans:
+    client: none
+    columns:
+    - admin_ui: {order: 0, width: 200}
+      name: user
+      target: users
+      type: link_single
+    - admin_ui: {order: 1, width: 120}
+      name: track
+      type: string
+    - admin_ui: {order: 2, width: 140}
+      name: target_date
+      type: date
+    - admin_ui: {order: 3, width: 180}
+      name: label
+      type: string
+    - admin_ui: {order: 4, width: 200}
+      name: updated
+      type: datetime
+    indexes: []
+    server: full
+    title: Plans
   questions:
     client: none
     columns:
@@ -257,6 +279,10 @@ db_schema:
       client_hidden: true
       name: remembered_logins
       type: simpleObject
+    - admin_ui: {order: 18, width: 120}
+      client_hidden: false
+      name: shields
+      type: number
     indexes: []
     server: full
     title: Users
@@ -267,7 +293,7 @@ metadata:
 name: CAF Guide
 native_deps:
   head_html: |
-    <script src="_/theme/legal-kit.js?v=62599f271f"></script>
+    <script src="_/theme/legal-kit.js?v=57f1bba8fb"></script>
 
     <!-- seo:start (APP_MAKER/seo: edit seo/apps/guild.json and run seo.py, not here) -->
     <link rel="canonical" href="https://caf-guide.anvil.app/">
@@ -295,8 +321,8 @@ native_deps:
     <p>CAF Guide is an active-recall flashcard app for learning about the Canadian Armed Forces: its structure, ranks, training and history, plus a lookup dictionary of military acronyms.</p>
     <p>Each card shows only the question. You answer in your head, reveal the answer and rate yourself; cards you know come back after growing gaps (1, 3, 7, 16, 35, then 90 days), and the home page gathers every due card into a daily review. It is an unofficial study aid, not affiliated with or endorsed by DND or the CAF.</p>
     <p>Who it's for: Recruits, applicants and anyone learning about the Canadian Armed Forces</p>
-    <h2>What it does</h2><ul><li>Active-recall flashcards: think of the answer, then reveal it</li><li>Spaced repetition: known cards return after 1, 3, 7, 16, 35 and 90 days</li><li>A daily review of every card that is due</li><li>Ready-made cards on CAF structure, training, ranks and history</li><li>A lookup dictionary of CAF acronyms</li><li>Streaks, collections and your own quizzes</li></ul>
-    <h2>Questions</h2><h3>Is CAF Guide official?</h3><p>No. It is an unofficial study aid, not affiliated with or endorsed by the Department of National Defence or the Canadian Armed Forces.</p><h3>How does the spaced repetition work?</h3><p>Rate each card Got it or Still learning. Cards you know come back after 1, 3, 7, 16, 35 and then 90 days; cards you are still learning come back a few cards later and again tomorrow.</p><h3>What topics does it cover?</h3><p>The demo cards cover CAF structure, training, ranks and history, and the app includes a dictionary of military acronyms. You can also make your own quizzes.</p><h3>Do I need an account?</h3><p>An account keeps your progress, streak and due cards across devices.</p>
+    <h2>What it does</h2><ul><li>Active-recall flashcards: think of the answer, then reveal it</li><li>Spaced repetition: known cards return after 1, 3, 7, 16, 35 and 90 days</li><li>A daily review of every card that is due</li><li>Ready-made cards on CAF structure, training, ranks and history</li><li>A lookup dictionary of CAF acronyms</li><li>A study plan: pick a track, set a date and see how ready you are</li></ul>
+    <h2>Questions</h2><h3>Is CAF Guide official?</h3><p>No. It is an unofficial study aid, not affiliated with or endorsed by the Department of National Defence or the Canadian Armed Forces.</p><h3>How does the spaced repetition work?</h3><p>Rate each card Got it or Still learning. Cards you know come back after 1, 3, 7, 16, 35 and then 90 days; cards you are still learning come back a few cards later and again tomorrow.</p><h3>What topics does it cover?</h3><p>29 learning modules (about 2,000 cards) cover CAF structure, ranks, abbreviations and slang, defence policy, doctrine and planning, reading lists and Afghanistan, and the app includes a dictionary of military acronyms.</p><h3>Do I need an account?</h3><p>An account keeps your progress, streak and due cards across devices.</p>
     <p><a href="https://caf-guide.anvil.app/about">About CAF Guide</a> &middot; <a href="https://caf-guide.anvil.app/llms.txt">CAF Guide for AI assistants</a> &middot; Made by <a href="https://arkvital.com">Arkvital</a>, Montreal, Canada. CAF Guide needs JavaScript in your browser.</p>
     </div></noscript>
     <!-- seo:end -->
@@ -309,7 +335,7 @@ native_deps:
     <!-- Prepsto feedback panel: every "Submit feedback" link and button slides it in (it is the only feedback channel). No floating button, no cookies, nothing loads until it is opened. Codes: APP_MAKER/prepsto-links.json -->
     <script src="https://prepsto.com/_/theme/widget.js" data-prepsto="jfr2n3p" data-button="false" data-label="Submit feedback" async></script>
     <link rel="stylesheet" href="_/theme/icons.css?v=3d6d6aaa00">
-    <link rel="stylesheet" href="_/theme/app.css?v=d105f671bc">
+    <link rel="stylesheet" href="_/theme/app.css?v=bcadf76036">
     <script src="_/theme/app-kit.js?v=dc1674dcb3"></script>
     <!-- The Lookup dictionary (generated by tools/build_acronyms.py in the old project, Guild/anvil-quiz) -->
     <script src="_/theme/acronyms.js?v=21c4437021"></script>

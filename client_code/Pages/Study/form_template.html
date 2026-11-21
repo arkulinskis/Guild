@@ -29,6 +29,15 @@
                 <anvil-component type="CheckBox" name="shuffle_box" prop:text="Shuffle cards"></anvil-component>
                 <p class="ui-hint">Mix up the order instead of following the quiz.</p>
               </div>
+              <div class="size-row" anvil:name="size_row">
+                <span class="muted small" id="qb-size-l">Cards this session</span>
+                <div class="ui-seg sizes" role="group" aria-labelledby="qb-size-l">
+                  <button type="button" data-n="10" anvil:name="sz10" anvil:on-dom:click="self.size_click">10</button>
+                  <button type="button" data-n="25" anvil:name="sz25" anvil:on-dom:click="self.size_click">25</button>
+                  <button type="button" data-n="50" anvil:name="sz50" anvil:on-dom:click="self.size_click">50</button>
+                </div>
+                <span class="ui-hint" anvil:dom-node="size_hint">Most overdue first. Remembered on this device.</span>
+              </div>
               <div class="ui-row">
                 <anvil-component type="Button" name="start_button" prop:text="Start" prop:role='["btn", "btn-primary"]'></anvil-component>
                 <span class="muted small" anvil:dom-node="start_note"></span>
@@ -106,6 +115,7 @@
                 <span class="badge warn" anvil:dom-node="r_still"></span>
               </div>
             </div>
+            <p class="shield-note" anvil:dom-node="shield_note"><i class="ic ic-shield" aria-hidden="true"></i> <span anvil:dom-node="shield_text"></span></p>
             <anvil-component type="Label" name="next_label" prop:role='["muted"]'></anvil-component>
             <div class="ui-row">
               <anvil-component type="Button" name="again_all_button" prop:text="Go again" prop:role='["btn", "btn-primary"]'></anvil-component>

@@ -23,6 +23,7 @@ from anvil.js import window
 
 _state: dict = {"me": None, "guest": False}
 GUEST_FLAG = "qb.guest"  # sessionStorage: this tab is trying the app as a guest (survives a reload, ends with the tab)
+KEEP_FLAG = "qb.guestKeep"  # sessionStorage: guest progress waiting to join the account the guest signs in to
 
 
 def me():
@@ -51,6 +52,41 @@ def guest_tab():
         return window.sessionStorage.getItem(GUEST_FLAG) == "1"
     except Exception:
         return False
+
+
+def keep_guest(data):
+    """Remember (or forget, with None) that this tab's guest progress should join the next account signed in to.
+    data = guest_export()'s copy, kept in case the server session doesn't survive signing in ({} when unknown)."""
+    try:
+        if data is None:
+            window.sessionStorage.removeItem(KEEP_FLAG)
+        else:
+            window.sessionStorage.setItem(KEEP_FLAG, window.JSON.stringify(data))
+    except Exception:
+        pass
+
+
+def kept_guest():
+    """The kept guest progress (a dict, maybe empty), or None when there is nothing waiting."""
+    try:
+        raw = window.sessionStorage.getItem(KEEP_FLAG)
+    except Exception:
+        return None
+    if raw is None:
+        return None
+    try:
+        import json
+        v = json.loads(str(raw))
+        return v if isinstance(v, dict) else {}
+    except Exception:
+        return {}
+
+
+def kept_count():
+    """How many cards the kept guest progress holds (for the sign-in page's note)."""
+    k = kept_guest()
+    cards = (k or {}).get("cards")
+    return len(cards) if isinstance(cards, dict) else 0
 
 
 def today():

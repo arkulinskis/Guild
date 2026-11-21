@@ -10,8 +10,30 @@
         <div class="ui-card stat"><div class="v"><span anvil:dom-node="s_done"></span><span class="of" anvil:dom-node="s_done_of"></span></div><div class="k">modules complete</div></div>
         <div class="ui-card stat"><div class="v"><span anvil:dom-node="s_learned"></span><span class="of" anvil:dom-node="s_learned_of"></span></div><div class="k">cards learned</div></div>
         <div class="ui-card stat"><div class="v"><span anvil:dom-node="s_due"></span></div><div class="k">due today</div></div>
-        <div class="ui-card stat"><div class="v"><span anvil:dom-node="s_streak"></span></div><div class="k">day streak</div></div>
+        <div class="ui-card stat"><div class="v"><span anvil:dom-node="s_streak"></span><span class="shields" anvil:dom-node="s_shields"><i class="ic ic-shield" aria-hidden="true"></i><span anvil:dom-node="s_shield_n"></span></span></div><div class="k">day streak</div></div>
       </div>
+      <p class="ui-hint shield-hint" anvil:dom-node="shield_hint"><i class="ic ic-shield" aria-hidden="true"></i> Every 7 days in a row earns a shield (max 2). A shield covers a missed day.</p>
+
+      <div class="ui-card plan-card plan-empty" anvil:name="plan_empty">
+        <span class="ico" aria-hidden="true"><i class="ic ic-calendar"></i></span>
+        <span class="body"><strong>What are you studying for?</strong><span class="meta">Choose a track (joining soon, officer and planning, defence policy, history) and add a date if you have one. You get a daily pace and a readiness bar.</span></span>
+        <anvil-component type="Button" name="plan_choose" prop:text="Choose a track" prop:role='["btn", "btn-sm"]'></anvil-component>
+      </div>
+      <section class="ui-card plan-card" anvil:name="plan_box" aria-labelledby="qb-plan-h">
+        <div class="plan-top">
+          <span class="ico" aria-hidden="true"><i class="ic ic-calendar"></i></span>
+          <div class="body"><h2 id="qb-plan-h" anvil:dom-node="plan_title"></h2><span class="meta" anvil:dom-node="plan_when"></span></div>
+          <div class="pct"><b anvil:dom-node="plan_pct"></b><span>ready</span></div>
+          <anvil-component type="Button" name="plan_change" prop:text="Change" prop:role='["btn", "btn-sm", "btn-ghost"]'></anvil-component>
+        </div>
+        <div class="plan-bar" aria-hidden="true"><span class="r" anvil:dom-node="bar_r"></span><span class="s" anvil:dom-node="bar_s"></span><span class="n" anvil:dom-node="bar_n"></span></div>
+        <div class="plan-legend">
+          <span class="k r"><i aria-hidden="true"></i>Ready <b anvil:dom-node="lg_r"></b></span>
+          <span class="k s"><i aria-hidden="true"></i>Shaky <b anvil:dom-node="lg_s"></b></span>
+          <span class="k n"><i aria-hidden="true"></i>Not started <b anvil:dom-node="lg_n"></b></span>
+        </div>
+        <p class="plan-pace" anvil:dom-node="plan_pace"></p>
+      </section>
 
       <a class="ui-card continue" href="#review" anvil:name="cont_link">
         <span class="ico" aria-hidden="true"><i class="ic" anvil:dom-node="cont_icon"></i></span>
@@ -28,6 +50,7 @@
           <h2>Your learning path</h2>
           <span class="muted small" anvil:dom-node="n_modules"></span>
           <div class="ui-seg filters" role="group" aria-label="Show modules">
+            <button type="button" data-f="track" anvil:name="f_track" anvil:on-dom:click="self.filter_click">My track</button>
             <button type="button" data-f="all" anvil:name="f_all" anvil:on-dom:click="self.filter_click">All</button>
             <button type="button" data-f="todo" anvil:name="f_todo" anvil:on-dom:click="self.filter_click">To do</button>
             <button type="button" data-f="due" anvil:name="f_due" anvil:on-dom:click="self.filter_click">Due</button>

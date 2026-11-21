@@ -6,7 +6,9 @@
 #   "Got it"         → box + 1, due again after BOX_INTERVALS[box] days
 #   "Still learning" → box 0, due today (stays in circulation)
 import json
+import math
 import re
+import secrets
 from datetime import date, datetime, timedelta, timezone
 
 import anvil.server
@@ -25,6 +27,31 @@ SESSION_LIMIT = 50                        # most cards in one study session
 XP_PER_REVIEW = 2
 XP_PER_GOT_IT = 3
 HISTORY_LIMIT = 30
+SHIELD_MAX = 2                            # streak shields held at most (Comeback kit)
+SHIELD_EVERY = 7                          # a shield for every 7 days in a row
+GUEST_CARD_CAP = 3000                     # most guest cards claim_guest moves into an account
+GUEST_SESSION_CAP = 30                    # most guest sessions it moves
+
+# Mission plan tracks: module numbers (collections.position) in study order; missing numbers are skipped.
+TRACKS = [
+    {"key": "joining", "title": "Joining soon",
+     "who": "Applicants and new recruits: ranks, abbreviations, the Army, the ethos and slang before the interview and BMQ.",
+     "modules": [16, 10, 1, 8, 4, 17, 5, 7, 20]},
+    {"key": "officer", "title": "Officer & planning",
+     "who": "Officer candidates and serving members: doctrine, the planning process and how the Army thinks.",
+     "modules": [8, 13, 9, 14, 11, 2, 15, 25, 26]},
+    {"key": "policy", "title": "Defence policy & news",
+     "who": "People who follow defence: policy, budgets, NATO in Latvia, reviews and reports.",
+     "modules": [4, 3, 12, 5, 20, 19, 7, 18, 30, 28, 29, 27]},
+    {"key": "history", "title": "History & reading",
+     "who": "Readers: Afghanistan, the reading lists and the Army's journals.",
+     "modules": [23, 24, 21, 22, 26, 25]},
+    {"key": "all", "title": "Everything, in order",
+     "who": "The whole guide, module by module, from the start.", "modules": None},
+]
+TRACK_KEYS = [t["key"] for t in TRACKS]
+PLAN_LABELS = ["BMQ start", "Recruiting interview", "Course", "Exam", "Own goal"]
+PLAN_MAX_DAYS = 730
 
 
 # ---------------------------------------------------------------- helpers
@@ -53,9 +80,43 @@ def _default_name(email):
     return re.sub(r"[._\-]+", " ", local).strip().title() or "Learner"
 
 
+def _col(row, name):
+    """A column that may not exist yet (the user accepts the Schema Mismatch later): None when it is missing."""
+    try:
+        return row[name]
+    except Exception:
+        return None
+
+
+def _shields(user):
+    """Streak shields held. None = the users.shields column isn't there yet, so the old streak rules apply."""
+    if _is_guest(user):
+        return int(user.data.get("shields") or 0)
+    try:
+        return int(user["shields"] or 0)
+    except Exception:
+        return None
+
+
+def _set_shields(user, n):
+    """Written on its own and guarded, so a missing column never breaks finishing a session."""
+    if _is_guest(user):
+        user.data["shields"] = n
+        user.save()
+        return
+    try:
+        user.update(shields=n)
+    except Exception:
+        pass
+
+
 def _current_streak(user, today):
+    """The streak is alive after yesterday's session, or when the shields held can cover every missed day."""
     last = user["last_active"]
-    if not last or (today - last).days > 1:
+    if not last:
+        return 0
+    gap = (today - last).days
+    if gap > 1 and not (_shields(user) and gap - 1 <= _shields(user)):
         return 0
     return user["streak"] or 0
 
@@ -89,6 +150,8 @@ def _me_dict(user, today):
         "is_admin": bool(user["is_admin"]),
         "signed_up": _iso(user["signed_up"]),
         "guest": _is_guest(user),
+        "shields": _shields(user) or 0,
+        "shields_on": _shields(user) is not None,
     }
 
 
@@ -181,8 +244,8 @@ class _Guest(object):
 
 
 def _new_guest():
-    return {"display_name": "Guest", "bio": "", "avatar_color": AVATAR_COLORS[0], "xp": 0, "streak": 0,
-            "last_active": None, "cards": {}, "sessions": []}
+    return {"id": secrets.token_hex(8), "display_name": "Guest", "bio": "", "avatar_color": AVATAR_COLORS[0],
+            "xp": 0, "streak": 0, "shields": 0, "last_active": None, "cards": {}, "sessions": [], "plan": None}
 
 
 def _guest():
@@ -214,6 +277,159 @@ def start_guest(today=None):
 @anvil.server.callable
 def end_guest():
     anvil.server.session[GUEST_KEY] = None  # the session object has no pop(); None means "no guest"
+
+
+@anvil.server.callable
+def guest_export():
+    """This browser session's own guest progress (plain values), kept by the browser when the guest goes to sign up,
+    in case the server session doesn't survive signing in. Only ever the caller's own session."""
+    data = anvil.server.session.get(GUEST_KEY)
+    return dict(data) if isinstance(data, dict) else None
+
+
+def _iso_date(value, lo, hi):
+    d = date.fromisoformat(str(value)[:10])
+    return d.isoformat() if lo <= d <= hi else None
+
+
+def _clean_kept(kept, today):
+    """The browser's copy of guest progress (guest_export): checked like any input. Question ids must be real
+    (checked when merging), boxes 0-6, dates sensible, numbers capped."""
+    if not isinstance(kept, dict):
+        return None
+    now = _now()
+    cards = {}
+    raw = kept.get("cards")
+    for qid, v in (list(raw.items())[:GUEST_CARD_CAP] if isinstance(raw, dict) else []):
+        try:
+            box = int(v[1])
+            if not 0 <= box < len(BOX_INTERVALS):
+                continue
+            due = _iso_date(v[2], today - timedelta(days=3650), today + timedelta(days=BOX_INTERVALS[-1])) if v[2] else None
+            last = datetime.fromisoformat(str(v[5])) if v[5] else None
+            if last is not None and (last.tzinfo is None or last > now):
+                last = now
+            cards[str(qid)] = [None, box, due, min(max(0, int(v[3] or 0)), 1000), min(max(0, int(v[4] or 0)), 1000),
+                               last.isoformat() if last else None]
+        except Exception:
+            continue
+    sessions = []
+    raw_s = kept.get("sessions")
+    for d in (raw_s[-GUEST_SESSION_CAP:] if isinstance(raw_s, list) else []):
+        try:
+            fin = datetime.fromisoformat(str(d["finished"]))
+            if fin.tzinfo is None or fin > now:
+                fin = now
+            sessions.append({"quiz_id": str(d["quiz_id"]) if d.get("quiz_id") else None,
+                             "module": str(d["module"]) if d.get("module") else None, "finished": fin.isoformat(),
+                             "reviewed": min(max(0, int(d.get("reviewed") or 0)), 500),
+                             "got": min(max(0, int(d.get("got") or 0)), 500),
+                             "again": min(max(0, int(d.get("again") or 0)), 500)})
+        except Exception:
+            continue
+    reviews = sum(v[3] for v in cards.values())
+    try:
+        last_active = _iso_date(kept.get("last_active"), today - timedelta(days=60), today) if kept.get("last_active") else None
+        xp = min(max(0, int(kept.get("xp") or 0)), (XP_PER_REVIEW + XP_PER_GOT_IT) * reviews)
+        streak = min(max(0, int(kept.get("streak") or 0)), 60) if last_active else 0
+        shields = min(max(0, int(kept.get("shields") or 0)), SHIELD_MAX)
+    except Exception:
+        last_active, xp, streak, shields = None, 0, 0, 0
+    plan = kept.get("plan") if isinstance(kept.get("plan"), dict) else None
+    return {"id": str(kept.get("id") or "")[:32] or None, "cards": cards, "sessions": sessions, "xp": xp,
+            "streak": streak, "shields": shields, "last_active": last_active, "plan": plan}
+
+
+def _merge_streak(a_last, a_n, b_last, b_n):
+    """Two day streaks (last day, length) as one: joined when they touch or overlap, else the later one."""
+    runs = sorted([(last - timedelta(days=n - 1), last) for last, n in ((a_last, a_n), (b_last, b_n)) if last and n],
+                  key=lambda r: r[1])
+    if not runs:
+        return None, 0
+    start, end = runs[-1]
+    if len(runs) == 2 and runs[0][1] >= start - timedelta(days=1):
+        start = min(start, runs[0][0])
+    return end, (end - start).days + 1
+
+
+def _claimed_before(user, gid):
+    if not gid:
+        return False
+    for row in app_tables.sessions.search(user=user):
+        r = row["ratings"]
+        if isinstance(r, dict) and r.get("from_guest") and r.get("guest_id") == gid:
+            return True
+    return False
+
+
+def _claim(user, data, today):
+    """Move guest progress into this account. Cards: added when the account has none for that question, else the
+    newer review wins (a newer box is never lowered); sessions are added; XP adds up; the streaks join."""
+    gid = data.get("id")
+    if _claimed_before(user, gid):
+        return {"ok": True, "cards": 0, "sessions": 0, "xp": 0, "streak": _current_streak(user, today)}
+    mine = {s["question"].get_id(): s for s in app_tables.card_state.search(user=user) if s["question"] is not None}
+    n_cards = 0
+    for qid, v in list((data.get("cards") or {}).items())[:GUEST_CARD_CAP]:
+        try:
+            q = app_tables.questions.get_by_id(qid)
+        except Exception:
+            q = None
+        if q is None:
+            continue  # deleted (or never real)
+        n_cards += 1
+        due = date.fromisoformat(v[2]) if v[2] else today
+        last = datetime.fromisoformat(v[5]) if v[5] else None
+        row = mine.get(q.get_id())
+        if row is None:
+            app_tables.card_state.add_row(user=user, question=q, quiz=q["quiz"], box=int(v[1] or 0), due=due,
+                                          reviews=int(v[3] or 0), lapses=int(v[4] or 0), last_reviewed=last)
+        elif last is not None and (row["last_reviewed"] is None or last > row["last_reviewed"]):
+            row.update(box=int(v[1] or 0), due=due, last_reviewed=last,
+                       reviews=(row["reviews"] or 0) + int(v[3] or 0), lapses=(row["lapses"] or 0) + int(v[4] or 0))
+    n_sessions = 0
+    for d in (data.get("sessions") or [])[-GUEST_SESSION_CAP:]:
+        try:
+            qz = app_tables.quizzes.get_by_id(d["quiz_id"]) if d.get("quiz_id") else None
+        except Exception:
+            qz = None
+        app_tables.sessions.add_row(user=user, quiz=qz, finished=datetime.fromisoformat(d["finished"]),
+                                    reviewed=int(d.get("reviewed") or 0), got=int(d.get("got") or 0),
+                                    again=int(d.get("again") or 0), xp=0,
+                                    ratings={"module": d.get("module"), "from_guest": True, "guest_id": gid})
+        n_sessions += 1
+    g_last = date.fromisoformat(data["last_active"]) if data.get("last_active") else None
+    last, streak = _merge_streak(user["last_active"], user["streak"] or 0, g_last, int(data.get("streak") or 0))
+    changes: dict = {"xp": (user["xp"] or 0) + int(data.get("xp") or 0)}
+    if last is not None:
+        changes.update(last_active=last, streak=streak)
+    user.update(**changes)
+    held = _shields(user)
+    if held is not None and int(data.get("shields") or 0) > held:
+        _set_shields(user, min(SHIELD_MAX, int(data.get("shields") or 0)))
+    plan = data.get("plan")
+    if isinstance(plan, dict) and plan.get("track") and _plan(user)[0] is None:
+        _save_plan(user, plan.get("track"), plan.get("target_date"), plan.get("label"), today)
+    return {"ok": True, "cards": n_cards, "sessions": n_sessions, "xp": int(data.get("xp") or 0),
+            "streak": _current_streak(user, today)}
+
+
+@anvil.server.callable(require_user=True)
+def claim_guest(today=None, kept=None):
+    """Right after signing in or up: the guest progress from this browser session joins the account.
+    The server session's copy is trusted; the browser's copy (kept, from guest_export) is only used when the session
+    lost it, and is checked first. Does nothing when there is nothing to claim; a second claim adds nothing."""
+    user = _user()
+    today = _client_today(today)
+    data = anvil.server.session.get(GUEST_KEY)
+    if not isinstance(data, dict):
+        data = _clean_kept(kept, today)
+    if not data or not (data.get("cards") or data.get("sessions") or data.get("plan")):
+        anvil.server.session[GUEST_KEY] = None
+        return {"ok": True, "cards": 0, "sessions": 0, "xp": 0, "streak": _current_streak(user, today)}
+    result = _claim(user, data, today)
+    anvil.server.session[GUEST_KEY] = None
+    return result
 
 
 def _require_admin():
@@ -248,7 +464,7 @@ def _states(user):
 def _quiz_counts(quizzes, states, today):
     """Per quiz: total cards, learned (last rating "Got it"), due now, new (never seen), mastered."""
     counts = {q.get_id(): {"total": q["card_count"] or 0, "seen": 0, "learned": 0, "due": 0, "mastered": 0,
-                           "next_due": None, "last": None} for q in quizzes}
+                           "ready": 0, "next_due": None, "last": None} for q in quizzes}
     for s in states.values():
         c = counts.get(s["quiz"].get_id()) if s["quiz"] is not None else None
         if c is None:
@@ -258,6 +474,8 @@ def _quiz_counts(quizzes, states, today):
             c["learned"] += 1
         if (s["box"] or 0) >= MASTERED_BOX:
             c["mastered"] += 1
+        if (s["box"] or 0) >= 2:
+            c["ready"] += 1
         if s["due"] is None or s["due"] <= today:
             c["due"] += 1
         elif c["next_due"] is None or s["due"] < c["next_due"]:
@@ -344,6 +562,106 @@ def _update_profile(user, display_name=None, bio=None, avatar_color=None):
     return {"ok": True, "me": _me_dict(user, _now().date())}
 
 
+# ---------------------------------------------------------------- mission plan
+def _track(key):
+    for t in TRACKS:
+        if t["key"] == key:
+            return t
+    return TRACKS[-1]
+
+
+def _plan(user):
+    """(plan dict or None, ready). ready is False while the plans table doesn't exist yet (schema not accepted):
+    the Home card then stays hidden instead of failing."""
+    if _is_guest(user):
+        p = user.data.get("plan")
+        return (dict(p) if isinstance(p, dict) and p.get("track") in TRACK_KEYS else None), True
+    try:
+        row = app_tables.plans.get(user=user)
+    except Exception:
+        return None, False
+    if row is None or row["track"] not in TRACK_KEYS:
+        return None, True
+    return {"track": row["track"], "target_date": _iso(row["target_date"]), "label": row["label"] or None}, True
+
+
+def _save_plan(user, track, target_date=None, label=None, today=None):
+    today = _client_today(today)
+    if track not in TRACK_KEYS:
+        return {"ok": False, "error": "Please choose one of the tracks."}
+    when = None
+    if target_date:
+        try:
+            when = date.fromisoformat(str(target_date)[:10])
+        except ValueError:
+            return {"ok": False, "error": "That date isn't valid."}
+        if when <= today:
+            return {"ok": False, "error": "Pick a date from tomorrow on."}
+        if when > today + timedelta(days=PLAN_MAX_DAYS):
+            return {"ok": False, "error": "Pick a date within the next two years."}
+    if label and label not in PLAN_LABELS:
+        return {"ok": False, "error": "Please choose what the date is for."}
+    label = (label or "Own goal") if when else None
+    if _is_guest(user):
+        user.data["plan"] = {"track": track, "target_date": when.isoformat() if when else None, "label": label}
+        user.save()
+        return {"ok": True}
+    try:
+        row = app_tables.plans.get(user=user)
+        if row is None:
+            app_tables.plans.add_row(user=user, track=track, target_date=when, label=label, updated=_now())
+        else:
+            row.update(track=track, target_date=when, label=label, updated=_now())
+    except Exception:
+        return {"ok": False, "error": "Study plans are still being set up. Please try again later."}
+    return {"ok": True}
+
+
+def _track_quizzes(quizzes, key):
+    """The track's parts in its module order (parts in their own order within a module)."""
+    mods = _track(key)["modules"]
+    if not mods:
+        return list(quizzes)
+    rank = {m: i for i, m in enumerate(mods)}
+    return sorted([q for q in quizzes if (q["collection"]["position"] or 0) in rank],
+                  key=lambda q: (rank[q["collection"]["position"] or 0], q["position"] or 0))
+
+
+def _plan_info(plan, quizzes, counts, today):
+    """Readiness over the track (Ready = box 2+, Shaky = seen but box 0-1, Not started) and the daily pace."""
+    t = _track(plan["track"])
+    tq = _track_quizzes(quizzes, t["key"])
+    cs = [counts[q.get_id()] for q in tq]
+    total = sum(c["total"] for c in cs)
+    seen = sum(min(c["seen"], c["total"]) for c in cs)
+    ready = sum(min(c["ready"], c["total"]) for c in cs)
+    not_started = max(0, total - seen)
+    info = {"track": t["key"], "title": t["title"], "label": plan.get("label"), "target_date": plan.get("target_date"),
+            "total": total, "ready": ready, "shaky": max(0, seen - ready), "not_started": not_started,
+            "days_left": None, "new_per_day": None, "buffer": 0,
+            "modules": sorted({q["collection"]["position"] or 0 for q in tq},
+                              key=lambda m: (t["modules"] or []).index(m) if t["modules"] and m in t["modules"] else m)}
+    if plan.get("target_date"):
+        days = (date.fromisoformat(plan["target_date"]) - today).days
+        info["days_left"] = days
+        if days > 0:
+            buffer = 7 if days > 14 else 0  # a week to spare for reviews when there's time for it
+            info["buffer"] = buffer
+            info["new_per_day"] = int(math.ceil(not_started / float(max(1, days - buffer)))) if not_started else 0
+    return info
+
+
+def _tracks_menu(quizzes):
+    """The five tracks for the plan dialog, with the cards and modules each holds in this app right now."""
+    out = []
+    for t in TRACKS:
+        tq = _track_quizzes(quizzes, t["key"])
+        out.append({"key": t["key"], "title": t["title"], "who": t["who"],
+                    "cards": sum(q["card_count"] or 0 for q in tq),
+                    "modules": len({q["collection"].get_id() for q in tq})})
+    return out
+
+
 # ---------------------------------------------------------------- pages
 def _get_home(user, today=None):
     today = _client_today(today)
@@ -354,19 +672,23 @@ def _get_home(user, today=None):
     live = {q.get_id() for q in quizzes}
     due = sum(c["due"] for c in counts.values())
 
-    # "Continue": due reviews first, else the next quiz that still has new cards.
+    plan, plan_ready = _plan(user)
+    order = _track_quizzes(quizzes, plan["track"]) if plan else quizzes
+
+    # "Continue": due reviews first, else the next quiz that still has new cards (in the track's order, then the rest).
     cont = None
     if due:
         cont = {"kind": "review", "due": due, "title": "Review %d due card%s" % (due, "" if due == 1 else "s"),
                 "subtitle": "Cards from all your modules that are due today"}
     else:
-        for qz in quizzes:
+        in_track = {q.get_id() for q in order}
+        for qz in order + [q for q in quizzes if q.get_id() not in in_track]:
             c = counts[qz.get_id()]
             if c["new"]:
                 cont = {"kind": "quiz", "quiz_id": qz.get_id(), "title": qz["title"],
                         "module": qz["collection"]["position"] or 0,
                         "subtitle": "%s · %d new card%s" % (qz["collection"]["title"], c["new"], "" if c["new"] == 1 else "s"),
-                        "started": bool(c["seen"])}
+                        "started": bool(c["seen"]), "track": bool(plan) and qz.get_id() in in_track}
                 break
     next_due = min((c["next_due"] for c in counts.values() if c["next_due"]), default=None)
 
@@ -383,6 +705,11 @@ def _get_home(user, today=None):
             "xp": user["xp"] or 0, "streak": _current_streak(user, today),
         },
         "continue": cont,
+        "plan": _plan_info(plan, quizzes, counts, today) if plan else None,
+        "plan_ready": plan_ready,
+        "tracks": _tracks_menu(quizzes) if plan_ready else [],
+        "plan_labels": PLAN_LABELS,
+        "away_days": (today - user["last_active"]).days if user["last_active"] else None,
         "collections": collections,
         "recent": [r for r in recent if r["quiz_id"] is None or r["quiz_id"] in live],
     }
@@ -519,13 +846,25 @@ def _finish_session(user, quiz_id, ratings, today=None, collection_id=None):
     xp = XP_PER_REVIEW * len(ratings) + XP_PER_GOT_IT * got
 
     last = user["last_active"]
+    shields = _shields(user)  # None = no shields column yet: the old rules
+    held, shield_used, shield_earned = shields, 0, False
     if last is not None and today <= last:  # same day (or the device clock went back a day)
         streak, today = user["streak"] or 1, last
     elif last is not None and (today - last).days == 1:
         streak = (user["streak"] or 0) + 1
+    elif last is not None and shields and 1 <= (today - last).days - 1 <= shields:
+        shield_used = (today - last).days - 1  # a shield covers each missed day: the streak goes on
+        shields -= shield_used
+        streak = (user["streak"] or 0) + 1
     else:
         streak = 1
+    if shields is not None and streak > (user["streak"] or 0) and streak % SHIELD_EVERY == 0 and shields < SHIELD_MAX:
+        shields += 1
+        shield_earned = True
+    old_streak = user["streak"] or 0
     user.update(xp=(user["xp"] or 0) + xp, streak=streak, last_active=today)
+    if shields is not None and shields != held:
+        _set_shields(user, shields)
     if _is_guest(user):
         user.data["sessions"] = (user.data["sessions"] + [{
             "quiz_id": qz.get_id() if qz else None, "module": collection_id if (collection_id and not qz) else None,
@@ -540,6 +879,8 @@ def _finish_session(user, quiz_id, ratings, today=None, collection_id=None):
     states = [s for s in _states(user).values() if s["due"] is not None]
     future = [s["due"] for s in states if s["due"] > today]
     return {"xp_gained": xp, "streak": streak, "next_due": _iso(min(future) if future else None),
+            "shield_used": shield_used, "shield_earned": shield_earned, "saved_streak": old_streak + 1 if shield_used else 0,
+            "shields": shields or 0,
             "due_tomorrow": sum(1 for s in states if s["due"] <= today + timedelta(days=1)),
             "me": _me_dict(user, today)}
 
@@ -598,6 +939,16 @@ def get_home(today=None):
 @anvil.server.callable
 def guest_get_home(today=None):
     return _get_home(_guest(), today)
+
+
+@anvil.server.callable(require_user=True)
+def save_plan(track, target_date=None, label=None, today=None):
+    return _save_plan(_user(), track, target_date, label, today)
+
+
+@anvil.server.callable
+def guest_save_plan(track, target_date=None, label=None, today=None):
+    return _save_plan(_guest(), track, target_date, label, today)
 
 
 @anvil.server.callable(require_user=True)

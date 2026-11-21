@@ -11,6 +11,8 @@ from ... import router, state
 REQUEUE_GAP = 3   # a "still learning" card returns after this many other cards
 MAX_REPEATS = 2   # ...at most this many extra times per session
 GAPS = [0, 1, 3, 7, 16, 35, 90]  # keep in step with BOX_INTERVALS in server_code/QuizService.py
+SIZES = (10, 25, 50)  # session size switch (50 = the server's SESSION_LIMIT, the old behaviour)
+LIGHT_DAY = 25        # #review/light: Home's "welcome back" card asks for a lighter session
 
 
 class Study(StudyTemplate):
@@ -23,7 +25,9 @@ class Study(StudyTemplate):
 
     Every rating is saved as it happens, one after another, without holding up the next card (rate_card through
     call_s in a queue); the summary waits for the queue, then finish_session awards XP and the streak.
-    Keys: Space/Enter shows the answer, 1 = still learning, 2 = got it."""
+    Keys: Space/Enter shows the answer, 1 = still learning, 2 = got it.
+    Session size 10 · 25 · 50 (remembered on this device as "sessSize"): the session takes the first cards of the list,
+    which comes most overdue first. #review/light (the "welcome back" card) caps it at 25 without changing the setting."""
 
     def __init__(self, args=(), mode="review", **properties):
         super().__init__(**properties)
@@ -42,6 +46,13 @@ class Study(StudyTemplate):
         state.heading(self.done_title, 1)
         state.live(self.next_label)
         self.shuffle_box.checked = bool(state.store_get("shuffle", False))
+        try:
+            size = int(state.store_get("sessSize", 50) or 50)
+        except (TypeError, ValueError):
+            size = 50
+        self.size = size if size in SIZES else 50
+        if mode == "review" and args and args[0] == "light":
+            self.size = min(self.size, LIGHT_DAY)
         self.data: dict = self._load("due") or {}
         if not self.data:
             self._show("missing")
@@ -112,12 +123,14 @@ class Study(StudyTemplate):
         self.ready.visible = bool(cards)
         self.caught_up.visible = not cards
         if cards:
-            n_new = len([x for x in cards if x.get("is_new")])
-            n_rev = len(cards) - n_new
-            self.start_button.text = "Start · " + state.plural(len(cards), "card")
+            self._draw_size()
+            chosen = cards[:self.size]
+            n_new = len([x for x in chosen if x.get("is_new")])
+            n_rev = len(chosen) - n_new
+            self.start_button.text = "Start · " + state.plural(len(chosen), "card")
             parts = [p for p in [("%d to review" % n_rev) if n_rev else "", ("%d new" % n_new) if n_new else ""] if p]
-            limit = " (session limit)" if c.get("limit") and len(cards) >= c["limit"] else ""
-            n["start_note"].textContent = " · ".join(parts) + limit
+            more = len(cards) > len(chosen) or (c.get("limit") and len(cards) >= c["limit"])
+            n["start_note"].textContent = " · ".join(parts) + (" · the rest wait for your next session" if more else "")
         else:
             n["next_text"].textContent = (self._due_text(c["next_due"]) + ".") if c.get("next_due") else "Nothing is due."
             self.all_button.visible = not mixed and bool(c.get("total"))
@@ -130,13 +143,24 @@ class Study(StudyTemplate):
         when = state.when(iso)
         return ("%s due %s" % (state.plural(count, "card"), when)) if count else "Next card due " + when
 
+    def _draw_size(self):
+        cards = self.data.get("cards") or []
+        self.size_row.visible = len(cards) > SIZES[0]  # 10 cards or fewer: nothing to choose
+        for el, size in ((self.sz10, 10), (self.sz25, 25), (self.sz50, 50)):
+            el.classes["on"] = size == self.size
+
+    def size_click(self, event):
+        self.size = int(event.currentTarget.getAttribute("data-n"))
+        state.store_set("sessSize", self.size)
+        self._intro()
+
     @handle("shuffle_box", "change")
     def shuffle_box_change(self, **event_args):
         state.store_set("shuffle", bool(self.shuffle_box.checked))
 
     @handle("start_button", "click")
     def start_button_click(self, **event_args):
-        self._start(self.data.get("cards") or [])
+        self._start((self.data.get("cards") or [])[:self.size])
 
     @handle("all_button", "click")
     def all_button_click(self, **event_args):
@@ -147,7 +171,7 @@ class Study(StudyTemplate):
             self.all_button.enabled = True
         if d:
             self.data = d
-            self._start(d.get("cards") or [])
+            self._start((d.get("cards") or [])[:self.size])
 
     # ------------------------------------------------------------ the session
     def _start(self, cards):
@@ -313,6 +337,7 @@ class Study(StudyTemplate):
         n["r_still"].textContent = "%d still learning" % len(still)
         n["r_still"].hidden = not still
         self.next_label.text = ""
+        n["shield_note"].hidden = True
         self.gains_saving.visible, self.gains.visible = True, False
         self.again_all_button.visible = bool(self.still_cards)
         self.again_all_button.text = "Go again with the %s I'm still learning" % state.plural(len(self.still_cards), "card")
@@ -347,6 +372,11 @@ class Study(StudyTemplate):
         n["g_streak"].hidden = not res.get("streak")
         n["g_saved"].hidden = bool(res.get("xp_gained") or res.get("streak"))
         n["g_failed"].hidden = True
+        if res.get("shield_used"):
+            n["shield_text"].textContent = "Shield used: your %d-day streak is safe." % (res.get("streak") or 0)
+        elif res.get("shield_earned"):
+            n["shield_text"].textContent = "You earned a shield. It covers a missed day, so one day off won't break your streak."
+        n["shield_note"].hidden = not (res.get("shield_used") or res.get("shield_earned"))
         if self._still_count:
             self.next_label.text = "Cards you are still learning stay due, so they will be in your next review."
         elif res.get("next_due"):

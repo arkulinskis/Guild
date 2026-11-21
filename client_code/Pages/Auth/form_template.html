@@ -25,6 +25,7 @@
             </div>
             <anvil-component type="Label" name="heading" prop:role='["au-title"]' prop:text="Welcome back"></anvil-component>
             <anvil-component type="Label" name="sub" prop:role='["au-sub"]' prop:text="Sign in to continue where you left off."></anvil-component>
+            <anvil-component type="Label" name="kept_note" prop:role='["msg-note"]' prop:visible="false"></anvil-component>
 
             <div class="ui-stack au-form">
               <label class="ui-field" anvil:name="name_field"><span>Your name</span>
@@ -53,7 +54,7 @@
             <div anvil:name="guest_part">
               <div class="au-or">or</div>
               <anvil-component type="Button" name="guest_button" prop:text="Try it without signing in" prop:role='["btn", "btn-block"]'></anvil-component>
-              <p class="ui-hint guest-note">Everything works, but your progress is only kept until you close this tab.</p>
+              <p class="ui-hint guest-note" anvil:name="guest_note">Everything works, but your progress is only kept until you close this tab.</p>
             </div>
           </div>
         </div>
